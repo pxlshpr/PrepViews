@@ -17,7 +17,7 @@ extension FoodSizesView.Cell {
     
     @ViewBuilder
     var body: some View {
-        if let didTapAddSize {
+        if let didTapAddSize, isAddButton {
             Button {
                 didTapAddSize()
             } label: {
