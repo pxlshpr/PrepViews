@@ -3,36 +3,68 @@ import PrepDataTypes
 
 extension FoodSizesView {
     struct Cell: View {
-        let size: FormSize
+        let size: FormSize?
+        let didTapAddSize: (() -> ())?
+
+        init(for size: FormSize?, didTapAddSize: (() -> ())? = nil) {
+            self.size = size
+            self.didTapAddSize = didTapAddSize
+        }
     }
 }
 
 extension FoodSizesView.Cell {
     
+    @ViewBuilder
     var body: some View {
+        if let didTapAddSize {
+            Button {
+                didTapAddSize()
+            } label: {
+                label
+            }
+        } else {
+            label
+        }
+    }
+    
+    var label: some View {
         ZStack {
             Capsule(style: .continuous)
                 .foregroundColor(Color(.secondarySystemFill))
             HStack(spacing: 5) {
+                if isAddButton {
+                    Image(systemName: "plus.circle.fill")
+                        .foregroundColor(.accentColor)
+                        .imageScale(.small)
+                        .frame(height: 25)
+                }
                 Text(name)
-                    .foregroundColor(.primary)
-                Text("•")
-                    .foregroundColor(Color(.quaternaryLabel))
-                Text(amountString)
-                    .foregroundColor(Color(.tertiaryLabel))
+                    .foregroundColor(isAddButton ? .accentColor : .primary)
+                if !amountString.isEmpty {
+                    Text("•")
+                        .foregroundColor(Color(.quaternaryLabel))
+                    Text(amountString)
+                        .foregroundColor(Color(.tertiaryLabel))
+                }
             }
+            .frame(height: 25)
             .padding(.horizontal, 12)
             .padding(.vertical, 5)
         }
         .fixedSize(horizontal: true, vertical: true)
     }
     
+    var isAddButton: Bool {
+        size == nil
+    }
+    
     var name: String {
-        size.fullNameString
+        size?.fullNameString ?? "Add a size"
     }
     
     var amountString: String {
-        size.scaledAmountString
+        size?.scaledAmountString ?? ""
     }
 }
 
@@ -43,7 +75,7 @@ struct CellPreviews: PreviewProvider {
 //        FoodSizesView.Cell(size: standardSize)
         FormStyledScrollView {
             FormStyledSection(header: Text("Sizes")) {
-                FoodSizesView(sizes: .constant(sizes))
+                FoodSizesView(sizes: .constant(sizes), didTapAddSize: { })
             }
         }
     }
