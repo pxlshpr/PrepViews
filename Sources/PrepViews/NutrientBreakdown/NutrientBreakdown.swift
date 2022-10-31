@@ -116,7 +116,7 @@ func artithmeticIcon(name: String, labelColor: Color? = nil) -> some View {
 
 //MARK: - 🔵 NutrientBreakdown.ViewModel
 
-extension NutrientBreakdown {
+public extension NutrientBreakdown {
     class ViewModel: ObservableObject {
         @Published var haveGoal: Bool = true
         @Published var showingDetails: Bool = false
@@ -132,14 +132,14 @@ extension NutrientBreakdown {
         @Published var fatViewModel: FoodMeter.ViewModel
         @Published var proteinViewModel: FoodMeter.ViewModel
         
-        required init(energyViewModel: FoodMeter.ViewModel, carbViewModel: FoodMeter.ViewModel, fatViewModel: FoodMeter.ViewModel, proteinViewModel: FoodMeter.ViewModel) {
+        public required init(energyViewModel: FoodMeter.ViewModel, carbViewModel: FoodMeter.ViewModel, fatViewModel: FoodMeter.ViewModel, proteinViewModel: FoodMeter.ViewModel) {
             self.energyViewModel = energyViewModel
             self.carbViewModel = carbViewModel
             self.fatViewModel = fatViewModel
             self.proteinViewModel = proteinViewModel
         }
         
-        static var empty: ViewModel {
+        public static var empty: ViewModel {
             Self.init(
                 energyViewModel: FoodMeter.ViewModel.empty(for: .energy),
                 carbViewModel: FoodMeter.ViewModel.empty(for: .carb),
