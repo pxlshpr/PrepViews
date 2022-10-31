@@ -13,6 +13,10 @@ public struct NutrientBreakdown: View {
     
     @ObservedObject var viewModel: ViewModel
 
+    public init(viewModel: ViewModel) {
+        self.viewModel = viewModel
+    }
+    
     public var body: some View {
         gaugesGrid
     }
