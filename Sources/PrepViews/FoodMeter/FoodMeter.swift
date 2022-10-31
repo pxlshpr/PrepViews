@@ -16,6 +16,9 @@ public struct FoodMeter: View {
 //    @State var type: FoodMeterComponent
     @State private var hasAppeared = false
     
+    public init(viewModel: FoodMeter.ViewModel) {
+        self.viewModel = viewModel
+    }
 }
 
 public extension FoodMeter {
