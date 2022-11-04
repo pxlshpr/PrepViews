@@ -3,6 +3,7 @@ import SwiftUI
 //TODO: Rewrite with new ViewModel
 public struct FoodMeter: View {
     
+    @Environment(\.colorScheme) var colorScheme
     @ObservedObject var viewModel: FoodMeter.ViewModel
     
 //    @Binding var goal: Double
@@ -118,7 +119,10 @@ public extension FoodMeter {
 
     //MARK: - 🎨 Colors
     var placeholderColor: Color {
+//        return PrepColor.statsEmptyFill.forColorScheme(colorScheme)
         return Colors.placeholder
+        
+        
 //        switch preppedPercentageType {
 //        case .complete:
 //            if prepped > 1.0 {
