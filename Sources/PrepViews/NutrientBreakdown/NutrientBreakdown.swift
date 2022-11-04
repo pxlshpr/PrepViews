@@ -23,8 +23,10 @@ public struct NutrientBreakdown: View {
     
     var gaugesGrid: some View {
         Grid(horizontalSpacing: viewModel.showingDetails ? 0 : nil) {
-            headerRow
-            Divider()
+            if viewModel.includeHeaderRow {
+                headerRow
+                Divider()
+            }
             row(foodMeterViewModel: viewModel.energyViewModel)
             row(foodMeterViewModel: viewModel.carbViewModel)
             row(foodMeterViewModel: viewModel.fatViewModel)
@@ -125,6 +127,7 @@ public extension NutrientBreakdown {
         @Published public var haveGoal: Bool = true
         @Published public var showingDetails: Bool = false
         @Published public var includeBurnedCalories: Bool = true
+        @Published public var includeHeaderRow: Bool = true
         
 //        @Published var foodMeterViewModels: [FoodMeter.ViewModel]
 //        init(foodMeterViewModels: [FoodMeter.ViewModel]) {
