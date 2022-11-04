@@ -122,19 +122,19 @@ func artithmeticIcon(name: String, labelColor: Color? = nil) -> some View {
 
 public extension NutrientBreakdown {
     class ViewModel: ObservableObject {
-        @Published var haveGoal: Bool = true
-        @Published var showingDetails: Bool = false
-        @Published var includeBurnedCalories: Bool = true
+        @Published public var haveGoal: Bool = true
+        @Published public var showingDetails: Bool = false
+        @Published public var includeBurnedCalories: Bool = true
         
 //        @Published var foodMeterViewModels: [FoodMeter.ViewModel]
 //        init(foodMeterViewModels: [FoodMeter.ViewModel]) {
 //            self.foodMeterViewModels = foodMeterViewModels
 //        }
         
-        @Published var energyViewModel: FoodMeter.ViewModel
-        @Published var carbViewModel: FoodMeter.ViewModel
-        @Published var fatViewModel: FoodMeter.ViewModel
-        @Published var proteinViewModel: FoodMeter.ViewModel
+        @Published public var energyViewModel: FoodMeter.ViewModel
+        @Published public var carbViewModel: FoodMeter.ViewModel
+        @Published public var fatViewModel: FoodMeter.ViewModel
+        @Published public var proteinViewModel: FoodMeter.ViewModel
         
         public required init(energyViewModel: FoodMeter.ViewModel, carbViewModel: FoodMeter.ViewModel, fatViewModel: FoodMeter.ViewModel, proteinViewModel: FoodMeter.ViewModel) {
             self.energyViewModel = energyViewModel
@@ -154,7 +154,7 @@ public extension NutrientBreakdown {
     }
 }
 
-extension FoodMeter.ViewModel {
+public extension FoodMeter.ViewModel {
     static func empty(for component: FoodMeterComponent) -> FoodMeter.ViewModel {
         FoodMeter.ViewModel(component: component, goal: 0, burned: 0, food: 0, eaten: 0)
     }
@@ -169,7 +169,7 @@ let mockEatenFoodMeterViewModels: [FoodMeter.ViewModel] = [
     FoodMeter.ViewModel(component: .protein, goal: 190, burned: 0, food: 102, eaten: 82)
 ]
 
-let mockIncrementsFoodMeterViewModels: [FoodMeter.ViewModel] = [
+public let mockIncrementsFoodMeterViewModels: [FoodMeter.ViewModel] = [
     FoodMeter.ViewModel(component: .energy, goal: 1596, burned: 676, food: 2272, increment: 500),
     FoodMeter.ViewModel(component: .carb, goal: 130, burned: 84, food: 196, increment: 100),
     FoodMeter.ViewModel(component: .fat, goal: 44, burned: 27, food: 44, increment: 204),
