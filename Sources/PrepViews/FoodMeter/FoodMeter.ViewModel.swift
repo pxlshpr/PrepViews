@@ -186,7 +186,7 @@ public extension FoodMeter.ViewModel {
     var preppedColor: Color {
         switch percentageType {
         case .empty:
-            return Color("StatsEmptyFill")
+            return Color("StatsEmptyFill", bundle: .module)
         case .regular:
             return component.preppedColor
         case .complete:
@@ -200,7 +200,7 @@ public extension FoodMeter.ViewModel {
 //        return type.eatenColor
         switch incrementPercentageType {
         case .empty:
-            return Color("StatsEmptyFill")
+            return Color("StatsEmptyFill", bundle: .module)
         case .regular:
             return component.eatenColor
         case .complete:
@@ -218,7 +218,7 @@ public extension FoodMeter.ViewModel {
         
         switch eatenPercentageType {
         case .empty:
-            return Color("StatsEmptyFill")
+            return Color("StatsEmptyFill", bundle: .module)
         case .regular:
             return component.eatenColor
         case .complete:
@@ -230,23 +230,23 @@ public extension FoodMeter.ViewModel {
     
     struct Colors {
         struct Complete {
-            static let placeholder = Color("StatsCompleteFillExtraNew")
-            static let fill = Color("StatsCompleteFill")
-            static let text = Color("StatsCompleteText")
-            static let textDarker = Color("StatsCompleteTextExtra")
+            static let placeholder = Color("StatsCompleteFillExtraNew", bundle: .module)
+            static let fill = Color("StatsCompleteFill", bundle: .module)
+            static let text = Color("StatsCompleteText", bundle: .module)
+            static let textDarker = Color("StatsCompleteTextExtra", bundle: .module)
         }
         
         struct Excess {
-            static let placeholder = Color("StatsExcessFillExtra")
-            static let fill = Color("StatsExcessFill")
-            static let text = Color("StatsExcessText")
-            static let textDarker = Color("StatsExcessTextExtra")
+            static let placeholder = Color("StatsExcessFillExtra", bundle: .module)
+            static let fill = Color("StatsExcessFill", bundle: .module)
+            static let text = Color("StatsExcessText", bundle: .module)
+            static let textDarker = Color("StatsExcessTextExtra", bundle: .module)
         }
         
         struct Empty {
-            static let fill = Color("StatsEmptyFill")
-            static let text = Color("StatsEmptyText")
-            static let textLighter = Color("StatsEmptyTextSecondary")
+            static let fill = Color("StatsEmptyFill", bundle: .module)
+            static let text = Color("StatsEmptyText", bundle: .module)
+            static let textLighter = Color("StatsEmptyTextSecondary", bundle: .module)
         }
     }
 }

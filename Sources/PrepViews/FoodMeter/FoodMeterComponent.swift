@@ -61,11 +61,11 @@ public enum FoodMeterComponent {
         case .energy:
             return energyTextColor
         case .carb:
-            return Color("StatsCarbText")
+            return Color("StatsCarbText", bundle: .module)
         case .fat:
-            return Color("StatsFatText")
+            return Color("StatsFatText", bundle: .module)
         case .protein:
-            return Color("StatsProteinText")
+            return Color("StatsProteinText", bundle: .module)
         case .micro:
             return Color.black
         }
@@ -133,30 +133,30 @@ public enum FoodMeterComponent {
     var eatenColor: Color {
         switch self {
         case .energy:
-            return Color("StatsEnergyFill")
+            return Color("StatsEnergyFill", bundle: .module)
         case .carb:
-            return Color("StatsCarbFill")
+            return Color("StatsCarbFill", bundle: .module)
         case .fat:
-            return Color("StatsFatFill")
+            return Color("StatsFatFill", bundle: .module)
         case .protein:
-            return Color("StatsProteinFill")
+            return Color("StatsProteinFill", bundle: .module)
         case .micro:
-            return Color("StatsEnergyFill")
+            return Color("StatsEnergyFill", bundle: .module)
         }
     }
     
     var preppedColor: Color {
         switch self {
         case .energy:
-            return Color("StatsEnergyPlaceholder")
+            return Color("StatsEnergyPlaceholder", bundle: .module)
         case .carb:
-            return Color("StatsCarbPlaceholder")
+            return Color("StatsCarbPlaceholder", bundle: .module)
         case .fat:
-            return Color("StatsFatPlaceholder")
+            return Color("StatsFatPlaceholder", bundle: .module)
         case .protein:
-            return Color("StatsProteinPlaceholder")
+            return Color("StatsProteinPlaceholder", bundle: .module)
         case .micro:
-            return Color("StatsEnergyPlaceholder")
+            return Color("StatsEnergyPlaceholder", bundle: .module)
         }
     }
     
