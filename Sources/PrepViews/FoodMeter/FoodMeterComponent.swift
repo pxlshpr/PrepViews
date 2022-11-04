@@ -85,7 +85,7 @@ public enum FoodMeterComponent {
     }
     
     var energyTextColor: Color {
-        Color("StatsEnergyText")
+        Color("StatsEnergyText", bundle: .module)
 //        let type = PercentageType(progress)
 //        switch type {
 //        case .empty:
@@ -110,7 +110,7 @@ public enum FoodMeterComponent {
     }
 
     var energyTextTotalColor: Color {
-        Color("StatsEnergyText")
+        Color("StatsEnergyText", bundle: .module)
 //        let type = PercentageType(progress)
 //        switch type {
 //        case .empty:
@@ -127,7 +127,7 @@ public enum FoodMeterComponent {
     
     var energyPlaceholderColor: Color {
 //        return Color("StatsEnergyPlaceholderText")
-        return Color("StatsEnergyText")
+        return Color("StatsEnergyText", bundle: .module)
     }
 
     var eatenColor: Color {

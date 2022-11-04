@@ -156,7 +156,7 @@ public extension FoodMeter {
     
     //MARK: - Enums
     struct Colors {
-        static let placeholder = Color("StatsEmptyFill")
+        static let placeholder = Color("StatsEmptyFill", bundle: .module)
     }
 }
 
