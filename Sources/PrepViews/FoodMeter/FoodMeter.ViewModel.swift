@@ -3,16 +3,16 @@ import SwiftUI
 public extension FoodMeter {
     class ViewModel: ObservableObject {
         
-        @Published var component: FoodMeterComponent
-        @Published var goal: Double
+        @Published public var component: FoodMeterComponent
+        @Published public var goal: Double
         
         /// Having this as a non-zero value implies that it's being included with the goal
         ///
-        @Published var burned: Double
-        @Published var food: Double
+        @Published public var burned: Double
+        @Published public var food: Double
         
-        @Published var eaten: Double?
-        @Published var increment: Double?
+        @Published public var eaten: Double?
+        @Published public var increment: Double?
         
         public init(component: FoodMeterComponent, goal: Double, burned: Double, food: Double, eaten: Double? = nil, increment: Double? = nil) {
             self.component = component
