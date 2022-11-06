@@ -15,8 +15,8 @@ let package = Package(
             targets: ["PrepViews"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/pxlshpr/PrepDataTypes", from: "0.0.22"),
-        .package(url: "https://github.com/pxlshpr/SwiftUISugar", from: "0.0.209"),
+        .package(url: "https://github.com/pxlshpr/PrepDataTypes", from: "0.0.108"),
+        .package(url: "https://github.com/pxlshpr/SwiftUISugar", from: "0.0.215"),
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
