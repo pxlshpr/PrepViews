@@ -9,8 +9,26 @@ public struct FoodCell: View {
     let carb: Double
     let fat: Double
     let protein: Double
+    
+    let nameWeight: Font.Weight
+    let detailWeight: Font.Weight = .regular
+    let brandWeight: Font.Weight = .regular
+    
+    let nameColor: Color = Color(.label)
+    let detailColor: Color = Color(.secondaryLabel)
+    let brandColor: Color = Color(.tertiaryLabel)
+    
 
-    public init(emoji: String, name: String, detail: String? = nil, brand: String? = nil, carb: Double, fat: Double, protein: Double) {
+    public init(
+        emoji: String,
+        name: String,
+        detail: String? = nil,
+        brand: String? = nil,
+        carb: Double,
+        fat: Double,
+        protein: Double,
+        nameFontWeight: Font.Weight = .medium
+    ) {
         self.emoji = emoji
         self.name = name
         self.detail = detail
@@ -18,6 +36,7 @@ public struct FoodCell: View {
         self.carb = carb
         self.fat = fat
         self.protein = protein
+        self.nameWeight = nameFontWeight
     }
     
     public var body: some View {
@@ -34,14 +53,6 @@ public struct FoodCell: View {
     var emojiText: some View {
         Text(emoji)
     }
-    
-    let nameWeight: Font.Weight = .medium
-    let detailWeight: Font.Weight = .regular
-    let brandWeight: Font.Weight = .regular
-    
-    let nameColor: Color = Color(.label)
-    let detailColor: Color = Color(.secondaryLabel)
-    let brandColor: Color = Color(.tertiaryLabel)
     
     var nameTexts: some View {
         var view = Text(name)
