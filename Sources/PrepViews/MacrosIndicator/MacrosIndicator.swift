@@ -13,6 +13,12 @@ public struct MacrosIndicator: View {
         self.protein = searchResult.protein
     }
     
+    public init(_ food: Food) {
+        self.carb = food.info.nutrients.carb
+        self.fat = food.info.nutrients.fat
+        self.protein = food.info.nutrients.protein
+    }
+    
     let width: CGFloat = 30
     
     public var body: some View {
