@@ -35,7 +35,7 @@ public struct FoodCell: View {
         Text(emoji)
     }
     
-    let nameWeight: Font.Weight = .medium
+    let nameWeight: Font.Weight = .regular
     let detailWeight: Font.Weight = .regular
     let brandWeight: Font.Weight = .regular
     
@@ -75,7 +75,11 @@ public struct FoodCell: View {
         .font(.callout)
         .fontWeight(.semibold)
         .foregroundColor(.secondary)
+        
         return view
+            .alignmentGuide(.listRowSeparatorLeading) { dimensions in
+                dimensions[.leading]
+            }
     }
     
     var macrosIndicator: some View {
