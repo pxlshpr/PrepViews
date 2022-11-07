@@ -11,15 +11,29 @@ public struct NutritionSummary<Provider: NutritionSummaryProvider>: View {
     /// For Plate and Recipe types
     @State var parentMultiplier: Double
 
-    public init(dataProvider: Provider, showDetails: Binding<Bool>? = nil, parentMultiplier: Double = 1) {
+    let showMacrosIndicator: Bool
+    
+    public init(
+        dataProvider: Provider,
+        showMacrosIndicator: Bool = false,
+        showDetails: Binding<Bool>? = nil,
+        parentMultiplier: Double = 1
+    ) {
         self.dataProvider = dataProvider
+        self.showMacrosIndicator = showMacrosIndicator
         self._showDetails = showDetails ?? .constant(true)
         self._parentMultiplier = State(initialValue: parentMultiplier)
     }
     
     public var body: some View {
         VStack(alignment: .trailing, spacing: 5) {
-            nutrientsEnergy
+            HStack {
+                if showMacrosIndicator {
+                    macrosIndicator
+                    Spacer()
+                }
+                nutrientsEnergy
+            }
             if showDetails {
                 nutrientsMacros
                     .transition(.asymmetric(insertion: .move(edge: .trailing),
@@ -34,6 +48,14 @@ public struct NutritionSummary<Provider: NutritionSummaryProvider>: View {
 
             }
         }
+    }
+    
+    var macrosIndicator: some View {
+        MacrosIndicator(
+            c: dataProvider.carbAmount,
+            f: dataProvider.fatAmount,
+            p: dataProvider.proteinAmount
+        )
     }
     
     var shouldHighlight: Bool {
