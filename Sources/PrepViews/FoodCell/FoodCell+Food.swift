@@ -4,9 +4,9 @@ import PrepDataTypes
 public extension FoodCell {
     init(
         food: Food,
-        isSelectable: Binding<Bool>,
+        isSelectable: Binding<Bool> = .constant(false),
         didTapMacrosIndicator: (() -> ())? = nil,
-        didToggleSelection: @escaping (Bool) -> ()
+        didToggleSelection: ((Bool) -> ())? = nil
     ) {
         self.init(
             emoji: food.emoji,
