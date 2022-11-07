@@ -5,6 +5,7 @@ public extension FoodCell {
     init(
         food: Food,
         isSelectable: Binding<Bool> = .constant(false),
+        showMacrosIndicator: Bool = true,
         didTapMacrosIndicator: (() -> ())? = nil,
         didToggleSelection: ((Bool) -> ())? = nil
     ) {
@@ -16,6 +17,7 @@ public extension FoodCell {
             carb: food.info.nutrients.carb,
             fat: food.info.nutrients.fat,
             protein: food.info.nutrients.protein,
+            showMacrosIndicator: showMacrosIndicator,
             isSelectable: isSelectable,
             didTapMacrosIndicator: didTapMacrosIndicator,
             didToggleSelection: didToggleSelection
