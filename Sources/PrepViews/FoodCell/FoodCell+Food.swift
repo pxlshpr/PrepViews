@@ -2,7 +2,12 @@ import SwiftUI
 import PrepDataTypes
 
 public extension FoodCell {
-    init(food: Food, isSelectable: Binding<Bool>, didToggleSelection: @escaping (Bool) -> ()) {
+    init(
+        food: Food,
+        isSelectable: Binding<Bool>,
+        didTapMacrosIndicator: (() -> ())? = nil,
+        didToggleSelection: @escaping (Bool) -> ()
+    ) {
         self.init(
             emoji: food.emoji,
             name: food.name,
@@ -12,6 +17,7 @@ public extension FoodCell {
             fat: food.info.nutrients.fat,
             protein: food.info.nutrients.protein,
             isSelectable: isSelectable,
+            didTapMacrosIndicator: didTapMacrosIndicator,
             didToggleSelection: didToggleSelection
         )
     }
