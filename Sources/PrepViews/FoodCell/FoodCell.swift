@@ -1,6 +1,17 @@
 import SwiftUI
+import SwiftHaptics
 
 public struct FoodCell: View {
+
+    //TODO: Refactor this and move to PrepViews
+    /// [ ] Rename it to `isSelectable`
+    /// [ ] Make it optional so that we can disregard it if needed
+    /// [ ] Conslidate it by moving it back to `PrepViews`
+
+    @Binding var isSelectable: Bool
+    @State var isSelected: Bool = false
+
+    let didToggleSelection: ((Bool) -> ())?
     
     let emoji: String
     let name: String
@@ -18,7 +29,6 @@ public struct FoodCell: View {
     let detailColor: Color = Color(.secondaryLabel)
     let brandColor: Color = Color(.tertiaryLabel)
     
-
     public init(
         emoji: String,
         name: String,
@@ -27,7 +37,9 @@ public struct FoodCell: View {
         carb: Double,
         fat: Double,
         protein: Double,
-        nameFontWeight: Font.Weight = .medium
+        nameFontWeight: Font.Weight = .medium,
+        isSelectable: Binding<Bool> = .constant(false),
+        didToggleSelection: ((Bool) -> ())? = nil
     ) {
         self.emoji = emoji
         self.name = name
@@ -37,16 +49,36 @@ public struct FoodCell: View {
         self.fat = fat
         self.protein = protein
         self.nameWeight = nameFontWeight
+        self.didToggleSelection = didToggleSelection
+
+        _isSelectable = isSelectable
     }
     
     public var body: some View {
         HStack {
+            selectionButton
             emojiText
             nameTexts
             Spacer()
             macrosIndicator
         }
         .listRowBackground(Color(.secondarySystemGroupedBackground))
+    }
+    
+    @ViewBuilder
+    var selectionButton: some View {
+        if isSelectable {
+            Button {
+                Haptics.feedback(style: .soft)
+                withAnimation {
+                    isSelected.toggle()
+                }
+                didToggleSelection?(isSelected)
+            } label: {
+                Image(systemName: isSelected ? "circle.inset.filled" : "circle")
+                    .foregroundColor(isSelected ? Color.accentColor : Color(.quaternaryLabel))
+            }
+        }
     }
     
     @ViewBuilder
@@ -126,7 +158,11 @@ struct FoodCellPreview: View {
                         brand: food.brand,
                         carb: food.c,
                         fat: food.f,
-                        protein: food.p
+                        protein: food.p,
+                        isSelectable: .constant(false),
+                        didToggleSelection: { isSelected in
+                            print("\(food) selection changed to: \(isSelected)")
+                        }
                     )
                 }
             }
