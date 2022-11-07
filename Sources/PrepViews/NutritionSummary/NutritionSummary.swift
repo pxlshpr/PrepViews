@@ -29,8 +29,8 @@ public struct NutritionSummary<Provider: NutritionSummaryProvider>: View {
         VStack(alignment: .trailing, spacing: 5) {
             HStack {
                 if showMacrosIndicator {
-                    macrosIndicator
                     Spacer()
+                    macrosIndicator
                 }
                 nutrientsEnergy
             }
@@ -41,10 +41,6 @@ public struct NutritionSummary<Provider: NutritionSummaryProvider>: View {
                                     .combined(with: .opacity)
                                     .combined(with: .scale)
                     )
-//                    .transition(.asymmetric(insertion: .move(edge: .bottom),
-//                                            removal: .move(edge: .top))
-//                                    .combined(with: .opacity))
-//                    .transition(.scale.combined(with: .opacity))
 
             }
         }
