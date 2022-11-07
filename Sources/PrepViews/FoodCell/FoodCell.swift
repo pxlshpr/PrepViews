@@ -137,6 +137,7 @@ public struct FoodCell: View {
             } label: {
                 macrosIndicatorLabel
             }
+            .buttonStyle(.borderless)
         } else {
             macrosIndicatorLabel
         }
