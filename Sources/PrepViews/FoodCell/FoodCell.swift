@@ -11,8 +11,6 @@ public struct FoodCell: View {
     @Binding var isSelectable: Bool
     @State var isSelected: Bool = false
 
-    let didToggleSelection: ((Bool) -> ())?
-    
     let emoji: String
     let name: String
     let detail: String?
@@ -29,6 +27,9 @@ public struct FoodCell: View {
     let detailColor: Color = Color(.secondaryLabel)
     let brandColor: Color = Color(.tertiaryLabel)
     
+    let didTapMacroIndicator: (() -> ())?
+    let didToggleSelection: ((Bool) -> ())?
+
     public init(
         emoji: String,
         name: String,
@@ -39,6 +40,7 @@ public struct FoodCell: View {
         protein: Double,
         nameFontWeight: Font.Weight = .medium,
         isSelectable: Binding<Bool> = .constant(false),
+        didTapMacroIndicator: (() -> ())? = nil,
         didToggleSelection: ((Bool) -> ())? = nil
     ) {
         self.emoji = emoji
@@ -49,6 +51,8 @@ public struct FoodCell: View {
         self.fat = fat
         self.protein = protein
         self.nameWeight = nameFontWeight
+        
+        self.didTapMacroIndicator = didTapMacroIndicator
         self.didToggleSelection = didToggleSelection
 
         _isSelectable = isSelectable
@@ -125,7 +129,20 @@ public struct FoodCell: View {
             }
     }
     
+    @ViewBuilder
     var macrosIndicator: some View {
+        if let didTapMacroIndicator {
+            Button {
+                didTapMacroIndicator()
+            } label: {
+                macrosIndicatorLabel
+            }
+        } else {
+            macrosIndicatorLabel
+        }
+    }
+    
+    var macrosIndicatorLabel: some View {
         MacrosIndicator(c: carb, f: fat, p: protein)
     }
 }
