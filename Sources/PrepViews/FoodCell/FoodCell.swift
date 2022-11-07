@@ -27,6 +27,7 @@ public struct FoodCell: View {
     let detailColor: Color = Color(.secondaryLabel)
     let brandColor: Color = Color(.tertiaryLabel)
     
+    let showMacrosIndicator: Bool
     let didTapMacrosIndicator: (() -> ())?
     let didToggleSelection: ((Bool) -> ())?
 
@@ -39,6 +40,7 @@ public struct FoodCell: View {
         fat: Double,
         protein: Double,
         nameFontWeight: Font.Weight = .medium,
+        showMacrosIndicator: Bool = true,
         isSelectable: Binding<Bool> = .constant(false),
         didTapMacrosIndicator: (() -> ())? = nil,
         didToggleSelection: ((Bool) -> ())? = nil
@@ -52,6 +54,7 @@ public struct FoodCell: View {
         self.protein = protein
         self.nameWeight = nameFontWeight
         
+        self.showMacrosIndicator = showMacrosIndicator
         self.didTapMacrosIndicator = didTapMacrosIndicator
         self.didToggleSelection = didToggleSelection
 
@@ -63,8 +66,10 @@ public struct FoodCell: View {
             selectionButton
             emojiText
             nameTexts
-            Spacer()
-            macrosIndicator
+            if showMacrosIndicator {
+                Spacer()
+                macrosIndicator
+            }
         }
         .listRowBackground(Color(.secondarySystemGroupedBackground))
     }
