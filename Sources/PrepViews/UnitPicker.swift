@@ -89,7 +89,7 @@ extension UnitPicker {
                     }
                 }
                 if !volumePrefixedSizes.isEmpty {
-                    Section("Volume Prefixed Sizes") {
+                    Section("Volume-named Sizes") {
                         volumePrefixedSizeContents
                     }
                 }
