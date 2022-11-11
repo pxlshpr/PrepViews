@@ -78,6 +78,7 @@ public struct NutrientsPicker: View {
             Section {
                 Button {
                     Haptics.feedback(style: .soft)
+                    energyIsPicked.toggle()
                 } label: {
                     HStack {
                         Image(systemName: "checkmark")
