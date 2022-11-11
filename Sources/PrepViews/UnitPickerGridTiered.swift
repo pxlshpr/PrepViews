@@ -250,6 +250,9 @@ public struct UnitPickerGridTiered: View {
                 if let size = option as? FormSize {
                     pickedUnit(unit: .size(size, nil))
                 }
+                else if let volumePrefixedSize = option as? VolumePrefixedSizeOption {
+                    pickedUnit(unit: .size(volumePrefixedSize.size, volumePrefixedSize.volumeUnit))
+                }
                 else if let weightUnit = option as? WeightUnit {
                     pickedUnit(unit: .weight(weightUnit))
                 }
