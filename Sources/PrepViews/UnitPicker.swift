@@ -12,6 +12,7 @@ public struct UnitPicker: View {
     @State var pickedVolumePrefixUnit: FormUnit = .volume(.cup)
     
     var includeServing: Bool
+    
     var allowAddSize: Bool
     var filteredType: UnitType?
     var servingDescription: String?

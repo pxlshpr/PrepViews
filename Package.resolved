@@ -14,8 +14,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/pxlshpr/PrepDataTypes",
       "state" : {
-        "revision" : "05fe3461ac51181abe7beaf037b4175304342619",
-        "version" : "0.0.118"
+        "revision" : "32b0295d64089269f3c3de0574b7eaa2f7d278ea",
+        "version" : "0.0.174"
       }
     },
     {
