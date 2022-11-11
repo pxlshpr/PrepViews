@@ -193,10 +193,18 @@ public struct NutrientsPicker: View {
     
     func didSubmit() { }
     
+    var pickedNutrientsCount: Int {
+        var count = 0
+        if energyIsPicked {
+            count += 1
+        }
+        count += pickedMacros.count + pickedNutrientTypes.count
+        return count
+    }
     var navigationTrailingContent: some ToolbarContent {
         ToolbarItemGroup(placement: .navigationBarTrailing) {
-            if !pickedNutrientTypes.isEmpty {
-                Button("Add \(pickedNutrientTypes.count)") {
+            if pickedNutrientsCount > 0 {
+                Button("Add \(pickedNutrientsCount)") {
                     didAddNutrients(energyIsPicked, pickedMacros, pickedNutrientTypes)
                     Haptics.successFeedback()
                     dismiss()
