@@ -98,7 +98,11 @@ public struct NutrientsPicker: View {
             guard let shouldShowMacro, shouldShowMacro(macro) else {
                 return false
             }
-            return macro.description.lowercased().contains(searchText)
+            if !searchText.isEmpty {
+                return macro.description.lowercased().contains(searchText)
+            } else {
+                return true
+            }
         }
     }
     
