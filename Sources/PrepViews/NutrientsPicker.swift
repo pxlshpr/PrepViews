@@ -17,16 +17,13 @@ public struct NutrientsPicker: View {
     @State var searchIsFocused: Bool = false
     
     public init(
-        didAddNutrientTypes: @escaping ([NutrientType]) -> Void,
         hasUnusedMicros: @escaping (NutrientTypeGroup, String) -> Bool,
         hasMicronutrient: @escaping (NutrientType) -> Bool,
-        pickedNutrientTypes: [NutrientType]
+        didAddNutrientTypes: @escaping ([NutrientType]) -> Void
     ) {
         self.didAddNutrientTypes = didAddNutrientTypes
         self.hasUnusedMicros = hasUnusedMicros
-        self.hasMicronutrient = hasMicronutrient
-        
-        self.pickedNutrientTypes = pickedNutrientTypes
+        self.hasMicronutrient = hasMicronutrient        
     }
     
     public var body: some View {
