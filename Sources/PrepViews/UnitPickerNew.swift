@@ -211,6 +211,7 @@ public struct UnitPickerGrid: View {
             .navigationTitle(navigationTitleString)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { gridButton }
+            .toolbar { closeButton }
         }
         .onChange(of: type) { newValue in
             if type == .serving {
