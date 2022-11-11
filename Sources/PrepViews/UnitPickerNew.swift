@@ -155,21 +155,22 @@ public struct UnitPickerGrid: View {
     @Environment(\.dismiss) var dismiss
     @Namespace var namespace
     
-    @State var isGrid: Bool = false
+    @State var isGrid: Bool
     @State var type: UnitType
     @State var pickedUnit: FormUnit
 
     @State var pickedVolumePrefixUnit: FormUnit = .volume(.cup)
     
-    var includeServing: Bool
-    var includeVolumes: Bool
-    var includeWeights: Bool
-    var allowAddSize: Bool
-    var filteredType: UnitType?
-    var servingDescription: String?
+    let includeServing: Bool
+    let includeVolumes: Bool
+    let includeWeights: Bool
+    let allowsCompactMode: Bool
+    let allowAddSize: Bool
+    let filteredType: UnitType?
+    let servingDescription: String?
     
-    var didPickUnit: (FormUnit) -> ()
-    var didTapAddSize: (() -> ())?
+    let didPickUnit: (FormUnit) -> ()
+    let didTapAddSize: (() -> ())?
 
     let standardSizes: [FormSize]
     let volumePrefixedSizes: [FormSize]
@@ -181,6 +182,7 @@ public struct UnitPickerGrid: View {
         includeVolumes: Bool = true,
         sizes: [FormSize],
         servingDescription: String? = nil,
+        allowsCompactMode: Bool = false,
         allowAddSize: Bool = true,
         filteredType: UnitType? = nil,
         didTapAddSize: (() -> ())? = nil,
@@ -189,6 +191,7 @@ public struct UnitPickerGrid: View {
         self.didPickUnit = didPickUnit
         self.didTapAddSize = didTapAddSize
         self.includeServing = includeServing
+        self.allowsCompactMode = allowsCompactMode
         self.includeWeights = includeWeights
         self.includeVolumes = includeVolumes
         self.servingDescription = servingDescription
@@ -200,6 +203,7 @@ public struct UnitPickerGrid: View {
         
         _pickedUnit = State(initialValue: unit)
         _type = State(initialValue: unit.unitType)
+        _isGrid = State(initialValue: !allowsCompactMode)
     }
     
     @State var presentationDetent: PresentationDetent = .medium
@@ -235,18 +239,20 @@ public struct UnitPickerGrid: View {
     
     var gridButton: some ToolbarContent {
         ToolbarItem(placement: .navigationBarTrailing) {
-            Button {
-                Haptics.feedback(style: .rigid)
-                withAnimation {
-                    isGrid.toggle()
-                    if isGrid {
-                        presentationDetent = .large
+            if allowsCompactMode {
+                Button {
+                    Haptics.feedback(style: .rigid)
+                    withAnimation {
+                        isGrid.toggle()
+                        if isGrid {
+                            presentationDetent = .large
+                        }
                     }
+                } label: {
+                    Image(systemName: isGrid ? "square.grid.3x2.fill" : "square.grid.3x2")
+                        .imageScale(.medium)
+                        .foregroundColor(.secondary)
                 }
-            } label: {
-                Image(systemName: isGrid ? "square.grid.3x2.fill" : "square.grid.3x2")
-                    .imageScale(.medium)
-                    .foregroundColor(.secondary)
             }
         }
     }
