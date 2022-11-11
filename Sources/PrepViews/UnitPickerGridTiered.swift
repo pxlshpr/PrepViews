@@ -1,7 +1,24 @@
 /**
  
- This should eventually replace `UnitPicker`.
- 
+ So for the food unit picker (call it that)—we'll be having:
+ [ ] A section at the top without a name that includes
+    [x] g, if measurable by weight
+    [x] mL, if measureable by volume
+    [x] Serving if present
+    [x] Any and all sizes
+    [x] Volume-prefixed sizes in their default units
+ [ ] This will be followed by two possible buttons, one for "Weights" and one for "Volumes"
+    [x] "Weights" If measurable by weight
+        [x] Contains all the possible weight units
+        [x] Toggling this hides the section we have above (use a slide transition) and transforms the button into the new section
+    [x] "Volumes" If measurable by volume and/or we have any volume-prefixed sizes
+        [x] If measurable by volumes—we have a volumes section
+            [x] Containing all the possible volumes
+            [x] Toggling this hides the section we have above (use a slide transition) and transforms the button into the new section
+        [x] If we have volume-prefixed sizes—one section for each of them
+            [x] Using the name as the header
+            [x] Containing all possible volumes with equivalent weights in each of them
+            [x] These transition in/out with a move from trailing edge transition or from the bottom
  */
 import SwiftUI
 import PrepDataTypes
@@ -42,18 +59,50 @@ extension UnitPickerGridTiered {
 }
 
 enum UnitGroup {
-    case sizes
     case weights
     case volumes
     var description: String {
         switch self {
-        case .sizes:
-            return "Sizes"
         case .weights:
             return "Weights"
         case .volumes:
             return "Volumes"
         }
+    }
+}
+
+
+extension WeightUnit: Option {
+    var optionId: String {
+        "\(self.rawValue)"
+    }
+    
+    var optionTitle: String {
+        self.shortDescription
+//        switch self {
+//        case .g:
+//            return "g"
+//        default:
+//            return description.lowercased()
+//        }
+    }
+    
+    var optionDetail: String {
+        self.description.lowercased()
+    }
+}
+
+extension VolumeUnit: Option {
+    var optionId: String {
+        "\(self.rawValue)"
+    }
+    
+    var optionTitle: String {
+        self.shortDescription
+    }
+    
+    var optionDetail: String {
+        description.lowercased()
     }
 }
 
@@ -84,6 +133,8 @@ public struct UnitPickerGridTiered: View {
     let standardSizes: [FormSize]
     let volumePrefixedSizes: [FormSize]
     
+    @State var groups: [UnitGroup]
+    
     public init(
         pickedUnit unit: FormUnit = .weight(.g),
         includeServing: Bool = true,
@@ -113,13 +164,21 @@ public struct UnitPickerGridTiered: View {
         _pickedUnit = State(initialValue: unit)
         _type = State(initialValue: unit.unitType)
         _isGrid = State(initialValue: !allowsCompactMode)
+        
+        var groups: [UnitGroup] = []
+        if includeWeights {
+            groups.append(.weights)
+        }
+        if includeVolumes || !volumePrefixedSizes.isEmpty {
+            groups.append(.volumes)
+        }
+        _groups = State(initialValue: groups)
     }
     
     @State var presentationDetent: PresentationDetent = .medium
     
     public var body: some View {
         NavigationView {
-//            longList
             content
             .navigationTitle(navigationTitleString)
             .navigationBarTitleDisplayMode(.inline)
@@ -131,7 +190,8 @@ public struct UnitPickerGridTiered: View {
                 pickedUnit(unit: .serving)
             }
         }
-        .presentationDetents([.height(350), .large], selection: $presentationDetent)
+//        .presentationDetents([.height(350), .large], selection: $presentationDetent)
+        .presentationDetents([.height(450), .large], selection: $presentationDetent)
         .presentationDragIndicator(.hidden)
     }
 
@@ -165,29 +225,120 @@ public struct UnitPickerGridTiered: View {
     
     var content: some View {
         FormStyledScrollView {
-            if let pickedGroup {
-                section(for: pickedGroup)
-            } else {
-                groupsGrid
+            if pickedGroup == nil {
+                primaryUnitsSection
+                    .transition(.move(edge: .leading))
             }
-//            standardSizesSection
-//            volumePrefixedSizesSection
-//            weightUnitsSection
-//            volumeUnitsSection
+            if let pickedGroup {
+                sections(for: pickedGroup)
+            } else {
+                groupButtons
+            }
         }
     }
+    
+    //MARK: - Primary Units Section
+    
+    @ViewBuilder
+    var primaryUnitsSection: some View {
+        if !standardSizes.isEmpty {
+            OptionsSection(
+                header: "Sizes",
+                options: primaryUnitOptions,
+                isGrid: $isGrid
+            ) { option in
+                guard let size = option as? FormSize else { return }
+                pickedUnit(unit: .size(size, nil))
+            }
+        }
+    }
+
+    var primaryUnitOptions: [Option] {
+        var options: [Option] = []
+        if includeWeights {
+            options.append(WeightUnit.g)
+        }
+        if includeVolumes {
+            options.append(VolumeUnit.mL)
+        }
+        if includeServing {
+            options.append(ServingOption(description: servingDescription ?? ""))
+        }
+        options.append(contentsOf: standardSizes.map{ $0 as Option})
+        
+        let volumePrefixedSizeOptions: [VolumePrefixedSizeOption] = volumePrefixedSizes.compactMap { size in
+            guard let volumePrefixUnit = size.volumePrefixUnit?.volumeUnit else {
+                return nil
+            }
+            return VolumePrefixedSizeOption(
+                size: size,
+                volumeUnit: volumePrefixUnit,
+                includeSize: true
+            )
+        }
+        options.append(contentsOf: volumePrefixedSizeOptions)
+        
+        return options
+    }
+    
+    //MARK: - Group Buttons
+
+    var groupButtons: some View {
+        HStack(spacing: 20) {
+            ForEach(groups, id: \.self) { group in
+                Button {
+                    withAnimation {
+                        self.pickedGroup = group
+                    }
+                } label: {
+                    Text(group.description)
+                        .fixedSize()
+                        .matchedGeometryEffect(id: "groupHeader_\(group.description)", in: namespace)
+                        .font(.title3)
+                        .foregroundColor(.accentColor)
+                        .frame(height: 100)
+                        .frame(maxWidth: .infinity)
+                        .background(
+                            RoundedRectangle(cornerRadius: 10)
+                                .foregroundColor(Color(.secondarySystemGroupedBackground))
+                                .matchedGeometryEffect(id: "groupBackground_\(group.description)", in: namespace)
+                        )
+                }
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.horizontal, 20)
+    }
+    
+    //MARK: - Measurement Section(s)
     
     let DefaultHorizontalPadding: CGFloat = 17
     let DefaultVerticalPadding: CGFloat = 15
 
     func options(for group: UnitGroup) -> [Option] {
         switch group {
-        case .sizes:
-            return []
         case .weights:
             return weightUnits.map { $0 as Option }
         case .volumes:
             return volumeUnits.map { $0 as Option }
+        }
+    }
+    
+    @ViewBuilder
+    func sections(for group: UnitGroup) -> some View {
+        switch group {
+        case .weights:
+            section(for: .weights)
+        case .volumes:
+            Group {
+                if includeVolumes {
+                    section(for: .volumes)
+                }
+                ForEach(volumePrefixedSizes, id: \.self) {
+                    volumePrefixedSizeSection(for: $0)
+                        .transition(.move(edge: .trailing))
+                }
+            }
         }
     }
     
@@ -200,6 +351,7 @@ public struct UnitPickerGridTiered: View {
                 .font(.footnote)
                 .textCase(.uppercase)
                 .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 20)
             FlowLayout(
                 mode: .scrollable,
                 items: options,
@@ -208,7 +360,6 @@ public struct UnitPickerGridTiered: View {
             ) {
                 button(for: $0)
             }
-//            .padding(.horizontal, 20)
             .frame(maxWidth: .infinity)
             .padding(.horizontal, DefaultHorizontalPadding)
             .padding(.vertical, DefaultVerticalPadding)
@@ -234,59 +385,6 @@ public struct UnitPickerGridTiered: View {
         )
     }
     
-    let columns = [ GridItem(.flexible()), GridItem(.flexible()) ]
-    @State var groups: [UnitGroup] = [.sizes, .volumes, .weights]
-    
-    var groupsGrid: some View {
-        LazyVGrid(columns: columns, spacing: 20) {
-            ForEach(groups, id: \.self) { group in
-                Button {
-                    withAnimation {
-                        self.pickedGroup = group
-                    }
-                } label: {
-                    Text(group.description)
-                        .fixedSize()
-                        .matchedGeometryEffect(id: "groupHeader_\(group.description)", in: namespace)
-                        .font(.title3)
-                        .foregroundColor(.accentColor)
-                        .frame(width: 150, height: 100)
-                        .background(
-                            RoundedRectangle(cornerRadius: 10)
-                                .foregroundColor(Color(.secondarySystemGroupedBackground))
-                                .matchedGeometryEffect(id: "groupBackground_\(group.description)", in: namespace)
-                        )
-                }
-            }
-        }
-        .padding(.horizontal)
-        .padding(.top)
-    }
-    
-    var standardSizeOptions: [Option] {
-        var options: [Option] = []
-        if includeServing {
-            options.append(ServingOption(description: servingDescription ?? ""))
-        }
-        options.append(contentsOf: standardSizes.map{ $0 as Option})
-        return options
-    }
-    
-
-    @ViewBuilder
-    var standardSizesSection: some View {
-        if !standardSizes.isEmpty {
-            OptionsSection(
-                header: "Sizes",
-                options: standardSizeOptions,
-                isGrid: $isGrid
-            ) { option in
-                guard let size = option as? FormSize else { return }
-                pickedUnit(unit: .size(size, nil))
-            }
-        }
-    }
-
     @ViewBuilder
     var volumePrefixedSizesSection: some View {
         ForEach(volumePrefixedSizes, id: \.self) {
@@ -603,3 +701,15 @@ struct UnitPickerGridTiered_Previews: PreviewProvider {
         }
     }
 }
+
+let mockSizes: [FormSize] = [
+    FormSize(quantity: 1, volumePrefixUnit: .volume(.cup), name: "chopped", amount: 240, unit: .weight(.g)),
+    FormSize(quantity: 1, volumePrefixUnit: .volume(.cup), name: "sliced", amount: 100, unit: .weight(.g)),
+    FormSize(quantity: 1, name: "large", amount: 70, unit: .weight(.g)),
+    FormSize(quantity: 1, name: "medium", amount: 40, unit: .weight(.g)),
+    FormSize(quantity: 1, name: "small", amount: 35, unit: .weight(.g)),
+    FormSize(quantity: 1, name: "slice", amount: 10, unit: .weight(.g)),
+    FormSize(quantity: 1, name: "extra large", amount: 110, unit: .weight(.g)),
+]
+
+let mockServingDescription = "1 cup chopped (240 mL)"

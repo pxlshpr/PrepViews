@@ -62,37 +62,16 @@ extension FormSize: Option {
     }
 }
 
-extension WeightUnit: Option {
-    var optionId: String {
-        "\(self.rawValue)"
-    }
-    
-    var optionTitle: String {
-        self.description.lowercased()
-    }
-    
-    var optionDetail: String {
-        self.shortDescription
-    }
-}
-
-extension VolumeUnit: Option {
-    var optionId: String {
-        "\(self.rawValue)"
-    }
-    
-    var optionTitle: String {
-        self.description.lowercased()
-    }
-    
-    var optionDetail: String {
-        self.shortDescription
-    }
-}
 
 struct VolumePrefixedSizeOption {
     let size: FormSize
     let volumeUnit: VolumeUnit
+    let includeSize: Bool
+    init(size: FormSize, volumeUnit: VolumeUnit, includeSize: Bool = false) {
+        self.size = size
+        self.volumeUnit = volumeUnit
+        self.includeSize = includeSize
+    }
 }
 
 extension VolumePrefixedSizeOption: Option {
@@ -101,7 +80,7 @@ extension VolumePrefixedSizeOption: Option {
     }
     
     var optionTitle: String {
-        "\(volumeUnit.shortDescription)"
+        "\(volumeUnit.shortDescription)\(includeSize ? ", \(size.name)" : "")"
     }
     
     var optionDetail: String {
@@ -582,18 +561,6 @@ public struct UnitPickerGrid: View {
     }
 }
 
-let mockSizes: [FormSize] = [
-    FormSize(quantity: 1, volumePrefixUnit: .volume(.cup), name: "chopped", amount: 240, unit: .weight(.g)),
-    FormSize(quantity: 1, volumePrefixUnit: .volume(.cup), name: "sliced", amount: 100, unit: .weight(.g)),
-    FormSize(quantity: 1, name: "large", amount: 70, unit: .weight(.g)),
-    FormSize(quantity: 1, name: "medium", amount: 40, unit: .weight(.g)),
-    FormSize(quantity: 1, name: "small", amount: 35, unit: .weight(.g)),
-    FormSize(quantity: 1, name: "slice", amount: 10, unit: .weight(.g)),
-    FormSize(quantity: 1, name: "extra large", amount: 110, unit: .weight(.g)),
-]
-
-let mockServingDescription = "1 cup chopped (240 mL)"
-
 struct UnitPickerGrid_Previews: PreviewProvider {
     static var previews: some View {
         NavigationView {
@@ -683,12 +650,12 @@ struct PillButton: View {
             Capsule(style: .continuous)
                 .foregroundColor(Color(.secondarySystemFill))
             HStack(spacing: 5) {
-                if primaryString != secondaryString {
-                    Text(primaryString)
-                        .foregroundColor(primaryColor)
+                Text(primaryString)
+                    .foregroundColor(primaryColor)
+                if !secondaryString.isEmpty && primaryString != secondaryString {
+                    Text(secondaryString)
+                        .foregroundColor(secondaryColor)
                 }
-                Text(secondaryString)
-                    .foregroundColor(secondaryColor)
             }
             .frame(height: 25)
             .padding(.horizontal, 12)
