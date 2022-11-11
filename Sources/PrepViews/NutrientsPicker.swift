@@ -107,7 +107,7 @@ public struct NutrientsPicker: View {
         if !macrosToShow.isEmpty {
             Section("Macros") {
                 ForEach(macrosToShow, id: \.self) { macro in
-                    
+                    button(for: macro)
                 }
             }
         }
