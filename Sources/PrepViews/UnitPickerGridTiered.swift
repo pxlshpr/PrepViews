@@ -175,7 +175,7 @@ public struct UnitPickerGridTiered: View {
         _groups = State(initialValue: groups)
     }
     
-    @State var presentationDetent: PresentationDetent = .medium
+    @State var presentationDetent: PresentationDetent = .height(450)
     
     public var body: some View {
         NavigationView {
@@ -247,8 +247,18 @@ public struct UnitPickerGridTiered: View {
                 options: primaryUnitOptions,
                 isGrid: $isGrid
             ) { option in
-                guard let size = option as? FormSize else { return }
-                pickedUnit(unit: .size(size, nil))
+                if let size = option as? FormSize {
+                    pickedUnit(unit: .size(size, nil))
+                }
+                else if let weightUnit = option as? WeightUnit {
+                    pickedUnit(unit: .weight(weightUnit))
+                }
+                else if let volumeUnit = option as? VolumeUnit {
+                    pickedUnit(unit: .volume(volumeUnit))
+                }
+                else if let _ = option as? ServingOption {
+                    pickedUnit(unit: .serving)
+                }
             }
         }
     }
@@ -287,6 +297,7 @@ public struct UnitPickerGridTiered: View {
         HStack(spacing: 20) {
             ForEach(groups, id: \.self) { group in
                 Button {
+                    Haptics.feedback(style: .rigid)
                     withAnimation {
                         self.pickedGroup = group
                     }
