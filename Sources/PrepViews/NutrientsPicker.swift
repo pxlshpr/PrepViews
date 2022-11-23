@@ -20,6 +20,8 @@ public struct NutrientsPicker: View {
     let shouldShowMacro: ((Macro) -> Bool)?
     let shouldShowEnergy: Bool
 
+    let shouldDisableLastMacroOrEnergy: Bool
+    
     @State var energyIsPicked: Bool = false
     @State var pickedMacros: [Macro] = []
     @State var pickedNutrientTypes: [NutrientType] = []
@@ -31,6 +33,7 @@ public struct NutrientsPicker: View {
         supportsEnergyAndMacros: Bool = false,
         shouldShowEnergy: Bool = false,
         shouldShowMacro: ((Macro) -> Bool)? = nil,
+        shoulddDisableLastMacroOrEnergy: Bool = false,
         hasUnusedMicros: @escaping (NutrientTypeGroup, String) -> Bool,
         hasMicronutrient: @escaping (NutrientType) -> Bool,
         didAddNutrients: @escaping (Bool, [Macro], [NutrientType]) -> Void
@@ -38,6 +41,7 @@ public struct NutrientsPicker: View {
         self.shouldShowMacro = shouldShowMacro
         self.shouldShowEnergy = shouldShowEnergy
         self.supportsEnergyAndMacros = supportsEnergyAndMacros
+        self.shouldDisableLastMacroOrEnergy = shoulddDisableLastMacroOrEnergy
         self.didAddNutrients = didAddNutrients
         self.hasUnusedMicros = hasUnusedMicros
         self.hasMicronutrient = hasMicronutrient
@@ -72,23 +76,41 @@ public struct NutrientsPicker: View {
         }
     }
     
-    @ViewBuilder
     var energySection: some View {
-        if shouldShowEnergy {
-            Section {
-                Button {
-                    Haptics.feedback(style: .soft)
-                    energyIsPicked.toggle()
-                } label: {
-                    HStack {
-                        Image(systemName: "checkmark")
-                            .opacity(energyIsPicked ? 1 : 0)
-                            .animation(.default, value: energyIsPicked)
-                        Text("Energy")
-                            .foregroundColor(.primary)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .contentShape(Rectangle())
+        var shouldDisableEnergy: Bool {
+            guard shouldDisableLastMacroOrEnergy else { return false }
+            return pickedMacros.count == 3
+        }
+        
+        var textColor: Color {
+            shouldDisableEnergy ? Color(.secondaryLabel) : .primary
+        }
+        
+        var checkmarkOpacity: CGFloat {
+            guard !shouldDisableEnergy else {
+                return 1
+            }
+            return energyIsPicked ? 1 : 0
+        }
+        
+        return Group {
+            if shouldShowEnergy {
+                Section {
+                    Button {
+                        Haptics.feedback(style: .soft)
+                        energyIsPicked.toggle()
+                    } label: {
+                        HStack {
+                            Image(systemName: "checkmark")
+                                .opacity(checkmarkOpacity)
+                                .animation(.default, value: energyIsPicked)
+                            Text("Energy")
+                                .foregroundColor(textColor)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .contentShape(Rectangle())
+                        }
                     }
+                    .disabled(shouldDisableEnergy)
                 }
             }
         }
@@ -119,7 +141,28 @@ public struct NutrientsPicker: View {
     }
 
     func button(for macro: Macro) -> some View {
-        Button {
+        var shouldDisable: Bool {
+            guard shouldDisableLastMacroOrEnergy,
+                  (pickedMacros.count == 2 && energyIsPicked)
+            else {
+                return false
+                
+            }
+            return !pickedMacros.contains(macro)
+        }
+        
+        var textColor: Color {
+            shouldDisable ? Color(.secondaryLabel) : .primary
+        }
+        
+        var checkmarkOpacity: CGFloat {
+            guard !shouldDisable else {
+                return 1
+            }
+            return pickedMacros.contains(macro) ? 1 : 0
+        }
+        
+        return Button {
             Haptics.feedback(style: .soft)
             if pickedMacros.contains(macro) {
                 pickedMacros.removeAll(where: { $0 == macro })
@@ -129,14 +172,15 @@ public struct NutrientsPicker: View {
         } label: {
             HStack {
                 Image(systemName: "checkmark")
-                    .opacity(pickedMacros.contains(macro) ? 1 : 0)
+                    .opacity(checkmarkOpacity)
                     .animation(.default, value: pickedMacros)
                 Text(macro.description)
-                    .foregroundColor(.primary)
+                    .foregroundColor(textColor)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .contentShape(Rectangle())
             }
         }
+        .disabled(shouldDisable)
     }
     var microSections: some View {
         ForEach(NutrientTypeGroup.allCases) {
@@ -221,5 +265,33 @@ public struct NutrientsPicker: View {
                 closeButtonLabel
             }
         }
+    }
+}
+
+struct NutrientsPickerPreview: View {
+    var body: some View {
+        NutrientsPicker(
+            supportsEnergyAndMacros: true,
+            shouldShowEnergy: true,
+            shouldShowMacro: { macro in
+                true
+            },
+            shoulddDisableLastMacroOrEnergy: true,
+            hasUnusedMicros: { _, _ in
+                return true
+            },
+            hasMicronutrient: { _ in
+                false
+            },
+            didAddNutrients: { _, _, _ in
+                
+            }
+        )
+    }
+}
+
+struct NutrientsPicker_Previews: PreviewProvider {
+    static var previews: some View {
+        NutrientsPickerPreview()
     }
 }
