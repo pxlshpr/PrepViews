@@ -276,7 +276,7 @@ struct NutrientsPickerPreview: View {
             shouldShowMacro: { macro in
                 true
             },
-            shoulddDisableLastMacroOrEnergy: true,
+            shouldDisableLastMacroOrEnergy: true,
             hasUnusedMicros: { _, _ in
                 return true
             },
