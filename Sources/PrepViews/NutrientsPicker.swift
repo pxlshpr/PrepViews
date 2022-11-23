@@ -33,7 +33,7 @@ public struct NutrientsPicker: View {
         supportsEnergyAndMacros: Bool = false,
         shouldShowEnergy: Bool = false,
         shouldShowMacro: ((Macro) -> Bool)? = nil,
-        shoulddDisableLastMacroOrEnergy: Bool = false,
+        shouldDisableLastMacroOrEnergy: Bool = false,
         hasUnusedMicros: @escaping (NutrientTypeGroup, String) -> Bool,
         hasMicronutrient: @escaping (NutrientType) -> Bool,
         didAddNutrients: @escaping (Bool, [Macro], [NutrientType]) -> Void
@@ -41,7 +41,7 @@ public struct NutrientsPicker: View {
         self.shouldShowMacro = shouldShowMacro
         self.shouldShowEnergy = shouldShowEnergy
         self.supportsEnergyAndMacros = supportsEnergyAndMacros
-        self.shouldDisableLastMacroOrEnergy = shoulddDisableLastMacroOrEnergy
+        self.shouldDisableLastMacroOrEnergy = shouldDisableLastMacroOrEnergy
         self.didAddNutrients = didAddNutrients
         self.hasUnusedMicros = hasUnusedMicros
         self.hasMicronutrient = hasMicronutrient
