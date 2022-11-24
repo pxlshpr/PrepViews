@@ -179,7 +179,7 @@ public let mockIncrementsFoodMeterViewModels: [FoodMeter.ViewModel] = [
     FoodMeter.ViewModel(component: .protein, goal: 190, burned: 0, food: 102, increment: 52)
 ]
 
-struct NutrientBreakdownPreviewView: View {
+public struct NutrientBreakdownPreviewView: View {
     
 //    @StateObject var viewModel = NutrientBreakdown.ViewModel(foodMeterViewModels: mockEatenFoodMeterViewModels)
 //    @StateObject var viewModel = NutrientBreakdown.ViewModel(foodMeterViewModels: mockIncrementsFoodMeterViewModels)
@@ -220,7 +220,11 @@ struct NutrientBreakdownPreviewView: View {
     @State var localIncludeBurnedCalories: Bool = true
     @State var localHaveGoal: Bool = true
 
-    var body: some View {
+    public init() {
+        
+    }
+    
+    public var body: some View {
         NavigationView {
             VStack {
                 Spacer()
