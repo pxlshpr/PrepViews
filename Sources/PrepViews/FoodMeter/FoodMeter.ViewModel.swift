@@ -229,24 +229,24 @@ public extension FoodMeter.ViewModel {
     }
     
     struct Colors {
-        struct Complete {
-            static let placeholder = Color("StatsCompleteFillExtraNew", bundle: .module)
-            static let fill = Color("StatsCompleteFill", bundle: .module)
-            static let text = Color("StatsCompleteText", bundle: .module)
-            static let textDarker = Color("StatsCompleteTextExtra", bundle: .module)
+        public struct Complete {
+            public static let placeholder = Color("StatsCompleteFillExtraNew", bundle: .module)
+            public static let fill = Color("StatsCompleteFill", bundle: .module)
+            public static let text = Color("StatsCompleteText", bundle: .module)
+            public static let textDarker = Color("StatsCompleteTextExtra", bundle: .module)
         }
         
-        struct Excess {
-            static let placeholder = Color("StatsExcessFillExtra", bundle: .module)
-            static let fill = Color("StatsExcessFill", bundle: .module)
-            static let text = Color("StatsExcessText", bundle: .module)
-            static let textDarker = Color("StatsExcessTextExtra", bundle: .module)
+        public struct Excess {
+            public static let placeholder = Color("StatsExcessFillExtra", bundle: .module)
+            public static let fill = Color("StatsExcessFill", bundle: .module)
+            public static let text = Color("StatsExcessText", bundle: .module)
+            public static let textDarker = Color("StatsExcessTextExtra", bundle: .module)
         }
         
-        struct Empty {
-            static let fill = Color("StatsEmptyFill", bundle: .module)
-            static let text = Color("StatsEmptyText", bundle: .module)
-            static let textLighter = Color("StatsEmptyTextSecondary", bundle: .module)
+        public struct Empty {
+            public static let fill = Color("StatsEmptyFill", bundle: .module)
+            public static let text = Color("StatsEmptyText", bundle: .module)
+            public static let textLighter = Color("StatsEmptyTextSecondary", bundle: .module)
         }
     }
 }
