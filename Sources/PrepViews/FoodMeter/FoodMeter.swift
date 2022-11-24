@@ -161,7 +161,7 @@ public extension FoodMeter {
 }
 
 //MARK: - 📲 Preview
-struct FoodMeterPreviewView: View {
+public struct FoodMeterPreviewView: View {
     
     enum MeterType {
         case eaten
@@ -238,7 +238,11 @@ struct FoodMeterPreviewView: View {
         ]
     ]
     
-    var body: some View {
+    public init() {
+        
+    }
+    
+    public var body: some View {
         NavigationView {
             scrollView
                 .toolbar { navigationTitleToolbarContent }
@@ -246,12 +250,14 @@ struct FoodMeterPreviewView: View {
         }
     }
     
-    @State var previewType: PreviewType = .planned
-    
+//    @State var previewType: PreviewType = .planned
+    @State var previewType: PreviewType = .eaten
+
     var navigationTitleToolbarContent: some ToolbarContent {
         ToolbarItemGroup(placement: .principal) {
             Picker("", selection: $previewType) {
                 ForEach(PreviewType.allCases, id: \.self) { previewType in
+//                ForEach([PreviewType.eaten], id: \.self) { previewType in
                     Text(previewType.rawValue).tag(previewType.rawValue)
                 }
             }
@@ -273,6 +279,7 @@ struct FoodMeterPreviewView: View {
         ScrollView(showsIndicators: false) {
             VStack {
                 ForEach(Array(gridTitles.indices), id: \.self) { gridIndex in
+//                ForEach([2], id: \.self) { gridIndex in
                     VStack(alignment: .leading) {
                         Text(gridTitles[gridIndex])
                             .font(.title2)
@@ -292,26 +299,31 @@ struct FoodMeterPreviewView: View {
         }
     }
     
-    func foodMeter(gridIndex: Int, rowIndex i: Int, type: PreviewType) -> some View {
-        Group {
-            //TODO: Rewrite
-//            if type == .planned {
-//                FoodMeter(goal: $gridDataPlanned[gridIndex][i].goal,
-//                          food: $gridDataPlanned[gridIndex][i].prepped,
-//                          eaten: $gridDataPlanned[gridIndex][i].eaten,
-//                          type: gridDataPlanned[gridIndex][i].type)
-//            } else if type == .eaten {
-//                FoodMeter(goal: $gridDataEaten[gridIndex][i].goal,
-//                          food: $gridDataEaten[gridIndex][i].prepped,
-//                          eaten: $gridDataEaten[gridIndex][i].eaten,
-//                          type: gridDataEaten[gridIndex][i].type)
-//            } else {
-//                FoodMeter(goal: $gridDataIncrement[gridIndex][i].goal,
-//                          food: $gridDataIncrement[gridIndex][i].prepped,
-//                          increment: $gridDataIncrement[gridIndex][i].increment,
-//                          type: gridDataIncrement[gridIndex][i].type)
-//            }
+    func gridData(for previewType: PreviewType) -> [[EatenValues]] {
+        switch previewType {
+        case .eaten:
+            return gridDataEaten
+        case .increment:
+            return gridDataIncrement
+        case .planned:
+            return gridDataPlanned
         }
+    }
+    
+    func viewModel(gridIndex: Int, rowIndex i: Int, previewType: PreviewType) -> FoodMeter.ViewModel {
+        let dataSet = gridData(for: previewType)
+        return FoodMeter.ViewModel(
+            component: dataSet[gridIndex][i].type,
+            goal: dataSet[gridIndex][i].goal,
+            burned: 0,
+            food: dataSet[gridIndex][i].prepped,
+            eaten: dataSet[gridIndex][i].eaten,
+            increment: previewType == .increment ? dataSet[gridIndex][i].increment : nil
+        )
+    }
+    
+    func foodMeter(gridIndex: Int, rowIndex i: Int, type: PreviewType) -> some View {
+        FoodMeter(viewModel: viewModel(gridIndex: gridIndex, rowIndex: i, previewType: type))
         .frame(height: 26)
     }
 }
