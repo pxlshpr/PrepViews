@@ -26,7 +26,9 @@ public enum FoodMeterComponent {
     case fat
     case protein
     case micro(name: String, unit: String = "g")
-    
+}
+
+public extension FoodMeterComponent {
     var iconImageName: String? {
         switch self {
         case .energy:
