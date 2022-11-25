@@ -121,7 +121,6 @@ public extension NutrientMeter {
 //        return PrepColor.statsEmptyFill.forColorScheme(colorScheme)
         return Colors.placeholder
         
-        
 //        switch preppedPercentageType {
 //        case .complete:
 //            if prepped > 1.0 {
