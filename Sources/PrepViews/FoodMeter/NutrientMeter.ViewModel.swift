@@ -14,20 +14,20 @@ public extension NutrientMeter {
         @Published public var eaten: Double?
         @Published public var increment: Double?
         
-        public init(component: NutrientMeterComponent, goal: Double? = nil, burned: Double = 0, food: Double, increment: Double) {
+        public init(component: NutrientMeterComponent, goal: Double? = nil, burned: Double = 0, planned: Double, increment: Double) {
             self.component = component
             self.goal = goal
             self.burned = burned
-            self.planned = food
+            self.planned = planned
             self.eaten = nil
             self.increment = increment
         }
         
-        public init(component: NutrientMeterComponent, goal: Double? = nil, burned: Double = 0, food: Double, eaten: Double) {
+        public init(component: NutrientMeterComponent, goal: Double? = nil, burned: Double = 0, planned: Double, eaten: Double) {
             self.component = component
             self.goal = goal
             self.burned = burned
-            self.planned = food
+            self.planned = planned
             self.eaten = eaten
             self.increment = nil
         }
