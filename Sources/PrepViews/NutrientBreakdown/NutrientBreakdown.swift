@@ -159,24 +159,24 @@ public extension NutrientBreakdown {
 
 public extension NutrientMeter.ViewModel {
     static func empty(for component: NutrientMeterComponent) -> NutrientMeter.ViewModel {
-        NutrientMeter.ViewModel(component: component, goal: 0, burned: 0, food: 0, eaten: 0)
+        NutrientMeter.ViewModel(component: component, goal: 0, burned: 0, planned: 0, eaten: 0)
     }
 }
 
 //MARK: - 📲 Preview
 
 let mockEatenFoodMeterViewModels: [NutrientMeter.ViewModel] = [
-    NutrientMeter.ViewModel(component: .energy, goal: 1596, burned: 676, food: 2272, eaten: 0),
-    NutrientMeter.ViewModel(component: .carb, goal: 130, burned: 84, food: 196, eaten: 156),
-    NutrientMeter.ViewModel(component: .fat, goal: 44, burned: 27, food: 44, eaten: 34),
-    NutrientMeter.ViewModel(component: .protein, goal: 190, burned: 0, food: 102, eaten: 82)
+    NutrientMeter.ViewModel(component: .energy, goal: 1596, burned: 676, planned: 2272, eaten: 0),
+    NutrientMeter.ViewModel(component: .carb, goal: 130, burned: 84, planned: 196, eaten: 156),
+    NutrientMeter.ViewModel(component: .fat, goal: 44, burned: 27, planned: 44, eaten: 34),
+    NutrientMeter.ViewModel(component: .protein, goal: 190, burned: 0, planned: 102, eaten: 82)
 ]
 
 public let mockIncrementsFoodMeterViewModels: [NutrientMeter.ViewModel] = [
-    NutrientMeter.ViewModel(component: .energy, goal: 1596, burned: 676, food: 2272, increment: 500),
-    NutrientMeter.ViewModel(component: .carb, goal: 130, burned: 84, food: 196, increment: 100),
-    NutrientMeter.ViewModel(component: .fat, goal: 44, burned: 27, food: 44, increment: 204),
-    NutrientMeter.ViewModel(component: .protein, goal: 190, burned: 0, food: 102, increment: 52)
+    NutrientMeter.ViewModel(component: .energy, goal: 1596, burned: 676, planned: 2272, increment: 500),
+    NutrientMeter.ViewModel(component: .carb, goal: 130, burned: 84, planned: 196, increment: 100),
+    NutrientMeter.ViewModel(component: .fat, goal: 44, burned: 27, planned: 44, increment: 204),
+    NutrientMeter.ViewModel(component: .protein, goal: 190, burned: 0, planned: 102, increment: 52)
 ]
 
 public struct NutrientBreakdownPreviewView: View {
@@ -201,10 +201,10 @@ public struct NutrientBreakdownPreviewView: View {
     }
     
     @StateObject var viewModel = NutrientBreakdown.ViewModel(
-        energyViewModel: NutrientMeter.ViewModel(component: .energy, goal: K.Goal.energy, burned: 676, food: 2272, eaten: K.Eaten.energy),
-        carbViewModel: NutrientMeter.ViewModel(component: .carb, goal: K.Goal.carb, burned: 84, food: 196, eaten: K.Eaten.carb),
-        fatViewModel: NutrientMeter.ViewModel(component: .fat, goal: K.Goal.fat, burned: 27, food: 44, eaten: K.Eaten.fat),
-        proteinViewModel: NutrientMeter.ViewModel(component: .protein, goal: K.Goal.protein, burned: 0, food: 102, eaten: K.Eaten.protein)
+        energyViewModel: NutrientMeter.ViewModel(component: .energy, goal: K.Goal.energy, burned: 676, planned: 2272, eaten: K.Eaten.energy),
+        carbViewModel: NutrientMeter.ViewModel(component: .carb, goal: K.Goal.carb, burned: 84, planned: 196, eaten: K.Eaten.carb),
+        fatViewModel: NutrientMeter.ViewModel(component: .fat, goal: K.Goal.fat, burned: 27, planned: 44, eaten: K.Eaten.fat),
+        proteinViewModel: NutrientMeter.ViewModel(component: .protein, goal: K.Goal.protein, burned: 0, planned: 102, eaten: K.Eaten.protein)
     )
     
 //    @StateObject var viewModel = NutrientBreakdown.ViewModel(foodMeterViewModels:

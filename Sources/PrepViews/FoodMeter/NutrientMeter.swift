@@ -328,7 +328,7 @@ public struct FoodMeterPreviewView: View {
                 component: dataSet[gridIndex][i].type,
                 goal: dataSet[gridIndex][i].goal,
                 burned: 0,
-                food: dataSet[gridIndex][i].prepped,
+                planned: dataSet[gridIndex][i].prepped,
                 increment: dataSet[gridIndex][i].increment
             )
         } else {
@@ -336,7 +336,7 @@ public struct FoodMeterPreviewView: View {
                 component: dataSet[gridIndex][i].type,
                 goal: dataSet[gridIndex][i].goal,
                 burned: 0,
-                food: dataSet[gridIndex][i].prepped,
+                planned: dataSet[gridIndex][i].prepped,
                 eaten: dataSet[gridIndex][i].eaten
             )
         }
