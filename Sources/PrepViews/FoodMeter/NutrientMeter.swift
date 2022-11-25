@@ -245,7 +245,20 @@ public struct FoodMeterPreviewView: View {
         NavigationView {
             scrollView
                 .toolbar { navigationTitleToolbarContent }
+                .toolbar { bottomContent }
                 .navigationBarTitleDisplayMode(.inline)
+        }
+    }
+    
+    @State var includeGoal: Bool = true
+    
+    var bottomContent: some ToolbarContent {
+        ToolbarItemGroup(placement: .bottomBar) {
+            Picker("", selection: $includeGoal) {
+                Text("With Goal").tag(true)
+                Text("Without Goal").tag(false)
+            }
+            .pickerStyle(.segmented)
         }
     }
     
@@ -331,7 +344,11 @@ public struct FoodMeterPreviewView: View {
     }
     
     func foodMeter(gridIndex: Int, rowIndex i: Int, type: PreviewType) -> some View {
-        NutrientMeter(viewModel: viewModel(gridIndex: gridIndex, rowIndex: i, previewType: type))
+        let viewModel = viewModel(gridIndex: gridIndex, rowIndex: i, previewType: type)
+        if !includeGoal {
+            viewModel.goal = nil
+        }
+        return NutrientMeter(viewModel: viewModel)
         .frame(height: 26)
     }
 }
