@@ -38,7 +38,7 @@ public struct NutrientBreakdown: View {
     }
     
     @ViewBuilder
-    func row(foodMeterViewModel: FoodMeter.ViewModel) -> some View {
+    func row(foodMeterViewModel: NutrientMeter.ViewModel) -> some View {
         Row(foodMeterViewModel: foodMeterViewModel)
             .environmentObject(viewModel)
             .if(!viewModel.haveGoal) { view in
@@ -134,12 +134,12 @@ public extension NutrientBreakdown {
 //            self.foodMeterViewModels = foodMeterViewModels
 //        }
         
-        @Published public var energyViewModel: FoodMeter.ViewModel
-        @Published public var carbViewModel: FoodMeter.ViewModel
-        @Published public var fatViewModel: FoodMeter.ViewModel
-        @Published public var proteinViewModel: FoodMeter.ViewModel
+        @Published public var energyViewModel: NutrientMeter.ViewModel
+        @Published public var carbViewModel: NutrientMeter.ViewModel
+        @Published public var fatViewModel: NutrientMeter.ViewModel
+        @Published public var proteinViewModel: NutrientMeter.ViewModel
         
-        public required init(energyViewModel: FoodMeter.ViewModel, carbViewModel: FoodMeter.ViewModel, fatViewModel: FoodMeter.ViewModel, proteinViewModel: FoodMeter.ViewModel) {
+        public required init(energyViewModel: NutrientMeter.ViewModel, carbViewModel: NutrientMeter.ViewModel, fatViewModel: NutrientMeter.ViewModel, proteinViewModel: NutrientMeter.ViewModel) {
             self.energyViewModel = energyViewModel
             self.carbViewModel = carbViewModel
             self.fatViewModel = fatViewModel
@@ -148,35 +148,35 @@ public extension NutrientBreakdown {
         
         public static var empty: ViewModel {
             Self.init(
-                energyViewModel: FoodMeter.ViewModel.empty(for: .energy),
-                carbViewModel: FoodMeter.ViewModel.empty(for: .carb),
-                fatViewModel: FoodMeter.ViewModel.empty(for: .fat),
-                proteinViewModel: FoodMeter.ViewModel.empty(for: .protein)
+                energyViewModel: NutrientMeter.ViewModel.empty(for: .energy),
+                carbViewModel: NutrientMeter.ViewModel.empty(for: .carb),
+                fatViewModel: NutrientMeter.ViewModel.empty(for: .fat),
+                proteinViewModel: NutrientMeter.ViewModel.empty(for: .protein)
             )
         }
     }
 }
 
-public extension FoodMeter.ViewModel {
-    static func empty(for component: FoodMeterComponent) -> FoodMeter.ViewModel {
-        FoodMeter.ViewModel(component: component, goal: 0, burned: 0, food: 0, eaten: 0)
+public extension NutrientMeter.ViewModel {
+    static func empty(for component: NutrientMeterComponent) -> NutrientMeter.ViewModel {
+        NutrientMeter.ViewModel(component: component, goal: 0, burned: 0, food: 0, eaten: 0)
     }
 }
 
 //MARK: - 📲 Preview
 
-let mockEatenFoodMeterViewModels: [FoodMeter.ViewModel] = [
-    FoodMeter.ViewModel(component: .energy, goal: 1596, burned: 676, food: 2272, eaten: 0),
-    FoodMeter.ViewModel(component: .carb, goal: 130, burned: 84, food: 196, eaten: 156),
-    FoodMeter.ViewModel(component: .fat, goal: 44, burned: 27, food: 44, eaten: 34),
-    FoodMeter.ViewModel(component: .protein, goal: 190, burned: 0, food: 102, eaten: 82)
+let mockEatenFoodMeterViewModels: [NutrientMeter.ViewModel] = [
+    NutrientMeter.ViewModel(component: .energy, goal: 1596, burned: 676, food: 2272, eaten: 0),
+    NutrientMeter.ViewModel(component: .carb, goal: 130, burned: 84, food: 196, eaten: 156),
+    NutrientMeter.ViewModel(component: .fat, goal: 44, burned: 27, food: 44, eaten: 34),
+    NutrientMeter.ViewModel(component: .protein, goal: 190, burned: 0, food: 102, eaten: 82)
 ]
 
-public let mockIncrementsFoodMeterViewModels: [FoodMeter.ViewModel] = [
-    FoodMeter.ViewModel(component: .energy, goal: 1596, burned: 676, food: 2272, increment: 500),
-    FoodMeter.ViewModel(component: .carb, goal: 130, burned: 84, food: 196, increment: 100),
-    FoodMeter.ViewModel(component: .fat, goal: 44, burned: 27, food: 44, increment: 204),
-    FoodMeter.ViewModel(component: .protein, goal: 190, burned: 0, food: 102, increment: 52)
+public let mockIncrementsFoodMeterViewModels: [NutrientMeter.ViewModel] = [
+    NutrientMeter.ViewModel(component: .energy, goal: 1596, burned: 676, food: 2272, increment: 500),
+    NutrientMeter.ViewModel(component: .carb, goal: 130, burned: 84, food: 196, increment: 100),
+    NutrientMeter.ViewModel(component: .fat, goal: 44, burned: 27, food: 44, increment: 204),
+    NutrientMeter.ViewModel(component: .protein, goal: 190, burned: 0, food: 102, increment: 52)
 ]
 
 public struct NutrientBreakdownPreviewView: View {
@@ -201,10 +201,10 @@ public struct NutrientBreakdownPreviewView: View {
     }
     
     @StateObject var viewModel = NutrientBreakdown.ViewModel(
-        energyViewModel: FoodMeter.ViewModel(component: .energy, goal: K.Goal.energy, burned: 676, food: 2272, eaten: K.Eaten.energy, increment: nil),
-        carbViewModel: FoodMeter.ViewModel(component: .carb, goal: K.Goal.carb, burned: 84, food: 196, eaten: K.Eaten.carb, increment: nil),
-        fatViewModel: FoodMeter.ViewModel(component: .fat, goal: K.Goal.fat, burned: 27, food: 44, eaten: K.Eaten.fat, increment: nil),
-        proteinViewModel: FoodMeter.ViewModel(component: .protein, goal: K.Goal.protein, burned: 0, food: 102, eaten: K.Eaten.protein, increment: nil)
+        energyViewModel: NutrientMeter.ViewModel(component: .energy, goal: K.Goal.energy, burned: 676, food: 2272, eaten: K.Eaten.energy),
+        carbViewModel: NutrientMeter.ViewModel(component: .carb, goal: K.Goal.carb, burned: 84, food: 196, eaten: K.Eaten.carb),
+        fatViewModel: NutrientMeter.ViewModel(component: .fat, goal: K.Goal.fat, burned: 27, food: 44, eaten: K.Eaten.fat),
+        proteinViewModel: NutrientMeter.ViewModel(component: .protein, goal: K.Goal.protein, burned: 0, food: 102, eaten: K.Eaten.protein)
     )
     
 //    @StateObject var viewModel = NutrientBreakdown.ViewModel(foodMeterViewModels:
@@ -272,7 +272,7 @@ public struct NutrientBreakdownPreviewView: View {
 
     @State var inputValueType: InputValueType = .food
     
-    func slider(component: FoodMeterComponent, value: Binding<Double>, maxValue: Double) -> some View {
+    func slider(component: NutrientMeterComponent, value: Binding<Double>, maxValue: Double) -> some View {
         VStack {
             HStack(alignment: .firstTextBaseline) {
                 Text("\(component.name):")
@@ -296,14 +296,14 @@ public struct NutrientBreakdownPreviewView: View {
     
     var energyValue: some View {
         HStack(alignment: .firstTextBaseline) {
-            Text("\(FoodMeterComponent.energy.name):")
+            Text("\(NutrientMeterComponent.energy.name):")
                 .font(.headline)
-                .foregroundColor(FoodMeterComponent.energy.textColor)
+                .foregroundColor(NutrientMeterComponent.energy.textColor)
             //                    .bold()
             Group {
                 switch inputValueType {
                 case .food:
-                    Text("\(Int(viewModel.energyViewModel.food))")
+                    Text("\(Int(viewModel.energyViewModel.planned))")
                 case .eaten:
                     Text("\(Int(viewModel.energyViewModel.eaten ?? 0))")
                 case .increment:
@@ -325,19 +325,19 @@ public struct NutrientBreakdownPreviewView: View {
             .pickerStyle(.segmented)
             switch inputValueType {
             case .food:
-                slider(component: .carb, value: $viewModel.carbViewModel.food, maxValue: K.Goal.carb * 3)
-                slider(component: .fat, value: $viewModel.fatViewModel.food, maxValue: K.Goal.fat * 3)
-                slider(component: .protein, value: $viewModel.proteinViewModel.food, maxValue: K.Goal.protein * 3)
+                slider(component: .carb, value: $viewModel.carbViewModel.planned, maxValue: K.Goal.carb * 3)
+                slider(component: .fat, value: $viewModel.fatViewModel.planned, maxValue: K.Goal.fat * 3)
+                slider(component: .protein, value: $viewModel.proteinViewModel.planned, maxValue: K.Goal.protein * 3)
             case .eaten:
 //                slider(component: .carb, value: $incrementCarbValue, maxValue: 1500)
 //                slider(component: .fat, value: $incrementFatValue, maxValue: 666.66666667)
 //                slider(component: .protein, value: $incrementProteinValue, maxValue: 1500)
                 //TODO-NEXT: Use modifiers to change values once triggered
-                slider(component: .carb, value: $eatenCarbValue, maxValue: max(viewModel.carbViewModel.food, 1))
+                slider(component: .carb, value: $eatenCarbValue, maxValue: max(viewModel.carbViewModel.planned, 1))
                     .disabled(eatenCarbValue == 0)
-                slider(component: .fat, value: $eatenFatValue, maxValue: max(viewModel.fatViewModel.food, 1))
+                slider(component: .fat, value: $eatenFatValue, maxValue: max(viewModel.fatViewModel.planned, 1))
                     .disabled(eatenFatValue == 0)
-                slider(component: .protein, value: $eatenProteinValue, maxValue: max(viewModel.proteinViewModel.food, 1))
+                slider(component: .protein, value: $eatenProteinValue, maxValue: max(viewModel.proteinViewModel.planned, 1))
                     .disabled(eatenProteinValue == 0)
             case .increment:
                 slider(component: .carb, value: $incrementCarbValue, maxValue: K.Goal.carb * 3)
@@ -352,7 +352,7 @@ public struct NutrientBreakdownPreviewView: View {
                 .stroke(lineWidth: 2.0)
                 .foregroundColor(Color(.secondarySystemFill))
         )
-        .onChange(of: viewModel.carbViewModel.food) { newValue in
+        .onChange(of: viewModel.carbViewModel.planned) { newValue in
             if newValue < eatenCarbValue {
                 eatenCarbValue = newValue
             }
@@ -361,7 +361,7 @@ public struct NutrientBreakdownPreviewView: View {
             }
             recalculateEnergy()
         }
-        .onChange(of: viewModel.fatViewModel.food) { newValue in
+        .onChange(of: viewModel.fatViewModel.planned) { newValue in
             if newValue < eatenFatValue {
                 eatenFatValue = newValue
             }
@@ -370,7 +370,7 @@ public struct NutrientBreakdownPreviewView: View {
             }
             recalculateEnergy()
         }
-        .onChange(of: viewModel.proteinViewModel.food) { newValue in
+        .onChange(of: viewModel.proteinViewModel.planned) { newValue in
             if newValue < eatenProteinValue {
                 eatenProteinValue = newValue
             }
@@ -380,7 +380,7 @@ public struct NutrientBreakdownPreviewView: View {
             recalculateEnergy()
         }
         .onChange(of: eatenCarbValue) { newValue in
-            guard !(newValue == 0 && viewModel.carbViewModel.food != 0) else {
+            guard !(newValue == 0 && viewModel.carbViewModel.planned != 0) else {
                 eatenCarbValue = 1
                 return
             }
@@ -389,7 +389,7 @@ public struct NutrientBreakdownPreviewView: View {
             nullifyIncrementValues()
         }
         .onChange(of: eatenFatValue) { newValue in
-            guard !(newValue == 0 && viewModel.fatViewModel.food != 0) else {
+            guard !(newValue == 0 && viewModel.fatViewModel.planned != 0) else {
                 eatenFatValue = 1
                 return
             }
@@ -398,7 +398,7 @@ public struct NutrientBreakdownPreviewView: View {
             nullifyIncrementValues()
         }
         .onChange(of: eatenProteinValue) { newValue in
-            guard !(newValue == 0 && viewModel.proteinViewModel.food != 0) else {
+            guard !(newValue == 0 && viewModel.proteinViewModel.planned != 0) else {
                 eatenProteinValue = 1
                 return
             }
@@ -438,7 +438,7 @@ public struct NutrientBreakdownPreviewView: View {
     }
 
     func recalculateEnergy() {
-        viewModel.energyViewModel.food = (viewModel.proteinViewModel.food * 4) + (viewModel.carbViewModel.food * 4) + (viewModel.fatViewModel.food * 9)
+        viewModel.energyViewModel.planned = (viewModel.proteinViewModel.planned * 4) + (viewModel.carbViewModel.planned * 4) + (viewModel.fatViewModel.planned * 9)
     }
 
     func recalculateEatenEnergy() {
@@ -492,7 +492,7 @@ struct NutrientBreakdown_Previews: PreviewProvider {
 
 }
 
-extension FoodMeter.ViewModel {
+extension NutrientMeter.ViewModel {
     
     var labelTextColor: Color {
         switch percentageType {

@@ -1,10 +1,9 @@
 import SwiftUI
 
-//TODO: Rewrite with new ViewModel
-public struct FoodMeter: View {
+public struct NutrientMeter: View {
     
     @Environment(\.colorScheme) var colorScheme
-    @ObservedObject var viewModel: FoodMeter.ViewModel
+    @ObservedObject var viewModel: NutrientMeter.ViewModel
     
 //    @Binding var goal: Double
 //    @Binding var food: Double
@@ -17,12 +16,12 @@ public struct FoodMeter: View {
 //    @State var type: FoodMeterComponent
     @State private var hasAppeared = false
     
-    public init(viewModel: FoodMeter.ViewModel) {
+    public init(viewModel: NutrientMeter.ViewModel) {
         self.viewModel = viewModel
     }
 }
 
-public extension FoodMeter {
+public extension NutrientMeter {
     var body: some View {
         GeometryReader { proxy -> AnyView in
             return AnyView(
@@ -86,7 +85,7 @@ public extension FoodMeter {
     
     //MARK: - Accessors
     var food: Double {
-        viewModel.food
+        viewModel.planned
     }
     
     //MARK: - 📐 Widths
@@ -168,7 +167,7 @@ public struct FoodMeterPreviewView: View {
         case increment
     }
     
-    typealias EatenValues = (type: FoodMeterComponent, goal: Double, prepped: Double, eaten: Double, increment: Double)
+    typealias EatenValues = (type: NutrientMeterComponent, goal: Double, prepped: Double, eaten: Double, increment: Double)
     @State var gridTitles: [String] = [
         "Standard",
         "Complete",
@@ -310,20 +309,29 @@ public struct FoodMeterPreviewView: View {
         }
     }
     
-    func viewModel(gridIndex: Int, rowIndex i: Int, previewType: PreviewType) -> FoodMeter.ViewModel {
+    func viewModel(gridIndex: Int, rowIndex i: Int, previewType: PreviewType) -> NutrientMeter.ViewModel {
         let dataSet = gridData(for: previewType)
-        return FoodMeter.ViewModel(
-            component: dataSet[gridIndex][i].type,
-            goal: dataSet[gridIndex][i].goal,
-            burned: 0,
-            food: dataSet[gridIndex][i].prepped,
-            eaten: dataSet[gridIndex][i].eaten,
-            increment: previewType == .increment ? dataSet[gridIndex][i].increment : nil
-        )
+        if previewType == .increment {
+            return NutrientMeter.ViewModel(
+                component: dataSet[gridIndex][i].type,
+                goal: dataSet[gridIndex][i].goal,
+                burned: 0,
+                food: dataSet[gridIndex][i].prepped,
+                increment: dataSet[gridIndex][i].increment
+            )
+        } else {
+            return NutrientMeter.ViewModel(
+                component: dataSet[gridIndex][i].type,
+                goal: dataSet[gridIndex][i].goal,
+                burned: 0,
+                food: dataSet[gridIndex][i].prepped,
+                eaten: dataSet[gridIndex][i].eaten
+            )
+        }
     }
     
     func foodMeter(gridIndex: Int, rowIndex i: Int, type: PreviewType) -> some View {
-        FoodMeter(viewModel: viewModel(gridIndex: gridIndex, rowIndex: i, previewType: type))
+        NutrientMeter(viewModel: viewModel(gridIndex: gridIndex, rowIndex: i, previewType: type))
         .frame(height: 26)
     }
 }

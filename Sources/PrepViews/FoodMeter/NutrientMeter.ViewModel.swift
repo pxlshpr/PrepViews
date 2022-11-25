@@ -1,33 +1,42 @@
 import SwiftUI
 
-public extension FoodMeter {
+public extension NutrientMeter {
     class ViewModel: ObservableObject {
         
-        @Published public var component: FoodMeterComponent
+        @Published public var component: NutrientMeterComponent
         @Published public var goal: Double
         
         /// Having this as a non-zero value implies that it's being included with the goal
         ///
         @Published public var burned: Double
-        @Published public var food: Double
+        @Published public var planned: Double
         
         @Published public var eaten: Double?
         @Published public var increment: Double?
         
-        public init(component: FoodMeterComponent, goal: Double, burned: Double, food: Double, eaten: Double? = nil, increment: Double? = nil) {
+        public init(component: NutrientMeterComponent, goal: Double, burned: Double, food: Double, increment: Double? = nil) {
             self.component = component
             self.goal = goal
             self.burned = burned
-            self.food = food
-            self.eaten = eaten
+            self.planned = food
+            self.eaten = nil
             self.increment = increment
+        }
+        
+        public init(component: NutrientMeterComponent, goal: Double, burned: Double, food: Double, eaten: Double? = nil) {
+            self.component = component
+            self.goal = goal
+            self.burned = burned
+            self.planned = food
+            self.eaten = eaten
+            self.increment = nil
         }
     }
 }
 
-public extension FoodMeter.ViewModel {
+public extension NutrientMeter.ViewModel {
     var remainingString: String {
-        "\(Int(goal + burned - food - (increment ?? 0)))"
+        "\(Int(goal + burned - planned - (increment ?? 0)))"
     }
     
     var goalString: String {
@@ -39,7 +48,7 @@ public extension FoodMeter.ViewModel {
     }
     
     var foodString: String {
-        "\(Int(food + (increment ?? 0)))"
+        "\(Int(planned + (increment ?? 0)))"
     }
     
 //    var incrementString: String {
@@ -47,24 +56,24 @@ public extension FoodMeter.ViewModel {
 //    }
 }
 
-extension FoodMeter.ViewModel: Hashable {
+extension NutrientMeter.ViewModel: Hashable {
     public func hash(into hasher: inout Hasher) {
     hasher.combine(component)
         hasher.combine(goal)
         hasher.combine(burned)
-        hasher.combine(food)
+        hasher.combine(planned)
         hasher.combine(eaten)
         hasher.combine(increment)
     }
 }
 
-extension FoodMeter.ViewModel: Equatable {
-    public static func ==(lhs: FoodMeter.ViewModel, rhs: FoodMeter.ViewModel) -> Bool {
+extension NutrientMeter.ViewModel: Equatable {
+    public static func ==(lhs: NutrientMeter.ViewModel, rhs: NutrientMeter.ViewModel) -> Bool {
         lhs.hashValue == rhs.hashValue
     }
 }
 
-public extension FoodMeter.ViewModel {
+public extension NutrientMeter.ViewModel {
     var totalGoal: Double {
         goal + burned
 //        if let burned = burned?.wrappedValue,
@@ -88,7 +97,7 @@ public extension FoodMeter.ViewModel {
     var incrementPercentage: Double {
         guard let increment = increment, totalGoal != 0 else { return 0 }
 //        guard let increment = increment?.wrappedValue, totalGoal != 0 else { return 0 }
-        return (increment + food) / totalGoal
+        return (increment + planned) / totalGoal
     }
     
     var incrementPercentageForMeter: Double {
@@ -97,8 +106,8 @@ public extension FoodMeter.ViewModel {
 
         /// Choose greater of goal or "prepped + increment"
         let total: Double
-        if food + increment > totalGoal {
-            total = food + increment
+        if planned + increment > totalGoal {
+            total = planned + increment
         } else {
             total = totalGoal
         }
@@ -119,8 +128,8 @@ public extension FoodMeter.ViewModel {
         if preppedPercentage < 1 {
             return eaten / totalGoal
         } else {
-            guard food != 0 else { return 0 }
-            return eaten / food
+            guard planned != 0 else { return 0 }
+            return eaten / planned
         }
     }
 
@@ -138,9 +147,9 @@ public extension FoodMeter.ViewModel {
         /// Choose greater of preppedPercentage or prepped/(prepped + increment)
         if let increment = increment,
            totalGoal + increment > 0,
-           food / (totalGoal + increment) > preppedPercentage
+           planned / (totalGoal + increment) > preppedPercentage
         {
-            return food / (food + increment)
+            return planned / (planned + increment)
         } else {
             return preppedPercentage
         }
@@ -151,17 +160,17 @@ public extension FoodMeter.ViewModel {
         
         let total: Double
         if let increment = increment,
-           food + increment > totalGoal
+           planned + increment > totalGoal
         {
 //        if let increment = increment?.wrappedValue,
 //           food + increment > totalGoal
 //        {
-            total = food + increment
+            total = planned + increment
         } else {
             total = totalGoal
         }
         
-        return food / total
+        return planned / total
     }
     
     var normalizedPreppedPercentage: Double {

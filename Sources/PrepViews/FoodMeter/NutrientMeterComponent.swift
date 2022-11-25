@@ -1,7 +1,7 @@
 import SwiftUI
 import PrepDataTypes
 
-extension FoodMeterComponent: Hashable {
+extension NutrientMeterComponent: Hashable {
     public func hash(into hasher: inout Hasher) {
         switch self {
         case .energy:
@@ -20,7 +20,7 @@ extension FoodMeterComponent: Hashable {
     }
 }
 
-public enum FoodMeterComponent {
+public enum NutrientMeterComponent {
     case energy
     case carb
     case fat
@@ -28,7 +28,7 @@ public enum FoodMeterComponent {
     case micro(name: String, unit: String = "g")
 }
 
-public extension FoodMeterComponent {
+public extension NutrientMeterComponent {
     var iconImageName: String? {
         switch self {
         case .energy:
@@ -178,7 +178,7 @@ public extension FoodMeterComponent {
     }
 }
 
-extension FoodMeterComponent: CustomStringConvertible {
+extension NutrientMeterComponent: CustomStringConvertible {
     public var description: String {
         switch self {
         case .energy:
