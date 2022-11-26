@@ -25,7 +25,7 @@ public enum NutrientMeterComponent {
     case carb
     case fat
     case protein
-    case micro(name: String, unit: String = "g")
+    case micro(nutrientType: NutrientType, nutrientUnit: NutrientUnit)
 }
 
 public extension NutrientMeterComponent {
@@ -48,8 +48,8 @@ public extension NutrientMeterComponent {
             return "Fat"
         case .protein:
             return "Protein"
-        case .micro(let name, _):
-            return name
+        case .micro(let nutrientType, _):
+            return nutrientType.description
         }
     }
     
@@ -78,8 +78,8 @@ public extension NutrientMeterComponent {
         //TODO: Handle kJ preference
         case .energy:
             return "kcal"
-        case .micro(_, let unit):
-            return unit
+        case .micro(_, let nutrientUnit):
+            return nutrientUnit.shortDescription
         default:
             /// Implies it's a macro
             return "g"
@@ -180,17 +180,6 @@ public extension NutrientMeterComponent {
 
 extension NutrientMeterComponent: CustomStringConvertible {
     public var description: String {
-        switch self {
-        case .energy:
-            return "Energy"
-        case .carb:
-            return "Carb"
-        case .fat:
-            return "Fat"
-        case .protein:
-            return "Protein"
-        case .micro(let name, _):
-            return name
-        }
+        name
     }
 }

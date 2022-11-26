@@ -338,10 +338,11 @@ extension MealItemNutrientMeters.ViewModel {
         viewModels.append(NutrientMeter.ViewModel(component: .protein, planned: p(.protein), increment: nutrients.protein))
 
         for micro in nutrients.micros {
+            guard let nutrientType = micro.nutrientType, micro.value > 0 else { continue }
             //TODO: Handle unit conversions and displaying the correct one here
             let component: NutrientMeterComponent = .micro(
-                name: micro.nutrientType?.description ?? "",
-                unit: micro.nutrientUnit.shortDescription
+                nutrientType: nutrientType,
+                nutrientUnit: micro.nutrientUnit
             )
             viewModels.append(NutrientMeter.ViewModel(
                 component: component,
@@ -379,24 +380,42 @@ extension DayMeal {
     }
 }
 
+extension Food {
+    func quantity(for amount: FoodValue) -> FoodQuantity? {
+        guard let unit = FoodQuantity.Unit(foodValue: amount, in: self) else { return nil }
+        return FoodQuantity(value: amount.value, unit: unit, food: self)
+    }
+}
+
 extension MealFoodItem {
+    
+    var nutrientScaleFactor: Double {
+        guard let foodQuantity = food.quantity(for: amount) else { return 0 }
+        return food.nutrientScaleFactor(for: foodQuantity) ?? 0
+    }
+    
     func value(for component: NutrientMeterComponent) -> Double {
+        guard let value = food.info.nutrients.value(for: component) else { return 0 }
+        return value * nutrientScaleFactor
+    }
+}
+
+extension FoodNutrients {
+    func value(for component: NutrientMeterComponent) -> Double? {
         //TODO: Complete this by doing the following
-        /// [ ] Account for `FoodValue` and multiply the values accordingly
-        /// [ ] Account for kcal/kJ for energy
-        /// [ ] Modify micro to include actual `NutrientType` and not just the `String` of the description
-        /// [ ] Account for possible different unit with micro (to what the nutrients are specified in), and consider that too when handling the conversion (this should be similar to getting a multiplier for a size)
+        /// [x] Account for `FoodValue` and multiply the values accordingly
+        /// [x] Modify micro to include actual `NutrientType` and not just the `String` of the description
         switch component {
         case .energy:
-            return food.info.nutrients.energyInKcal
+            return energyInKcal
         case .carb:
-            return food.info.nutrients.carb
+            return carb
         case .fat:
-            return food.info.nutrients.fat
+            return fat
         case .protein:
-            return food.info.nutrients.protein
-        case .micro:
-            return 0
+            return protein
+        case .micro(let nutrientType, _):
+            return micros.first(where: { $0.nutrientType == nutrientType })?.value
         }
     }
 }
