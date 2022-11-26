@@ -109,14 +109,20 @@ public extension NutrientMeter.ViewModel {
     }
     
     var incrementPercentage: Double {
-        guard let increment = increment, totalGoal != 0 else { return 0 }
-        //        guard let increment = increment?.wrappedValue, totalGoal != 0 else { return 0 }
+        guard let increment = increment else { return 0 }
+        guard totalGoal == 0 else {
+            return 100
+        }
         return (increment + planned) / totalGoal
     }
     
     var incrementPercentageForMeter: Double {
-        guard let increment = increment, totalGoal != 0 else { return 0 }
+        guard let increment = increment, increment > 0 else { return 0 }
         //        guard let increment = increment?.wrappedValue, totalGoal != 0 else { return 0 }
+        
+        guard totalGoal != 0 else {
+            return 100
+        }
         
         /// Choose greater of goal or "prepped + increment"
         let total: Double
@@ -278,5 +284,61 @@ public extension NutrientMeter.ViewModel {
             public static let text = Color("StatsEmptyText", bundle: .module)
             public static let textLighter = Color("StatsEmptyTextSecondary", bundle: .module)
         }
+    }
+}
+
+//MARK: - 👁‍🗨 Previews
+import SwiftUISugar
+import PrepDataTypes
+import PrepMocks
+
+public struct MealItemNutrientMetersPreview: View {
+    
+    public init() { }
+    
+    public var body: some View {
+        NavigationView {
+            FormStyledScrollView {
+                textFieldSection
+                metersSection
+            }
+            .navigationTitle("Quantity")
+        }
+    }
+
+    var metersSection: some View {
+        MealItemNutrientMeters(
+            foodItem: MealFoodItem(
+                food: FoodMock.peanutButter,
+                amount: FoodValue(value: 20, unitType: .weight, weightUnit: .g)
+            ),
+            meal: DayMeal(from: MealMock.preWorkoutWithItems),
+            day: DayMock.cutting
+        )
+    }
+    
+    var textFieldSection: some View {
+        FormStyledSection(header: Text("Weight")) {
+            HStack {
+                TextField("Required", text: .constant(""))
+                Button {
+                } label: {
+                    HStack(spacing: 5) {
+                        Text("g")
+                        Image(systemName: "chevron.up.chevron.down")
+                            .imageScale(.small)
+                    }
+                }
+                .buttonStyle(.borderless)
+            }
+        }
+    }
+
+}
+
+struct MealItemNutrientMeters_Previews: PreviewProvider {
+    static var previews: some View {
+//        Color.blue
+        MealItemNutrientMetersPreview()
     }
 }

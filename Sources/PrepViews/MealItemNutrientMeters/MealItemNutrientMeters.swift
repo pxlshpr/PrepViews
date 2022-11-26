@@ -172,14 +172,29 @@ enum MetersType: Int, CaseIterable {
     }
     
     var footerString: String {
-        switch self {
-        case .nutrients:
-            return "These are all the nutrients listed for the food. Each meter shows how much of an increase this food will contribute to what you've already added today."
-        case .diet:
-            return "These are the goals for the diet you have chosen for today. Each meter shows how much of an increase this food will contribute to what you've already added  today."
-        case .meal:
-            return "These are the goals for the meal type you have chosen. Each bar shows how much of an increase this food will contribute to what you've already added to this meal."
+        var prefix: String {
+            switch self {
+            case .nutrients:
+                return "These are all the nutrients listed for this food."
+            case .diet:
+                return "These are the goals for the diet you have chosen for today."
+            case .meal:
+                return "These are the goals for the meal you are adding this to."
+            }
         }
+        
+        var suffix: String {
+            let string: String
+            switch self {
+            case .nutrients:
+                string = " today."
+            case .diet, .meal:
+                string = ", against the total goal."
+            }
+            return "Each meter represents the relative increase from what you've added so far\(string)"
+        }
+
+        return "\(prefix) \(suffix)"
     }
 }
 
@@ -301,19 +316,36 @@ extension MealItemNutrientMeters.ViewModel {
         foodItem.food.info.nutrients
     }
     
+    func plannedValue(for component: NutrientMeterComponent, type: MetersType) -> Double {
+        switch type {
+        case .nutrients, .diet:
+            return day.plannedValue(for: component, ignoring: meal.id) + meal.plannedValue(for: component)
+        case .meal:
+            return meal.plannedValue(for: component)
+        }
+    }
+    
     var nutrientViewModels: [NutrientMeter.ViewModel] {
+        func p(_ component: NutrientMeterComponent) -> Double {
+            plannedValue(for: component, type: .nutrients)
+        }
+        
         var viewModels: [NutrientMeter.ViewModel] = []
-        viewModels.append(NutrientMeter.ViewModel(component: .energy, planned: 1, increment: nutrients.energyInKcal))
+        viewModels.append(NutrientMeter.ViewModel(component: .energy, planned: p(.energy), increment: nutrients.energyInKcal))
 
-        viewModels.append(NutrientMeter.ViewModel(component: .carb, planned: 1, increment: nutrients.carb))
-        viewModels.append(NutrientMeter.ViewModel(component: .fat, planned: 1, increment: nutrients.fat))
-        viewModels.append(NutrientMeter.ViewModel(component: .protein, planned: 1, increment: nutrients.protein))
+        viewModels.append(NutrientMeter.ViewModel(component: .carb, planned: p(.carb), increment: nutrients.carb))
+        viewModels.append(NutrientMeter.ViewModel(component: .fat, planned: p(.fat), increment: nutrients.fat))
+        viewModels.append(NutrientMeter.ViewModel(component: .protein, planned: p(.protein), increment: nutrients.protein))
 
         for micro in nutrients.micros {
             //TODO: Handle unit conversions and displaying the correct one here
+            let component: NutrientMeterComponent = .micro(
+                name: micro.nutrientType?.description ?? "",
+                unit: micro.nutrientUnit.shortDescription
+            )
             viewModels.append(NutrientMeter.ViewModel(
-                component: .micro(name: micro.nutrientType?.description ?? "", unit: micro.nutrientUnit.shortDescription),
-                planned: 1,
+                component: component,
+                planned: p(component),
                 increment: micro.value
             ))
         }
@@ -328,6 +360,43 @@ extension MealItemNutrientMeters.ViewModel {
             return []
         case .meal:
             return []
+        }
+    }
+}
+
+extension Day {
+    func plannedValue(for component: NutrientMeterComponent, ignoring mealID: UUID) -> Double {
+        meals.reduce(0) { partialResult, dayMeal in
+            partialResult + (dayMeal.id != mealID ? dayMeal.plannedValue(for: component) : 0)
+        }
+    }
+}
+extension DayMeal {
+    func plannedValue(for component: NutrientMeterComponent) -> Double {
+        foodItems.reduce(0) { partialResult, mealFoodItem in
+            partialResult + mealFoodItem.value(for: component)
+        }
+    }
+}
+
+extension MealFoodItem {
+    func value(for component: NutrientMeterComponent) -> Double {
+        //TODO: Complete this by doing the following
+        /// [ ] Account for `FoodValue` and multiply the values accordingly
+        /// [ ] Account for kcal/kJ for energy
+        /// [ ] Modify micro to include actual `NutrientType` and not just the `String` of the description
+        /// [ ] Account for possible different unit with micro (to what the nutrients are specified in), and consider that too when handling the conversion (this should be similar to getting a multiplier for a size)
+        switch component {
+        case .energy:
+            return food.info.nutrients.energyInKcal
+        case .carb:
+            return food.info.nutrients.carb
+        case .fat:
+            return food.info.nutrients.fat
+        case .protein:
+            return food.info.nutrients.protein
+        case .micro:
+            return 0
         }
     }
 }
@@ -373,256 +442,5 @@ extension MealItemNutrientMeters.Meters {
                     .foregroundColor(Color(.tertiaryLabel))
             }
         }
-    }
-}
-
-extension MealItemNutrientMeters.Meters {
-    
-    var exampleMeters: some View {
-        VStack {
-            Grid(alignment: .leading, verticalSpacing: MeterSpacing) {
-                GridRow {
-                    Text("Energy")
-                        .foregroundColor(NutrientMeterComponent.energy.textColor)
-                        .font(MeterLabelFont)
-    //                    .font(.title3)
-                    NutrientMeter(viewModel: .init(
-                        component: .energy, burned: 0, planned: 170, increment: 180))
-                    .frame(height: MeterHeight)
-                    HStack(alignment: .firstTextBaseline, spacing: 2) {
-                        Text("170")
-                            .font(.footnote)
-                            .foregroundColor(.secondary)
-                        Text("kcal")
-                            .font(.caption2)
-                            .foregroundColor(Color(.tertiaryLabel))
-                    }
-                }
-                GridRow {
-                    Text("Carb")
-                        .foregroundColor(NutrientMeterComponent.carb.textColor)
-                        .font(MeterLabelFont)
-    //                    .fontWeight(.bold)
-    //                    .font(.title3)
-                    NutrientMeter(viewModel: .init(
-                        component: .carb, burned: 0, planned: 170, increment: 20))
-                    .frame(height: MeterHeight)
-                    HStack(alignment: .firstTextBaseline, spacing: 2) {
-                        Text("12")
-                            .font(.footnote)
-                            .foregroundColor(.secondary)
-                        Text("g")
-                            .font(.caption2)
-                            .foregroundColor(Color(.tertiaryLabel))
-                    }
-                }
-                GridRow {
-                    Text("Fat")
-                        .foregroundColor(NutrientMeterComponent.fat.textColor)
-                        .font(MeterLabelFont)
-    //                    .fontWeight(.bold)
-    //                    .font(.title3)
-                    NutrientMeter(viewModel: .init(
-                        component: .fat, burned: 0, planned: 70, increment: 60))
-                    .frame(height: MeterHeight)
-                    HStack(alignment: .firstTextBaseline, spacing: 2) {
-                        Text("28.5")
-                            .font(.footnote)
-                            .foregroundColor(.secondary)
-                        Text("g")
-                            .font(.caption2)
-                            .foregroundColor(Color(.tertiaryLabel))
-                    }
-                }
-                GridRow {
-                    Text("Protein")
-                        .foregroundColor(NutrientMeterComponent.protein.textColor)
-                        .font(MeterLabelFont)
-    //                    .fontWeight(.bold)
-    //                    .font(.title3)
-                    NutrientMeter(viewModel: .init(
-                        component: .protein, burned: 0, planned: 170, increment: 70))
-                    .frame(height: MeterHeight)
-                    HStack(alignment: .firstTextBaseline, spacing: 2) {
-                        Text("6")
-                            .font(.footnote)
-                            .foregroundColor(.secondary)
-                        Text("g")
-                            .font(.caption2)
-                            .foregroundColor(Color(.tertiaryLabel))
-                    }
-                }
-            }
-        }
-    }
-
-    var exampleMeters2: some View {
-        VStack {
-            Grid(alignment: .leading, verticalSpacing: MeterSpacing) {
-                GridRow {
-                    Text("Energy")
-                        .foregroundColor(NutrientMeterComponent.energy.textColor)
-                        .font(MeterLabelFont)
-    //                    .font(.title3)
-                    NutrientMeter(viewModel: .init(
-                        component: .energy, goal: 400, burned: 0, planned: 170, increment: 180))
-                    .frame(height: MeterHeight)
-                    HStack(alignment: .firstTextBaseline, spacing: 2) {
-                        Text("170")
-                            .font(.footnote)
-                            .foregroundColor(.secondary)
-                        Text("kcal")
-                            .font(.caption2)
-                            .foregroundColor(Color(.tertiaryLabel))
-                    }
-                }
-                GridRow {
-                    Text("Carb")
-                        .foregroundColor(NutrientMeterComponent.carb.textColor)
-                        .font(MeterLabelFont)
-    //                    .fontWeight(.bold)
-    //                    .font(.title3)
-                    NutrientMeter(viewModel: .init(
-                        component: .carb, goal: 400, burned: 0, planned: 170, increment: 20))
-                    .frame(height: MeterHeight)
-                    HStack(alignment: .firstTextBaseline, spacing: 2) {
-                        Text("12")
-                            .font(.footnote)
-                            .foregroundColor(.secondary)
-                        Text("g")
-                            .font(.caption2)
-                            .foregroundColor(Color(.tertiaryLabel))
-                    }
-                }
-                GridRow {
-                    Text("Fat")
-                        .foregroundColor(NutrientMeterComponent.fat.textColor)
-                        .font(MeterLabelFont)
-    //                    .fontWeight(.bold)
-    //                    .font(.title3)
-                    NutrientMeter(viewModel: .init(
-                        component: .fat, goal: 300, burned: 0, planned: 70, increment: 60))
-                    .frame(height: MeterHeight)
-                    HStack(alignment: .firstTextBaseline, spacing: 2) {
-                        Text("28.5")
-                            .font(.footnote)
-                            .foregroundColor(.secondary)
-                        Text("g")
-                            .font(.caption2)
-                            .foregroundColor(Color(.tertiaryLabel))
-                    }
-                }
-                GridRow {
-                    Text("Protein")
-                        .foregroundColor(NutrientMeterComponent.protein.textColor)
-                        .font(MeterLabelFont)
-    //                    .fontWeight(.bold)
-    //                    .font(.title3)
-                    NutrientMeter(viewModel: .init(
-                        component: .protein, goal: 300, burned: 0, planned: 170, increment: 70))
-                    .frame(height: MeterHeight)
-                    HStack(alignment: .firstTextBaseline, spacing: 2) {
-                        Text("6")
-                            .font(.footnote)
-                            .foregroundColor(.secondary)
-                        Text("g")
-                            .font(.caption2)
-                            .foregroundColor(Color(.tertiaryLabel))
-                    }
-                }
-                GridRow {
-                    Text("Magnesium")
-                        .foregroundColor(NutrientMeterComponent.micro(name: "").textColor)
-                        .font(MeterLabelFont)
-    //                    .fontWeight(.bold)
-    //                    .font(.title3)
-                    NutrientMeter(viewModel: .init(
-                        component: .micro(name: "Magnesium"), goal: 440, burned: 0, planned: 170, increment: 70))
-                    .frame(height: MeterHeight)
-                    HStack(alignment: .firstTextBaseline, spacing: 2) {
-                        Text("6")
-                            .font(.footnote)
-                            .foregroundColor(.secondary)
-                        Text("g")
-                            .font(.caption2)
-                            .foregroundColor(Color(.tertiaryLabel))
-                    }
-                }
-                GridRow {
-                    Text("Sodium")
-                        .foregroundColor(NutrientMeterComponent.micro(name: "").textColor)
-                        .font(MeterLabelFont)
-    //                    .fontWeight(.bold)
-    //                    .font(.title3)
-                    NutrientMeter(viewModel: .init(
-                        component: .micro(name: "Sodium"), goal: 600, burned: 0, planned: 170, increment: 70))
-                    .frame(height: MeterHeight)
-                    HStack(alignment: .firstTextBaseline, spacing: 2) {
-                        Text("6")
-                            .font(.footnote)
-                            .foregroundColor(.secondary)
-                        Text("g")
-                            .font(.caption2)
-                            .foregroundColor(Color(.tertiaryLabel))
-                    }
-                }
-            }
-        }
-    }
-}
-
-//MARK: - 👁‍🗨 Previews
-import SwiftUISugar
-import PrepDataTypes
-import PrepMocks
-
-public struct MealItemNutrientMetersPreview: View {
-    
-    public init() { }
-    
-    public var body: some View {
-        NavigationView {
-            FormStyledScrollView {
-                textFieldSection
-                metersSection
-            }
-            .navigationTitle("Quantity")
-        }
-    }
-
-    var metersSection: some View {
-        MealItemNutrientMeters(
-            foodItem: MealFoodItem(
-                food: FoodMock.peanutButter,
-                amount: FoodValue(value: 20, unitType: .weight, weightUnit: .g)
-            ),
-            meal: DayMeal(from: MealMock.preWorkoutWithItems),
-            day: DayMock.cutting
-        )
-    }
-    
-    var textFieldSection: some View {
-        FormStyledSection(header: Text("Weight")) {
-            HStack {
-                TextField("Required", text: .constant(""))
-                Button {
-                } label: {
-                    HStack(spacing: 5) {
-                        Text("g")
-                        Image(systemName: "chevron.up.chevron.down")
-                            .imageScale(.small)
-                    }
-                }
-                .buttonStyle(.borderless)
-            }
-        }
-    }
-
-}
-
-struct MealItemNutrientMeters_Previews: PreviewProvider {
-    static var previews: some View {
-//        Color.blue
-        MealItemNutrientMetersPreview()
     }
 }
