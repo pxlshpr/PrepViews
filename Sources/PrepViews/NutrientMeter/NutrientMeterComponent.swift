@@ -69,7 +69,7 @@ public extension NutrientMeterComponent {
         case .protein:
             return Color("StatsProteinText", bundle: .module)
         case .micro:
-            return Color.black
+            return Color("StatsMicroText", bundle: .module)
         }
     }
     
@@ -143,7 +143,7 @@ public extension NutrientMeterComponent {
         case .protein:
             return Color("StatsProteinFill", bundle: .module)
         case .micro:
-            return Color("StatsEnergyFill", bundle: .module)
+            return Color("StatsMicroFill", bundle: .module)
         }
     }
     
@@ -158,7 +158,7 @@ public extension NutrientMeterComponent {
         case .protein:
             return Color("StatsProteinPlaceholder", bundle: .module)
         case .micro:
-            return Color("StatsEnergyPlaceholder", bundle: .module)
+            return Color("StatsMicroPlaceholder", bundle: .module)
         }
     }
     

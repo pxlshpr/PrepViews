@@ -15,8 +15,11 @@ let package = Package(
             targets: ["PrepViews"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/pxlshpr/PrepDataTypes", from: "0.0.186"),
+        .package(url: "https://github.com/pxlshpr/PrepDataTypes", from: "0.0.190"),
+        .package(url: "https://github.com/pxlshpr/PrepMocks", from: "0.0.2"),
         .package(url: "https://github.com/pxlshpr/SwiftUISugar", from: "0.0.234"),
+        
+        .package(url: "https://github.com/fermoya/SwiftUIPager", from: "2.5.0"),
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
@@ -25,7 +28,10 @@ let package = Package(
             name: "PrepViews",
             dependencies: [
                 .product(name: "PrepDataTypes", package: "prepdatatypes"),
+                .product(name: "PrepMocks", package: "prepmocks"),
                 .product(name: "SwiftUISugar", package: "swiftuisugar"),
+                
+                .product(name: "SwiftUIPager", package: "swiftuipager"),
             ]),
         .testTarget(
             name: "PrepViewsTests",

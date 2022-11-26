@@ -80,6 +80,10 @@ public extension NutrientMeter.ViewModel {
         goal != nil
     }
     
+    var showingIncrement: Bool {
+        increment != nil
+    }
+    
     var totalGoal: Double {
         /// Returned `planned` when we have no goal so that the entire meter becomes the planned amount
         guard let goal else {
