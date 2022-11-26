@@ -189,8 +189,8 @@ extension NutrientMeterComponent: CustomStringConvertible {
             return "Fat"
         case .protein:
             return "Protein"
-        case .micro:
-            return "Micronutrient"
+        case .micro(let name, _):
+            return name
         }
     }
 }

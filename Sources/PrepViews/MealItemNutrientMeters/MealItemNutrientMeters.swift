@@ -8,12 +8,6 @@ struct MealItemNutrientMeters: View {
     
     @StateObject var viewModel: ViewModel
 
-    @State var showingDaily: Bool
-    @State var pagerHeight: CGFloat
-
-    @StateObject var page: Page = .first()
-    var items = Array(0..<2)
-
     init(
         foodItem: MealFoodItem,
         meal: DayMeal,
@@ -27,10 +21,6 @@ struct MealItemNutrientMeters: View {
             shouldCreateSubgoals: shouldCreateSubgoals
         )
         _viewModel = StateObject(wrappedValue: viewModel)
-        
-        let showingDaily = true
-        _showingDaily = State(initialValue: showingDaily)
-        _pagerHeight = State(initialValue: calculateHeight(numberOfRows: showingDaily ? 6 : 4))
     }
     
     var header: some View {
@@ -45,7 +35,7 @@ struct MealItemNutrientMeters: View {
     }
     
     var footer: some View {
-        Text("Brighter colored components indicate what this meal will be adding.")
+        Text(viewModel.metersType.footerString)
             .fixedSize(horizontal: false, vertical: true)
             .foregroundColor(Color(.secondaryLabel))
             .font(.footnote)
@@ -57,19 +47,30 @@ struct MealItemNutrientMeters: View {
     
     @ViewBuilder
     var goalSetPicker: some View {
-        if showingDaily {
+        switch viewModel.metersType {
+        case .nutrients:
+            emptyPicker
+                .transition(.move(edge: .leading)
+                    .combined(with: .opacity)
+                    .combined(with: .scale)
+                )
+        case .diet:
             dietPicker
                 .transition(.move(edge: .leading)
                     .combined(with: .opacity)
                     .combined(with: .scale)
                 )
-        } else {
+        case .meal:
             mealTypePicker
                 .transition(.move(edge: .trailing)
                     .combined(with: .opacity)
                     .combined(with: .scale)
                 )
         }
+    }
+    
+    var emptyPicker: some View {
+        picker().opacity(0)
     }
     
     var dietPicker: some View {
@@ -99,25 +100,14 @@ struct MealItemNutrientMeters: View {
                 .foregroundColor(Color(.tertiarySystemFill))
         )
     }
-    
+
     var dailyOrMealPicker: some View {
-        let binding = Binding<Bool>(
-            get: { showingDaily },
-            set: { newValue in
-                withAnimation {
-                    showingDaily = newValue
-                    page.update(showingDaily ? .moveToFirst : .moveToLast)
-                    pagerHeight = calculateHeight(numberOfRows: showingDaily ? 6 : 4)
-                }
+        Picker("", selection: viewModel.metersTypeBinding) {
+            ForEach(MetersType.allCases, id: \.self) {
+                Text($0.description).tag($0)
             }
-        )
-        return Picker("", selection: binding) {
-            Text("Nutrients").tag(true)
-            Text("Diet").tag(false)
-            Text("Meal Type").tag(false)
         }
         .pickerStyle(.segmented)
-//        .frame(width: 150)
     }
     
     var arrow: some View {
@@ -128,11 +118,12 @@ struct MealItemNutrientMeters: View {
     
     var pager: some View {
         Pager(
-            page: page,
-            data: items,
+            page: viewModel.page,
+            data: MetersType.allCases,
             id: \.self,
-            content: { index in
-                TempExampleMeters(isLong: index == 0)
+            content: { metersType in
+                Meters(metersType)
+                    .environmentObject(viewModel)
                     .frame(maxWidth: .infinity)
                     .padding(.horizontal, 17)
                     .padding(.vertical, 15)
@@ -145,19 +136,9 @@ struct MealItemNutrientMeters: View {
             }
         )
         .pagingPriority(.simultaneous)
-        .onPageWillTransition({ result in
-            switch result {
-            case .success(let transition):
-                withAnimation {
-                    showingDaily = transition.currentPage == 1
-//                    pagerHeight = showingDaily ? 200 : 140
-                    pagerHeight = calculateHeight(numberOfRows: showingDaily ? 6 : 4)
-                }
-            case .failure:
-                break
-            }
-        })
-        .frame(height: pagerHeight)
+        .onPageWillTransition(viewModel.pageWillTransition)
+//        .frame(height: 200)
+        .frame(height: viewModel.pagerHeight)
     }
     
     var body: some View {
@@ -173,6 +154,35 @@ struct MealItemNutrientMeters: View {
     }
 }
 
+//MARK: MetersType
+enum MetersType: Int, CaseIterable {
+    case nutrients = 1
+    case diet
+    case meal
+    
+    var description: String {
+        switch self {
+        case .nutrients:
+            return "Nutrients"
+        case .diet:
+            return "Diet"
+        case .meal:
+            return "Meal"
+        }
+    }
+    
+    var footerString: String {
+        switch self {
+        case .nutrients:
+            return "These are all the nutrients listed for the food. Each meter shows how much of an increase this food will contribute to what you've already added today."
+        case .diet:
+            return "These are the goals for the diet you have chosen for today. Each meter shows how much of an increase this food will contribute to what you've already added  today."
+        case .meal:
+            return "These are the goals for the meal type you have chosen. Each bar shows how much of an increase this food will contribute to what you've already added to this meal."
+        }
+    }
+}
+
 //MARK: - View Model
 
 extension MealItemNutrientMeters {
@@ -183,11 +193,29 @@ extension MealItemNutrientMeters {
         let day: Day
         let shouldCreateSubgoals: Bool
         
+        @Published var metersType: MetersType
+        @Published var pagerHeight: CGFloat
+        
+        @Published var page: Page
+
         init(foodItem: MealFoodItem, meal: DayMeal, day: Day, shouldCreateSubgoals: Bool) {
             self.foodItem = foodItem
             self.day = day
             self.meal = meal
             self.shouldCreateSubgoals = shouldCreateSubgoals
+            
+            let numberOfRows: Int
+            if let diet = day.goalSet {
+                self.metersType = .meal
+                //TODO: If we have a meal.goalSet, add any rows from there that aren't in the day.goalSet
+                numberOfRows = diet.goals.count
+                self.page = Page.withIndex(3)
+            } else {
+                self.metersType = .nutrients
+                numberOfRows = foodItem.food.numberOfNutrients
+                self.page = Page.first()
+            }
+            self.pagerHeight = calculateHeight(numberOfRows: numberOfRows)
         }
     }
 }
@@ -200,9 +228,58 @@ extension MealItemNutrientMeters.ViewModel {
     var hasDiet: Bool {
         diet != nil
     }
+    
+    var metersTypeBinding: Binding<MetersType> {
+        Binding<MetersType>(
+            get: { self.metersType },
+            set: { newType in
+                withAnimation {
+                    self.metersType = newType
+                    self.page.update(.new(index: newType.rawValue - 1))
+                    self.pagerHeight = calculateHeight(numberOfRows: self.numberOfRows(for: newType))
+                }
+            }
+        )
+    }
+    
+    func numberOfRows(for metersType: MetersType) -> Int {
+        switch metersType {
+        case .nutrients:
+            return foodItem.food.numberOfNutrients
+        case .diet:
+            return day.goalSet?.goals.count ?? 0
+        case .meal:
+            //TODO: Add MealType goals we may not have in Diet
+            return day.goalSet?.goals.count ?? 0
+        }
+    }
+    
+    func pageWillTransition(_ result: Result<PageTransition, PageTransitionError>) {
+        switch result {
+        case .success(let transition):
+            withAnimation {
+                self.metersType = MetersType(rawValue: transition.nextPage + 1) ?? .nutrients
+                self.pagerHeight = calculateHeight(numberOfRows: self.numberOfRows(for: self.metersType))
+            }
+        case .failure:
+            break
+        }
+    }
 }
 
-//TODO: Example Meters (To be removed)
+//MARK: Food + Convenience
+
+extension Food {
+    var numberOfMicronutrients: Int {
+        info.nutrients.micros.count
+    }
+    var numberOfNutrients: Int {
+        /// All foods have energy + 3 macros
+        return 4 + numberOfMicronutrients
+    }
+}
+
+//MARK: - Example Meters (Remove)
 
 let MeterSpacing = 5.0
 let MeterHeight = 20.0
@@ -218,17 +295,88 @@ func calculateHeight(numberOfRows: Int) -> CGFloat {
     return meters + spacing + padding + extraPadding
 }
 
-struct TempExampleMeters: View {
+extension MealItemNutrientMeters.ViewModel {
     
-    let isLong: Bool
- 
-    var body: some View {
-        if isLong {
-            exampleMeters2
-        } else {
-            exampleMeters
+    var nutrients: FoodNutrients {
+        foodItem.food.info.nutrients
+    }
+    
+    var nutrientViewModels: [NutrientMeter.ViewModel] {
+        var viewModels: [NutrientMeter.ViewModel] = []
+        viewModels.append(NutrientMeter.ViewModel(component: .energy, planned: 1, increment: nutrients.energyInKcal))
+
+        viewModels.append(NutrientMeter.ViewModel(component: .carb, planned: 1, increment: nutrients.carb))
+        viewModels.append(NutrientMeter.ViewModel(component: .fat, planned: 1, increment: nutrients.fat))
+        viewModels.append(NutrientMeter.ViewModel(component: .protein, planned: 1, increment: nutrients.protein))
+
+        for micro in nutrients.micros {
+            //TODO: Handle unit conversions and displaying the correct one here
+            viewModels.append(NutrientMeter.ViewModel(
+                component: .micro(name: micro.nutrientType?.description ?? "", unit: micro.nutrientUnit.shortDescription),
+                planned: 1,
+                increment: micro.value
+            ))
+        }
+        return viewModels
+    }
+    
+    func meterViewModels(for type: MetersType) -> [NutrientMeter.ViewModel] {
+        switch type {
+        case .nutrients:
+            return nutrientViewModels
+        case .diet:
+            return []
+        case .meal:
+            return []
         }
     }
+}
+
+extension MealItemNutrientMeters {
+    
+    struct Meters: View {
+        
+        @EnvironmentObject var viewModel: MealItemNutrientMeters.ViewModel
+        
+        let type: MetersType
+        
+        init(_ type: MetersType) {
+            self.type = type
+        }
+        
+        var body: some View {
+            VStack {
+                Grid(alignment: .leading, verticalSpacing: MeterSpacing) {
+                    ForEach(viewModel.meterViewModels(for: type), id: \.self) { meterViewModel in
+                        meterRow(for: meterViewModel)
+                    }
+                }
+            }
+        }
+    }
+}
+
+extension MealItemNutrientMeters.Meters {
+    func meterRow(for meterViewModel: NutrientMeter.ViewModel) -> some View {
+        GridRow {
+            Text(meterViewModel.component.description)
+                .foregroundColor(meterViewModel.component.textColor)
+                .font(MeterLabelFont)
+            NutrientMeter(viewModel: meterViewModel)
+                .frame(height: MeterHeight)
+            HStack(alignment: .firstTextBaseline, spacing: 2) {
+                Text(meterViewModel.increment?.cleanAmount ?? "")
+                    .font(.footnote)
+                    .foregroundColor(.secondary)
+                Text(meterViewModel.component.unit)
+                    .font(.caption2)
+                    .foregroundColor(Color(.tertiaryLabel))
+            }
+        }
+    }
+}
+
+extension MealItemNutrientMeters.Meters {
     
     var exampleMeters: some View {
         VStack {
@@ -421,7 +569,6 @@ struct TempExampleMeters: View {
             }
         }
     }
-
 }
 
 //MARK: - 👁‍🗨 Previews
