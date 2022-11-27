@@ -12,7 +12,7 @@ public struct MealItemMeters: View {
     
     public init(
         foodItem: Binding<MealFoodItem>,
-        meal: DayMeal,
+        meal: DayMeal?,
         day: Day,
         userUnits: UserUnits,
         bodyProfile: BodyProfile?,
@@ -49,12 +49,19 @@ public struct MealItemMeters: View {
         }
     }
     
+    var metersTypes: [MetersType] {
+        if viewModel.meal == nil {
+            return [MetersType.nutrients, MetersType.diet]
+        } else {
+            return MetersType.allCases
+        }
+    }
     //MARK: Pager
     
     var pager: some View {
         Pager(
             page: viewModel.page,
-            data: MetersType.allCases,
+            data: metersTypes,
             id: \.self,
             content: { metersType in
                 Meters(metersType)

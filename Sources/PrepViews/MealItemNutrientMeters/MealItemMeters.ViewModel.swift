@@ -17,7 +17,7 @@ extension MealItemMeters {
             }
         }
         
-        let meal: DayMeal
+        let meal: DayMeal?
         let day: Day
         let userUnits: UserUnits
         let bodyProfile: BodyProfile?
@@ -34,7 +34,7 @@ extension MealItemMeters {
 
         init(
             foodItem: MealFoodItem,
-            meal: DayMeal,
+            meal: DayMeal?,
             day: Day,
             userUnits: UserUnits,
             bodyProfile: BodyProfile?,
@@ -142,9 +142,13 @@ extension MealItemMeters.ViewModel {
     func plannedValue(for component: NutrientMeterComponent, type: MetersType) -> Double {
         switch type {
         case .nutrients, .diet:
-            return day.plannedValue(for: component, ignoring: meal.id) + meal.plannedValue(for: component)
+            if let meal {
+                return day.plannedValue(for: component, ignoring: meal.id) + meal.plannedValue(for: component)
+            } else {
+                return day.plannedValue(for: component, ignoring: UUID())
+            }
         case .meal:
-            return meal.plannedValue(for: component)
+            return meal?.plannedValue(for: component) ?? 0
         }
     }
     
@@ -215,14 +219,14 @@ extension MealItemMeters.ViewModel {
     //MARK: Meal MeterViewModels
     var calculatedMealMeterViewModels: [NutrientMeter.ViewModel] {
 
-        let mealType = meal.goalSet
+        guard let meal else { return [] }
         
         var viewModels: [NutrientMeter.ViewModel] = []
         
         /// First get any explicit goals we have for the `mealType`
         
         
-        var subgoals: [NutrientMeter.ViewModel] = dietMeterViewModels.compactMap { dietMeterViewModel in
+        let subgoals: [NutrientMeter.ViewModel] = dietMeterViewModels.compactMap { dietMeterViewModel in
             
             let component = dietMeterViewModel.component
             /// Make sure we don't already have a ViewModel for this
