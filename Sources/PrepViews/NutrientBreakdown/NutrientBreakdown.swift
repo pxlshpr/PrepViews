@@ -27,10 +27,10 @@ public struct NutrientBreakdown: View {
                 headerRow
                 Divider()
             }
-            row(foodMeterViewModel: viewModel.energyViewModel)
-            row(foodMeterViewModel: viewModel.carbViewModel)
-            row(foodMeterViewModel: viewModel.fatViewModel)
-            row(foodMeterViewModel: viewModel.proteinViewModel)
+            row(foodMeterViewModel: $viewModel.energyViewModel)
+            row(foodMeterViewModel: $viewModel.carbViewModel)
+            row(foodMeterViewModel: $viewModel.fatViewModel)
+            row(foodMeterViewModel: $viewModel.proteinViewModel)
 //            ForEach(viewModel.foodMeterViewModels, id: \.self) { foodMeterViewModel in
 //                row(foodMeterViewModel: foodMeterViewModel)
 //            }
@@ -38,7 +38,7 @@ public struct NutrientBreakdown: View {
     }
     
     @ViewBuilder
-    func row(foodMeterViewModel: NutrientMeter.ViewModel) -> some View {
+    func row(foodMeterViewModel: Binding<NutrientMeter.ViewModel>) -> some View {
         Row(foodMeterViewModel: foodMeterViewModel)
             .environmentObject(viewModel)
             .if(!viewModel.haveGoal) { view in

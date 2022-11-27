@@ -3,7 +3,7 @@ import SwiftUI
 extension NutrientBreakdown {
     struct Row: View {
         @EnvironmentObject var breakdownViewModel: NutrientBreakdown.ViewModel
-        @ObservedObject var foodMeterViewModel: NutrientMeter.ViewModel
+        @Binding var foodMeterViewModel: NutrientMeter.ViewModel
     }
 }
 
@@ -103,7 +103,7 @@ extension NutrientBreakdown.Row {
 
     var gauge: some View {
         //TODO: See if just using an ObservedObject here is sufficient (instead of a binding)
-        NutrientMeter(viewModel: foodMeterViewModel)
+        NutrientMeter(viewModel: $foodMeterViewModel)
 //        FoodMeter(goal: $foodMeterViewModel.goal,
 //                  food: $foodMeterViewModel.food,
 //                  burned: $foodMeterViewModel.burned,

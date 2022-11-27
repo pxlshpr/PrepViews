@@ -34,7 +34,7 @@ extension MealItemMeters.Meters {
         }
     }
     
-    func meterRowBound(for meterViewModel: Binding<NutrientMeter2.ViewModel>) -> some View {
+    func meterRowBound(for meterViewModel: Binding<NutrientMeter.ViewModel>) -> some View {
         var label: some View {
             HStack {
                 Text(meterViewModel.wrappedValue.component.description)
@@ -49,7 +49,7 @@ extension MealItemMeters.Meters {
         }
         
         var meter: some View {
-            NutrientMeter2(viewModel: meterViewModel)
+            NutrientMeter(viewModel: meterViewModel)
                 .frame(height: MeterHeight)
         }
 
@@ -86,7 +86,7 @@ extension MealItemMeters.Meters {
         }
     }
 
-    func meterRow(for meterViewModel: NutrientMeter2.ViewModel) -> some View {
+    func meterRow(for meterViewModel: NutrientMeter.ViewModel) -> some View {
         var label: some View {
             HStack {
                 Text(meterViewModel.component.description)
@@ -101,7 +101,7 @@ extension MealItemMeters.Meters {
         }
         
         var meter: some View {
-            NutrientMeter2(viewModel: .constant(meterViewModel))
+            NutrientMeter(viewModel: .constant(meterViewModel))
                 .frame(height: MeterHeight)
         }
 
