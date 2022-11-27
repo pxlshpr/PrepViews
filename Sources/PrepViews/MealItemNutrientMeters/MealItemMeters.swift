@@ -294,7 +294,6 @@ public struct MealItemNutrientMetersPreview: View {
         MealItemMeters(
             foodItem: foodItemBinding,
             meal: DayMeal(from: MealMock.preWorkoutWithItems),
-//            day: DayMock.cutting,
             day: mockDay,
             userUnits: .standard,
             bodyProfile: BodyProfileMock.calculated
