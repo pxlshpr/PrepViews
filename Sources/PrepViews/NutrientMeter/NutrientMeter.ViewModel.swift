@@ -4,20 +4,24 @@ public extension NutrientMeter {
     class ViewModel: ObservableObject {
         
         @Published public var component: NutrientMeterComponent
+
+        /// Used to convey that this is for a component that has been generated (either an implicit daily goal or a meal subgoal),
+        /// as we may want to style it differently
+        @Published public var isGenerated: Bool
         
         @Published public var goalLower: Double?
         @Published public var goalUpper: Double?
 
-        /// Having this as a non-zero value implies that it's being included with the goal
-        ///
-        @Published public var burned: Double
         @Published public var planned: Double
-        
         @Published public var eaten: Double?
         @Published public var increment: Double?
+
+        //TODO: Remove this
+        @Published public var burned: Double
         
         public init(
             component: NutrientMeterComponent,
+            isGenerated: Bool = false,
             goalLower: Double? = nil,
             goalUpper: Double? = nil,
             burned: Double = 0,
@@ -25,6 +29,7 @@ public extension NutrientMeter {
             increment: Double
         ) {
             self.component = component
+            self.isGenerated = isGenerated
             self.goalLower = goalLower
             self.goalUpper = goalUpper
             self.burned = burned
@@ -35,6 +40,7 @@ public extension NutrientMeter {
         
         public init(
             component: NutrientMeterComponent,
+            isGenerated: Bool = false,
             goalLower: Double? = nil,
             goalUpper: Double? = nil,
             burned: Double = 0,
@@ -42,6 +48,7 @@ public extension NutrientMeter {
             eaten: Double
         ) {
             self.component = component
+            self.isGenerated = isGenerated
             self.goalLower = goalLower
             self.goalUpper = goalUpper
             self.burned = burned
@@ -637,6 +644,7 @@ struct NutrientBreakdown_Previews: PreviewProvider {
 extension NutrientMeter.ViewModel {
     
     var labelTextColor: Color {
+        guard haveGoal else { return component.textColor }
         switch percentageType {
         case .empty:
             return Colors.Empty.text

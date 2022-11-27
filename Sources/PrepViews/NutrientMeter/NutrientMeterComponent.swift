@@ -1,6 +1,7 @@
 import SwiftUI
 import PrepDataTypes
 
+//TODO: WTF is this?
 extension NutrientMeterComponent: Hashable {
     public func hash(into hasher: inout Hasher) {
         switch self {
