@@ -1,23 +1,23 @@
 import SwiftUI
 
 public extension NutrientMeter2 {
-    class ViewModel: ObservableObject {
+    struct ViewModel {
         
-        @Published public var component: NutrientMeterComponent
+        public var component: NutrientMeterComponent
 
         /// Used to convey that this is for a component that has been generated (either an implicit daily goal or a meal subgoal),
         /// as we may want to style it differently
-        @Published public var isGenerated: Bool
+        public var isGenerated: Bool
         
-        @Published public var goalLower: Double?
-        @Published public var goalUpper: Double?
+        public var goalLower: Double?
+        public var goalUpper: Double?
 
-        @Published public var planned: Double
-        @Published public var eaten: Double?
-        @Published public var increment: Double?
+        public var planned: Double
+        public var eaten: Double?
+        public var increment: Double?
 
         //TODO: Remove this
-        @Published public var burned: Double
+        public var burned: Double
         
         public init(
             component: NutrientMeterComponent,
@@ -85,23 +85,23 @@ public extension NutrientMeter2.ViewModel {
 //    }
 }
 
-extension NutrientMeter2.ViewModel: Hashable {
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(component)
-        hasher.combine(goalLower)
-        hasher.combine(goalUpper)
-        hasher.combine(burned)
-        hasher.combine(planned)
-        hasher.combine(eaten)
-        hasher.combine(increment)
-    }
-}
-
-extension NutrientMeter2.ViewModel: Equatable {
-    public static func ==(lhs: NutrientMeter2.ViewModel, rhs: NutrientMeter2.ViewModel) -> Bool {
-        lhs.hashValue == rhs.hashValue
-    }
-}
+//extension NutrientMeter2.ViewModel: Hashable {
+//    public func hash(into hasher: inout Hasher) {
+//        hasher.combine(component)
+//        hasher.combine(goalLower)
+//        hasher.combine(goalUpper)
+//        hasher.combine(burned)
+//        hasher.combine(planned)
+//        hasher.combine(eaten)
+//        hasher.combine(increment)
+//    }
+//}
+//
+//extension NutrientMeter2.ViewModel: Equatable {
+//    public static func ==(lhs: NutrientMeter2.ViewModel, rhs: NutrientMeter2.ViewModel) -> Bool {
+//        lhs.hashValue == rhs.hashValue
+//    }
+//}
 
 public extension NutrientMeter2.ViewModel {
     var haveGoal: Bool {

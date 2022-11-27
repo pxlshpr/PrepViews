@@ -3,13 +3,13 @@ import SwiftUI
 public struct NutrientMeter2: View {
     
     @Environment(\.colorScheme) var colorScheme
-    @ObservedObject var viewModel: NutrientMeter.ViewModel
+    @Binding var viewModel: NutrientMeter2.ViewModel
     
     @State private var hasAppeared = false
     
-    public init(viewModel: NutrientMeter.ViewModel) {
-        self.viewModel = viewModel
-    }
+//    public init(viewModel: NutrientMeter2.ViewModel) {
+//        _viewModel = State(initialValue: viewModel)
+//    }
 }
 
 public extension NutrientMeter2 {
@@ -20,11 +20,12 @@ public extension NutrientMeter2 {
             )
         }
         //TODO: Rewrite this
-//        .if(hasAppeared, transform: { view in
-//            /// Use this to make sure the animation only gets applied after the view has appeared, so that it doesn't animate it during it being transitioned into view
-//            view
-//                .animation(animation, value: eaten)
-//        })
+        .if(hasAppeared, transform: { view in
+            /// Use this to make sure the animation only gets applied after the view has appeared, so that it doesn't animate it during it being transitioned into view
+            view
+                .animation(animation, value: viewModel.eaten)
+                .animation(animation, value: viewModel.increment)
+        })
         .clipShape(
             shape
         )
@@ -139,14 +140,13 @@ public extension NutrientMeter2 {
 
     //MARK: - 🎞 Animations
     var animation: Animation {
-        .default
-        //TODO: Rewrite this
-//        if eaten <= 0.05 || eaten >= 0.95 {
-//            /// don't bounce the bar if we're going to 0 or going close to 1
-//            return .interactiveSpring()
-//        } else {
-//            return .interactiveSpring(response: 0.35, dampingFraction: 0.66, blendDuration: 0.35)
-//        }
+        
+        if viewModel.isCloseToEdges {
+            /// don't bounce the bar if we're going to 0 or going close to 1
+            return .interactiveSpring()
+        } else {
+            return .interactiveSpring(response: 0.35, dampingFraction: 0.66, blendDuration: 0.35)
+        }
     }
     
     //MARK: - Enums
@@ -156,6 +156,14 @@ public extension NutrientMeter2 {
 }
 
 extension NutrientMeter2.ViewModel {
+    
+    var isCloseToEdges: Bool {
+        if showingIncrement {
+            return incrementPercentage <= 0.05 || incrementPercentage >= 0.95
+        } else {
+            return eatenPercentage <= 0.05 || eatenPercentage >= 0.95
+        }
+    }
     
     var shouldShowLowerGoalMark: Bool {
         switch goalBoundsType {
