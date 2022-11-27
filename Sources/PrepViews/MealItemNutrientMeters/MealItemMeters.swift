@@ -139,7 +139,7 @@ public struct MealItemMeters: View {
 
     var typePicker: some View {
         Picker("", selection: viewModel.metersTypeBinding) {
-            ForEach(MetersType.allCases, id: \.self) {
+            ForEach(metersTypes, id: \.self) {
                 Text($0.description).tag($0)
             }
         }
@@ -303,8 +303,10 @@ public struct MealItemNutrientMetersPreview: View {
     var metersSection: some View {
         MealItemMeters(
             foodItem: foodItemBinding,
-            meal: DayMeal(from: MealMock.preWorkoutWithItems),
-            day: mockDay,
+//            meal: DayMeal(from: MealMock.preWorkoutWithItems),
+//            day: mockDay,
+            meal: nil,
+            day: nil,
             userUnits: .standard,
             bodyProfile: BodyProfileMock.calculated
         )
