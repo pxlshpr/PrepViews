@@ -281,7 +281,7 @@ public struct MealItemNutrientMetersPreview: View {
                 foodItems: [
                     MealFoodItem(
                         food: FoodMock.wheyProtein,
-                        amount: FoodValue(120, .g)
+                        amount: FoodValue(30, .g)
                     )
                 ]
             )
@@ -303,10 +303,10 @@ public struct MealItemNutrientMetersPreview: View {
     var metersSection: some View {
         MealItemMeters(
             foodItem: foodItemBinding,
-//            meal: DayMeal(from: MealMock.preWorkoutWithItems),
-//            day: mockDay,
-            meal: nil,
-            day: nil,
+            meal: DayMeal(from: MealMock.preWorkoutWithItems),
+            day: mockDay,
+//            meal: nil,
+//            day: nil,
             userUnits: .standard,
             bodyProfile: BodyProfileMock.calculated
         )
@@ -315,7 +315,8 @@ public struct MealItemNutrientMetersPreview: View {
     var foodItemBinding: Binding<MealFoodItem> {
         Binding<MealFoodItem>(
             get: {
-                MealFoodItem(
+                print("Returning")
+                return MealFoodItem(
                     food: FoodMock.peanutButter,
                     amount: FoodValue(value: value ?? 0, unitType: .weight, weightUnit: .g)
                 )
