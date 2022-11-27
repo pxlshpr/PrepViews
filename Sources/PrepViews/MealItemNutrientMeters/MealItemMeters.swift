@@ -50,11 +50,14 @@ public struct MealItemMeters: View {
     }
     
     var metersTypes: [MetersType] {
-        if viewModel.meal == nil {
-            return [MetersType.nutrients, MetersType.diet]
-        } else {
-            return MetersType.allCases
+        var types = [MetersType.nutrients]
+        if viewModel.day != nil {
+            types.append(.diet)
         }
+        if viewModel.meal != nil {
+            types.append(.meal)
+        }
+        return types
     }
     //MARK: Pager
     
