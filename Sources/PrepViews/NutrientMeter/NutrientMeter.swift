@@ -7,9 +7,9 @@ public struct NutrientMeter: View {
     
     @State private var hasAppeared = false
     
-//    public init(viewModel: NutrientMeter2.ViewModel) {
-//        _viewModel = State(initialValue: viewModel)
-//    }
+    public init(viewModel: Binding<NutrientMeter.ViewModel>) {
+        _viewModel = viewModel
+    }
 }
 
 public extension NutrientMeter {
