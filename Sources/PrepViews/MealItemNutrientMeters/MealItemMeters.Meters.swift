@@ -49,7 +49,7 @@ extension MealItemMeters.Meters {
 
         var quantity: some View {
             var valueString: String {
-                guard let value = meterViewModel.wrappedValue.increment else { return "" }
+                guard let value = meterViewModel.increment else { return "" }
                 if value < 50 {
                     return value.rounded(toPlaces: 1).cleanAmount
                 } else {
