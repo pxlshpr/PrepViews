@@ -14,8 +14,17 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/pxlshpr/PrepDataTypes",
       "state" : {
-        "revision" : "fb489abd0231fe9fd428905ff27399e1431cf061",
-        "version" : "0.0.186"
+        "revision" : "4c62da1678b512f602ac07721b61da443b2684c0",
+        "version" : "0.0.192"
+      }
+    },
+    {
+      "identity" : "prepmocks",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/pxlshpr/PrepMocks",
+      "state" : {
+        "revision" : "ecf161115522677d7b28a47f7bf2b4ac50831251",
+        "version" : "0.0.3"
       }
     },
     {
@@ -34,6 +43,15 @@
       "state" : {
         "revision" : "080d38c0cb15782a1b24ae9ba1ff2163b0e196cb",
         "version" : "0.0.86"
+      }
+    },
+    {
+      "identity" : "swiftuipager",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/fermoya/SwiftUIPager",
+      "state" : {
+        "revision" : "4ddc04c801aac143090bb14cf26603a3bf9c74cb",
+        "version" : "2.5.0"
       }
     },
     {

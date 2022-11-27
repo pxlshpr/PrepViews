@@ -227,7 +227,7 @@ extension MealItemNutrientMeters {
                 self.page = Page.withIndex(3)
             } else {
                 self.metersType = .nutrients
-                numberOfRows = foodItem.food.numberOfNutrients
+                numberOfRows = foodItem.food.numberOfNonZeroNutrients
                 self.page = Page.first()
             }
             self.pagerHeight = calculateHeight(numberOfRows: numberOfRows)
@@ -260,7 +260,7 @@ extension MealItemNutrientMeters.ViewModel {
     func numberOfRows(for metersType: MetersType) -> Int {
         switch metersType {
         case .nutrients:
-            return foodItem.food.numberOfNutrients
+            return foodItem.food.numberOfNonZeroNutrients
         case .diet:
             return day.goalSet?.goals.count ?? 0
         case .meal:
@@ -285,12 +285,25 @@ extension MealItemNutrientMeters.ViewModel {
 //MARK: Food + Convenience
 
 extension Food {
-    var numberOfMicronutrients: Int {
+    var numberOfMicros: Int {
         info.nutrients.micros.count
     }
+    
+    var nonZeroMicros: [FoodNutrient] {
+        info.nutrients.micros.filter { $0.value > 0 }
+    }
+
+    
+    var baseNumberOfNutrients: Int {
+        /// Energy + 3 Macros that are always present
+        return 4
+    }
     var numberOfNutrients: Int {
-        /// All foods have energy + 3 macros
-        return 4 + numberOfMicronutrients
+        return baseNumberOfNutrients + numberOfMicros
+    }
+    
+    var numberOfNonZeroNutrients: Int {
+        return baseNumberOfNutrients + nonZeroMicros.count
     }
 }
 
@@ -461,5 +474,61 @@ extension MealItemNutrientMeters.Meters {
                     .foregroundColor(Color(.tertiaryLabel))
             }
         }
+    }
+}
+
+//MARK: - 👁‍🗨 Previews
+import SwiftUISugar
+import PrepDataTypes
+import PrepMocks
+
+public struct MealItemNutrientMetersPreview: View {
+    
+    public init() { }
+    
+    public var body: some View {
+        NavigationView {
+            FormStyledScrollView {
+                textFieldSection
+                metersSection
+            }
+            .navigationTitle("Quantity")
+        }
+    }
+
+    var metersSection: some View {
+        MealItemNutrientMeters(
+            foodItem: MealFoodItem(
+                food: FoodMock.peanutButter,
+                amount: FoodValue(value: 20, unitType: .weight, weightUnit: .g)
+            ),
+            meal: DayMeal(from: MealMock.preWorkoutWithItems),
+            day: DayMock.cutting
+        )
+    }
+    
+    var textFieldSection: some View {
+        FormStyledSection(header: Text("Weight")) {
+            HStack {
+                TextField("Required", text: .constant(""))
+                Button {
+                } label: {
+                    HStack(spacing: 5) {
+                        Text("g")
+                        Image(systemName: "chevron.up.chevron.down")
+                            .imageScale(.small)
+                    }
+                }
+                .buttonStyle(.borderless)
+            }
+        }
+    }
+
+}
+
+struct MealItemNutrientMeters_Previews: PreviewProvider {
+    static var previews: some View {
+//        Color.blue
+        MealItemNutrientMetersPreview()
     }
 }

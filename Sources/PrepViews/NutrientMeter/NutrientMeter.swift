@@ -1,19 +1,20 @@
 import SwiftUI
 
+struct DottedLine: Shape {
+        
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        path.move(to: CGPoint(x: 1, y: 0))
+        path.addLine(to: CGPoint(x: rect.width, y: rect.height))
+        return path
+    }
+}
+
 public struct NutrientMeter: View {
     
     @Environment(\.colorScheme) var colorScheme
     @ObservedObject var viewModel: NutrientMeter.ViewModel
     
-//    @Binding var goal: Double
-//    @Binding var food: Double
-//    var burned: Binding<Double>?
-//    var eaten: Binding<Double>?
-//    var increment: Binding<Double>?
-//    var includeBurned: Binding<Bool>?
-
-    //TODO: Rename this to style
-//    @State var type: FoodMeterComponent
     @State private var hasAppeared = false
     
     public init(viewModel: NutrientMeter.ViewModel) {
@@ -74,12 +75,44 @@ public extension NutrientMeter {
                 .fill(viewModel.incrementColor.gradient)
                 .frame(width: incrementWidth(proxy: proxy))
         }
+        
+        @ViewBuilder
+        var lowerGoalMark: some View {
+            if viewModel.shouldShowLowerGoalMark {
+                DottedLine()
+                    .stroke(style: StrokeStyle(
+                        lineWidth: viewModel.lowerGoalMarkLineWidth,
+                        dash: [viewModel.lowerGoalMarkDash])
+                    )
+                    .frame(width: 1)
+                    .foregroundColor(viewModel.lowerGoalMarkColor)
+                    .opacity(viewModel.lowerGoalMarkOpacity)
+                    .offset(x: lowerGoalMarkOffset(for: proxy))
+            }
+        }
+
+        @ViewBuilder
+        var upperGoalMark: some View {
+            if viewModel.shouldShowUpperGoalMark {
+                DottedLine()
+                    .stroke(style: StrokeStyle(
+                        lineWidth: viewModel.upperGoalMarkLineWidth,
+                        dash: [viewModel.upperGoalMarkDash])
+                    )
+                    .frame(width: 1)
+                    .foregroundColor(viewModel.upperGoalMarkColor)
+                    .opacity(viewModel.upperGoalMarkOpacity)
+                    .offset(x: upperGoalMarkOffset(for: proxy))
+            }
+        }
 
         return ZStack(alignment: .leading) {
             placeholderCapsule
             incrementCapsule
             preppedCapsule
             eatenCapsule
+            lowerGoalMark
+            upperGoalMark
         }
     }
     
@@ -90,55 +123,29 @@ public extension NutrientMeter {
     
     //MARK: - 📐 Widths
     func preppedWidth(for proxy: GeometryProxy) -> Double {
-        
         proxy.size.width * viewModel.preppedPercentageForMeter
-
-//        if let increment = increment?.wrappedValue,
-//           totalGoal + increment > 0,
-//           food / (totalGoal + increment) > preppedPercentage
-//        {
-//            percentage = food / (food + increment)
-//        } else {
-//            percentage = preppedPercentage
-//        }
-//        return proxy.size.width * percentage
     }
     
     func eatenWidth(proxy: GeometryProxy) -> Double {
         proxy.size.width * viewModel.eatenPercentage
-//        (preppedWidth(proxy: proxy) * eatenPercentage) + preppedWidth(proxy: proxy)
     }
     
     func incrementWidth(proxy: GeometryProxy) -> Double {
         proxy.size.width * viewModel.incrementPercentageForMeter
     }
+    
+    func lowerGoalMarkOffset(for proxy: GeometryProxy) -> Double {
+        (proxy.size.width * viewModel.lowerGoalPercentage) - 1.0
+    }
 
-    //MARK: - % Percentages
-   
+    func upperGoalMarkOffset(for proxy: GeometryProxy) -> Double {
+        (proxy.size.width * viewModel.upperGoalPercentage) - 1.0
+    }
 
     //MARK: - 🎨 Colors
     var placeholderColor: Color {
-//        return PrepColor.statsEmptyFill.forColorScheme(colorScheme)
-        return Colors.placeholder
-        
-//        switch preppedPercentageType {
-//        case .complete:
-//            if prepped > 1.0 {
-//                return Color("StatsCompleteFill")
-//                    .brighter(by: 120)
-//                    .opacity(0.4)
-//            } else {
-//                return Color("StatsEmptyFill")
-//            }
-//        case .excess:
-//            return Color("StatsExcessFill")
-//                .brighter(by: 120)
-//                .opacity(0.4)
-//        default:
-//            return Color("StatsEmptyFill")
-//        }
+        Colors.placeholder
     }
-    
 
     //MARK: - 🎞 Animations
     var animation: Animation {
@@ -155,6 +162,190 @@ public extension NutrientMeter {
     //MARK: - Enums
     struct Colors {
         static let placeholder = Color("StatsEmptyFill", bundle: .module)
+    }
+}
+
+extension NutrientMeter.ViewModel {
+    
+    var shouldShowLowerGoalMark: Bool {
+        switch goalBoundsType {
+            
+        case .lowerAndUpper:
+            /// Always shows
+            return true
+            
+        case .lowerOnly:
+            /// Shows if the endPoint exceeds the lower mark
+            guard let goalLower else { return false }
+            return endPoint > goalLower
+            
+        default:
+            return false
+        }
+    }
+    
+    var shouldShowUpperGoalMark: Bool {
+        switch goalBoundsType {
+            
+        case .lowerAndUpper, .upperOnly:
+            /// Shows if the endPoint exceeds the upper mark
+            guard let goalUpper else { return false }
+            return endPoint > goalUpper
+            
+        default:
+            return false
+        }
+    }
+    var preppedPercentageType: PercentageType {
+        let defaultType = PercentageType(preppedPercentage)
+        switch goalBoundsType {
+        case .none, .lowerOnly:
+            return preppedPercentage < 1 ? defaultType : .complete
+        case .upperOnly:
+            return preppedPercentage < 1 ? .complete : .excess
+        case .lowerAndUpper:
+            guard let goalLower, let goalUpper else { return defaultType }
+            if planned < goalLower {
+                return defaultType
+            } else if planned < goalUpper {
+                return .complete
+            } else {
+                return .excess
+            }
+        }
+    }
+    
+    var incrementPercentageType: PercentageType {
+        guard let increment else { return .regular }
+        let defaultType = PercentageType(incrementPercentage)
+        switch goalBoundsType {
+        case .none, .lowerOnly:
+            return incrementPercentage < 1 ? defaultType : .complete
+        case .upperOnly:
+            return incrementPercentage < 1 ? .complete : .excess
+        case .lowerAndUpper:
+            guard let goalLower, let goalUpper else { return defaultType }
+            if planned + increment < goalLower {
+                return defaultType
+            } else if planned + increment < goalUpper {
+                return .complete
+            } else {
+                return .excess
+            }
+        }
+    }
+
+    var incrementPercentage: Double {
+        guard let increment = increment else { return 0 }
+        guard totalGoal != 0 else {
+            return 1
+        }
+        return (increment + planned) / totalGoal
+    }
+    
+    var incrementPercentageForMeter: Double {
+        guard let increment = increment, increment > 0 else { return 0 }
+        //        guard let increment = increment?.wrappedValue, totalGoal != 0 else { return 0 }
+        
+        guard totalGoal != 0 else {
+            return 1
+        }
+        
+        /// Choose greater of goal or "prepped + increment"
+        let total: Double
+        if planned + increment > totalGoal {
+            total = planned + increment
+        } else {
+            total = totalGoal
+        }
+        
+        return ((increment / total) + preppedPercentage)
+    }
+    
+    
+    var endPoint: Double {
+        if let increment {
+            return planned + increment
+        } else {
+            return planned
+        }
+    }
+    
+    //MARK: Lower Goal
+    var lowerGoalPercentage: CGFloat {
+        guard let goalLower else { return 0 }
+        //TODO: Possibly remove this redundant conditional by always using endPoint instead
+        if let goalUpper, goalUpper > 0 {
+            return goalLower / max(goalUpper, endPoint)
+        } else {
+            guard endPoint > 0 else { return 0}
+            return goalLower / endPoint
+        }
+    }
+    var lowerGoalMarkColor: Color {
+        Color(.systemGroupedBackground)
+//        Color.white
+//        Color(.label)
+//        let percentageType = showingIncrement ? incrementPercentageType : preppedPercentageType
+//        switch percentageType {
+//        case .excess:
+//            return Colors.Excess.text
+//        default:
+//            return Colors.Complete.text
+//        }
+    }
+    
+    var lowerGoalMarkOpacity: CGFloat {
+        lowerGoalMarkOverBar ? 0.5 : 1.0
+    }
+    
+    var lowerGoalMarkLineWidth: CGFloat {
+        lowerGoalMarkOverBar ? 1 : 1.5
+    }
+    
+    var lowerGoalMarkOverBar: Bool {
+        guard let goalLower else { return false }
+        return goalLower < endPoint
+    }
+    
+    var lowerGoalMarkDash: CGFloat {
+        lowerGoalMarkOverBar ? 2 : 100
+    }
+    
+    //MARK: Upper Goal
+    
+    var upperGoalPercentage: CGFloat {
+        guard let goalUpper, endPoint > 0 else { return 0 }
+        return goalUpper / endPoint
+    }
+    var upperGoalMarkColor: Color {
+        Color(.systemGroupedBackground)
+//        Color.white
+//        Color(.label)
+//        let percentageType = showingIncrement ? incrementPercentageType : preppedPercentageType
+//        switch percentageType {
+//        case .excess:
+//            return Colors.Excess.text
+//        default:
+//            return Colors.Complete.text
+//        }
+    }
+    
+    var upperGoalMarkOpacity: CGFloat {
+        upperGoalMarkOverBar ? 0.5 : 1.0
+    }
+    
+    var upperGoalMarkLineWidth: CGFloat {
+        upperGoalMarkOverBar ? 1 : 1.5
+    }
+    
+    var upperGoalMarkOverBar: Bool {
+        guard let goalUpper else { return false }
+        return goalUpper < endPoint
+    }
+    
+    var upperGoalMarkDash: CGFloat {
+        upperGoalMarkOverBar ? 2 : 100
     }
 }
 
@@ -262,7 +453,7 @@ public struct FoodMeterPreviewView: View {
     }
     
 //    @State var previewType: PreviewType = .planned
-    @State var previewType: PreviewType = .eaten
+    @State var previewType: PreviewType = .increment
 
     var navigationTitleToolbarContent: some ToolbarContent {
         ToolbarItemGroup(placement: .principal) {
@@ -326,7 +517,8 @@ public struct FoodMeterPreviewView: View {
         if previewType == .increment {
             return NutrientMeter.ViewModel(
                 component: dataSet[gridIndex][i].type,
-                goal: dataSet[gridIndex][i].goal,
+                goalLower: dataSet[gridIndex][i].goal,
+                goalUpper: dataSet[gridIndex][i].goal + 200,
                 burned: 0,
                 planned: dataSet[gridIndex][i].prepped,
                 increment: dataSet[gridIndex][i].increment
@@ -334,7 +526,8 @@ public struct FoodMeterPreviewView: View {
         } else {
             return NutrientMeter.ViewModel(
                 component: dataSet[gridIndex][i].type,
-                goal: dataSet[gridIndex][i].goal,
+                goalLower: dataSet[gridIndex][i].goal,
+                goalUpper: dataSet[gridIndex][i].goal + 100,
                 burned: 0,
                 planned: dataSet[gridIndex][i].prepped,
                 eaten: dataSet[gridIndex][i].eaten
@@ -345,7 +538,7 @@ public struct FoodMeterPreviewView: View {
     func foodMeter(gridIndex: Int, rowIndex i: Int, type: PreviewType) -> some View {
         let viewModel = viewModel(gridIndex: gridIndex, rowIndex: i, previewType: type)
         if !includeGoal {
-            viewModel.goal = nil
+            viewModel.goalLower = nil
         }
         return NutrientMeter(viewModel: viewModel)
         .frame(height: 26)
