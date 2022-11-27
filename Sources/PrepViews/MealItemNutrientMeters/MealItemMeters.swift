@@ -13,7 +13,7 @@ public struct MealItemMeters: View {
     public init(
         foodItem: Binding<MealFoodItem>,
         meal: DayMeal?,
-        day: Day,
+        day: Day?,
         userUnits: UserUnits,
         bodyProfile: BodyProfile?,
         shouldCreateSubgoals: Bool = true

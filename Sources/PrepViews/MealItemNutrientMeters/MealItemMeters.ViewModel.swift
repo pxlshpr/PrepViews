@@ -18,7 +18,7 @@ extension MealItemMeters {
         }
         
         let meal: DayMeal?
-        let day: Day
+        let day: Day?
         let userUnits: UserUnits
         let bodyProfile: BodyProfile?
         let shouldCreateSubgoals: Bool
@@ -35,7 +35,7 @@ extension MealItemMeters {
         init(
             foodItem: MealFoodItem,
             meal: DayMeal?,
-            day: Day,
+            day: Day?,
             userUnits: UserUnits,
             bodyProfile: BodyProfile?,
             shouldCreateSubgoals: Bool
@@ -47,7 +47,7 @@ extension MealItemMeters {
             self.bodyProfile = bodyProfile
             self.shouldCreateSubgoals = shouldCreateSubgoals
             
-            if let diet = day.goalSet {
+            if day?.goalSet != nil {
 //                self.metersType = .meal
 //                //TODO: If we have a meal.goalSet, add any rows from there that aren't in the day.goalSet
 //                self.page = Page.withIndex(2)
@@ -72,7 +72,7 @@ extension MealItemMeters {
 
 extension MealItemMeters.ViewModel {
     var diet: GoalSet? {
-        day.goalSet
+        day?.goalSet
     }
     
     var hasDiet: Bool {
@@ -96,7 +96,7 @@ extension MealItemMeters.ViewModel {
         GoalCalcParams(
             userUnits: userUnits,
             bodyProfile: bodyProfile,
-            energyGoal: day.goalSet?.energyGoal)
+            energyGoal: day?.goalSet?.energyGoal)
     }
     
     func numberOfRows(for metersType: MetersType) -> Int {
@@ -104,10 +104,10 @@ extension MealItemMeters.ViewModel {
         case .nutrients:
             return foodItem.food.numberOfNonZeroNutrients
         case .diet:
-            return day.numberOfGoals(with: goalCalcParams)
+            return day?.numberOfGoals(with: goalCalcParams) ?? 0
         case .meal:
             //TODO: Add MealType goals we may not have in Diet
-            return day.numberOfGoals(with: goalCalcParams)
+            return day?.numberOfGoals(with: goalCalcParams) ?? 0
         }
     }
     
@@ -142,6 +142,7 @@ extension MealItemMeters.ViewModel {
     func plannedValue(for component: NutrientMeterComponent, type: MetersType) -> Double {
         switch type {
         case .nutrients, .diet:
+            guard let day else { return 0 }
             if let meal {
                 return day.plannedValue(for: component, ignoring: meal.id) + meal.plannedValue(for: component)
             } else {
@@ -199,7 +200,7 @@ extension MealItemMeters.ViewModel {
     
     //MARK: Diet MeterViewModels
     var calculatedDietMeterViewModels: [NutrientMeter.ViewModel] {
-        guard let diet = day.goalSet else { return [] }
+        guard let diet = day?.goalSet else { return [] }
         
         var viewModels = diet.goals.map {
             nutrientMeterViewModel(for: $0, metersType: .diet)
@@ -219,7 +220,7 @@ extension MealItemMeters.ViewModel {
     //MARK: Meal MeterViewModels
     var calculatedMealMeterViewModels: [NutrientMeter.ViewModel] {
 
-        guard let meal else { return [] }
+        guard let meal, let day else { return [] }
         
         var viewModels: [NutrientMeter.ViewModel] = []
         
