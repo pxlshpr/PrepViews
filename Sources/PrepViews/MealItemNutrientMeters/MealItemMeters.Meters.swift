@@ -54,8 +54,17 @@ extension MealItemMeters.Meters {
         }
 
         var quantity: some View {
-            HStack(alignment: .firstTextBaseline, spacing: 2) {
-                Text(meterViewModel.wrappedValue.increment?.cleanAmount ?? "")
+            var valueString: String {
+                guard let value = meterViewModel.wrappedValue.increment else { return "" }
+                if value < 50 {
+                    return value.rounded(toPlaces: 1).cleanAmount
+                } else {
+                    return value.rounded().cleanAmount
+                }
+            }
+            
+            return HStack(alignment: .firstTextBaseline, spacing: 2) {
+                Text(valueString)
                     .font(.callout)
                     .fontWeight(.medium)
                     .foregroundColor(meterViewModel.wrappedValue.labelTextColor)
