@@ -4,13 +4,13 @@ import PrepDataTypes
 import PrepMocks
 import SwiftUIPager
 
-struct MealItemMeters: View {
+public struct MealItemMeters: View {
     
     @StateObject var viewModel: ViewModel
 
     @Binding var foodItem: MealFoodItem
     
-    init(
+    public init(
         foodItem: Binding<MealFoodItem>,
         meal: DayMeal,
         day: Day,
@@ -30,7 +30,7 @@ struct MealItemMeters: View {
         _viewModel = StateObject(wrappedValue: viewModel)
     }
     
-    var body: some View {
+    public var body: some View {
         Group {
             arrow
             VStack(spacing: 7) {
