@@ -37,7 +37,7 @@ public struct MealItemMeters: View {
         Group {
             arrow
             VStack(spacing: 7) {
-                buttonsRow
+                typePickerRow
                 header
                 pager
                 footer
@@ -108,15 +108,13 @@ public struct MealItemMeters: View {
         .padding(.top, 10)
     }
     
-    var buttonsRow: some View {
-        HStack(alignment: .center) {
+    @ViewBuilder
+    var typePickerRow: some View {
+        if metersTypes.count > 1 {
             typePicker
-                .textCase(.none)
-//            Spacer()
-//            goalSetPicker
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 20)
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.horizontal, 20)
     }
     
     var footer_legend: some View {

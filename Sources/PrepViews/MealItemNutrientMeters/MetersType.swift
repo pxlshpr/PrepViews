@@ -8,18 +8,18 @@ enum MetersType: Int, CaseIterable {
     var description: String {
         switch self {
         case .nutrients:
-            return "Nutrients"
+            return "Nutrition Facts"
         case .diet:
-            return "Diet"
+            return "Daily Goals"
         case .meal:
-            return "Meal"
+            return "Meal Goals"
         }
     }
     
     var headerString: String {
         switch self {
         case .nutrients:
-            return "All Listed Nutrients"
+            return "Nutrition Facts"
         case .diet:
             return "Goals for Today"
         case .meal:
@@ -28,6 +28,11 @@ enum MetersType: Int, CaseIterable {
     }
     
     var footerString: String {
-        "Each bar shows the relative increase from what you've added so far."
+        switch self {
+        case .nutrients:
+            return "Each bar shows the portion of the recommended daily allowance that this food will add. You can customise how these are calculated in settings."
+        default:
+            return "Each bar shows the relative increase from what you've added so far."
+        }
     }
 }

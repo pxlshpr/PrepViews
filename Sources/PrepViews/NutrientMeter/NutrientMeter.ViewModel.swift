@@ -56,6 +56,22 @@ public extension NutrientMeter {
             self.eaten = eaten
             self.increment = nil
         }
+        
+        public init(
+            component: NutrientMeterComponent,
+            isGenerated: Bool = false,
+            customPercentage: Double,
+            customValue: Double
+        ) {
+            self.component = component
+            self.isGenerated = isGenerated
+            self.goalLower = nil
+            self.goalUpper = nil
+            self.burned = 0
+            self.planned = customPercentage == 0 ? 0 : (customValue / customPercentage)
+            self.eaten = customValue
+            self.increment = nil
+        }
     }
 }
 
@@ -647,3 +663,4 @@ struct NutrientBreakdown_Previews: PreviewProvider {
     }
 
 }
+

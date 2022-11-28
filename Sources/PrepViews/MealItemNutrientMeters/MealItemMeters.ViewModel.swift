@@ -206,6 +206,64 @@ extension MealItemMeters.ViewModel {
     }
 }
 
+extension Food {
+    func percentOfMicroComparedToHighest(_ nutrientType: NutrientType) -> Double? {
+        guard let highestMicroValueInGrams,
+              highestMicroValueInGrams > 0,
+              let nutrient = info.nutrients.micros.first(where: { $0.nutrientType == nutrientType })
+        else { return nil }
+        return nutrient.valueInGrams / highestMicroValueInGrams
+    }
+
+    func percentOfMicroComparedToRDA(_ nutrientType: NutrientType) -> Double? {
+        guard let nutrient = info.nutrients.micros.first(where: { $0.nutrientType == nutrientType }),
+              let dailyValueInGrams = nutrientType.dailyValueInGrams,
+              dailyValueInGrams > 0
+        else { return nil }
+        
+        return nutrient.valueInGrams / dailyValueInGrams
+    }
+
+    var highestMicroValueInGrams: Double? {
+        info.nutrients.micros.sorted {
+            $0.valueInGrams > $1.valueInGrams
+        }.first?.valueInGrams
+    }
+}
+
+extension NutrientType {
+    var dailyValueInGrams: Double? {
+        guard let dailyValue else { return nil }
+        
+        let value = dailyValue.0
+        let unit = dailyValue.1
+        
+        if unit.isMicrograms {
+            return value / 1000000
+        } else if unit.isMilligrams {
+            return value / 1000
+        } else if unit == .g {
+            return value
+        } else {
+            return nil
+        }
+    }
+}
+
+extension FoodNutrient {
+    var valueInGrams: Double {
+        switch nutrientUnit {
+        case .g:
+            return value
+        case .mg, .mgAT, .mgNE, .mgGAE:
+            return value / 1000.0
+        case .mcg, .mcgDFE, .mcgRAE:
+            return value / 1000000.0
+        default:
+            return 0
+        }
+    }
+}
 extension MealItemMeters.ViewModel {
     
     var nutrients: FoodNutrients {
@@ -228,6 +286,97 @@ extension MealItemMeters.ViewModel {
     
     //MARK: Nutrient MeterViewModels
     var calculatedNutrientMeterViewModels: [NutrientMeter.ViewModel] {
+        if let meals = day?.meals, !meals.isEmpty {
+            return calculatedNutrientViewModelsRelativeToDay
+        } else {
+            return calculatedNutrientViewModelsRelativeToRDA
+        }
+    }
+    
+    var calculatedNutrientViewModelsRelativeToRDA: [NutrientMeter.ViewModel] {
+        func s(_ component: NutrientMeterComponent) -> Double {
+            foodItem.scaledValue(for: component)
+        }
+        
+        func p(_ component: NutrientMeterComponent) -> Double {
+            let scaledValue = s(component)
+            let scaledEnergy = foodItem.scaledValue(for: .energy)
+            switch component {
+            case .energy:
+                return scaledValue / 2000
+            case .carb:
+                return (scaledValue * KcalsPerGramOfCarb) / scaledEnergy
+            case .fat:
+                return  (scaledValue * KcalsPerGramOfFat) / scaledEnergy
+            case .protein:
+                return  (scaledValue * KcalsPerGramOfProtein) / scaledEnergy
+            case .micro(let nutrientType, _):
+//                return foodItem.food.percentOfMicroComparedToHighest(nutrientType) ?? 0
+                return foodItem.food.percentOfMicroComparedToRDA(nutrientType) ?? 0
+            }
+        }
+        
+        func lowerGoal(for component: NutrientMeterComponent) -> Double? {
+            switch component {
+            case .energy:
+                return 1000
+            case .carb:
+                return 100
+            case .fat:
+                return 20
+            case .protein:
+                return 50
+            case .micro(let nutrientType, _):
+                return nutrientType.dailyValue?.0
+            }
+        }
+        
+        func upperGoal(for component: NutrientMeterComponent) -> Double? {
+            switch component {
+            case .energy:
+                return 2000
+            case .carb:
+                return 300
+            case .fat:
+                return 60
+            case .protein:
+                return nil
+            case .micro(let nutrientType, _):
+                return nutrientType.dailyValueMax?.0
+            }
+        }
+        
+        func vm(_ component: NutrientMeterComponent) -> NutrientMeter.ViewModel {
+            NutrientMeter.ViewModel(
+                component: component,
+                goalLower: lowerGoal(for: component),
+                goalUpper: upperGoal(for: component),
+                planned: s(component),
+                eaten: s(component)
+            )
+        }
+
+        var viewModels: [NutrientMeter.ViewModel] = []
+        viewModels.append(vm(.energy))
+
+        viewModels.append(vm(.carb))
+        viewModels.append(vm(.fat))
+        viewModels.append(vm(.protein))
+
+        for micro in nutrients.micros {
+            guard let nutrientType = micro.nutrientType, micro.value > 0 else { continue }
+            //TODO: Handle unit conversions and displaying the correct one here
+            let component: NutrientMeterComponent = .micro(
+                nutrientType: nutrientType,
+                nutrientUnit: micro.nutrientUnit
+            )
+            
+            viewModels.append(vm(component))
+        }
+        return viewModels
+    }
+    
+    var calculatedNutrientViewModelsRelativeToDay: [NutrientMeter.ViewModel] {
         func p(_ component: NutrientMeterComponent) -> Double {
             plannedValue(for: component, type: .nutrients)
         }
@@ -383,3 +532,159 @@ extension MealItemMeters.ViewModel {
 
 
 
+//MARK: - 👁‍🗨 Previews
+import SwiftUISugar
+import PrepDataTypes
+import PrepMocks
+
+public struct MealItemNutrientMetersPreview: View {
+    
+    public init() { }
+    
+    public var body: some View {
+        NavigationView {
+            FormStyledScrollView {
+                textFieldSection
+                metersSection
+            }
+            .navigationTitle("Quantity")
+        }
+    }
+    
+    var mockMeals: [DayMeal] {
+        [
+//            DayMeal(
+//                name: "Breakfast",
+//                time: 0,
+//                goalSet: nil,
+//                foodItems: []
+//            ),
+//            DayMeal(
+//                name: "Lunch",
+//                time: 0,
+//                goalSet: nil,
+//                foodItems: []
+//            ),
+//            DayMeal(
+//                name: "Dinner",
+//                time: 0,
+//                goalSet: nil,
+//                foodItems: []
+//            ),
+//            DayMeal(
+//                name: "Supper",
+//                time: 0,
+//                goalSet: nil,
+//                foodItems: [
+//                    MealFoodItem(
+//                        food: FoodMock.wheyProtein,
+//                        amount: FoodValue(30, .g)
+//                    )
+//                ]
+//            )
+        ]
+    }
+    
+    var mockDay: Day {
+        Day(
+            id: Date().calendarDayString,
+            calendarDayString: Date().calendarDayString,
+            goalSet: DietMock.cutting,
+            bodyProfile: BodyProfileMock.calculated,
+            meals: mockMeals,
+            syncStatus: .notSynced,
+            updatedAt: 0
+        )
+    }
+    
+    var metersSection: some View {
+        MealItemMeters(
+            foodItem: foodItemBinding,
+//            meal: DayMeal(from: MealMock.preWorkoutWithItems),
+            meal: mealBinding,
+//            meal: .constant(nil),
+            day: mockDay,
+//            day: nil,
+            userUnits: .standard,
+            bodyProfile: BodyProfileMock.calculated
+        )
+    }
+    
+    var mealBinding: Binding<DayMeal?> {
+        Binding<DayMeal?>(
+            get: {
+                DayMeal(
+                    name: "Temp meal",
+                    time: 0
+                )
+            },
+            set: { _ in }
+        )
+    }
+    
+    var foodItemBinding: Binding<MealFoodItem> {
+        Binding<MealFoodItem>(
+            get: {
+                MealFoodItem(
+                    food: FoodMock.carrots,
+                    amount: FoodValue(value: value ?? 0, unitType: .weight, weightUnit: weightUnit)
+                )
+            },
+            set: { _ in }
+        )
+    }
+    
+    @State var weightUnit: WeightUnit = .oz
+    @State var value: Double? = 20
+    @State var valueString: String = "20"
+
+    var valueBinding: Binding<String> {
+        Binding<String>(
+            get: { valueString },
+            set: { newValue in
+                guard !newValue.isEmpty else {
+                    value = nil
+                    valueString = newValue
+                    return
+                }
+                guard let value = Double(newValue) else {
+                    return
+                }
+                self.value = value
+                withAnimation {
+                    self.valueString = newValue
+                }
+            }
+        )
+    }
+    
+    var textFieldSection: some View {
+        var unitPicker: some View {
+            Button {
+                weightUnit = weightUnit == .g ? .oz : .g
+            } label: {
+                HStack(spacing: 5) {
+                    Text(weightUnit == .g ? "g" : "oz")
+                    Image(systemName: "chevron.up.chevron.down")
+                        .imageScale(.small)
+                }
+            }
+            .buttonStyle(.borderless)
+        }
+        
+        return FormStyledSection(header: Text("Weight")) {
+            HStack {
+                TextField("Required", text: valueBinding)
+                    .keyboardType(.decimalPad)
+                unitPicker
+            }
+        }
+    }
+
+}
+
+struct MealItemNutrientMeters_Previews: PreviewProvider {
+    static var previews: some View {
+        MealItemNutrientMetersPreview()
+    }
+}

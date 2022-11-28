@@ -19,13 +19,6 @@ public extension NutrientMeter {
                 capsulesPrototype(proxy)
             )
         }
-        //TODO: Rewrite this
-        .if(hasAppeared, transform: { view in
-            /// Use this to make sure the animation only gets applied after the view has appeared, so that it doesn't animate it during it being transitioned into view
-            view
-                .animation(animation, value: viewModel.eaten)
-                .animation(animation, value: viewModel.increment)
-        })
         .clipShape(
             shape
         )
@@ -53,18 +46,36 @@ public extension NutrientMeter {
             shape
                 .fill(viewModel.preppedColor.gradient)
                 .frame(width: preppedWidth(for: proxy))
+                .if(hasAppeared, transform: { view in
+                    /// Use this to make sure the animation only gets applied after the view has appeared, so that it doesn't animate it during it being transitioned into view
+                    view
+                        .animation(animation, value: viewModel.eaten)
+                        .animation(animation, value: viewModel.increment)
+                })
         }
         
         var eatenCapsule: some View {
             shape
                 .fill(viewModel.eatenColor.gradient)
                 .frame(width: eatenWidth(proxy: proxy))
+                .if(hasAppeared, transform: { view in
+                    /// Use this to make sure the animation only gets applied after the view has appeared, so that it doesn't animate it during it being transitioned into view
+                    view
+                        .animation(animation, value: viewModel.eaten)
+                        .animation(animation, value: viewModel.increment)
+                })
         }
 
         var incrementCapsule: some View {
             shape
                 .fill(viewModel.incrementColor.gradient)
                 .frame(width: incrementWidth(proxy: proxy))
+                .if(hasAppeared, transform: { view in
+                    /// Use this to make sure the animation only gets applied after the view has appeared, so that it doesn't animate it during it being transitioned into view
+                    view
+                        .animation(animation, value: viewModel.eaten)
+                        .animation(animation, value: viewModel.increment)
+                })
         }
         
         @ViewBuilder
@@ -113,16 +124,21 @@ public extension NutrientMeter {
     }
     
     //MARK: - 📐 Widths
+    /// If it's not at 0, return a minimum to account for the corner width
+    func correctedWidth(_ width: Double) -> Double {
+        guard width != 0 else { return width }
+        return max(width, 5)
+    }
     func preppedWidth(for proxy: GeometryProxy) -> Double {
-        proxy.size.width * viewModel.preppedPercentageForMeter
+        correctedWidth(proxy.size.width * viewModel.preppedPercentageForMeter)
     }
     
     func eatenWidth(proxy: GeometryProxy) -> Double {
-        proxy.size.width * viewModel.eatenPercentage
+        correctedWidth(proxy.size.width * viewModel.eatenPercentage)
     }
     
     func incrementWidth(proxy: GeometryProxy) -> Double {
-        proxy.size.width * viewModel.incrementPercentageForMeter
+        correctedWidth(proxy.size.width * viewModel.incrementPercentageForMeter)
     }
     
     func lowerGoalMarkOffset(for proxy: GeometryProxy) -> Double {
@@ -547,162 +563,5 @@ public struct FoodMeterPreviewView: View {
 struct FoodMeter_Previews: PreviewProvider {
     static var previews: some View {
         FoodMeterPreviewView()
-    }
-}
-
-
-//MARK: - 👁‍🗨 Previews
-import SwiftUISugar
-import PrepDataTypes
-import PrepMocks
-
-public struct MealItemNutrientMetersPreview: View {
-    
-    public init() { }
-    
-    public var body: some View {
-        NavigationView {
-            FormStyledScrollView {
-                textFieldSection
-                metersSection
-            }
-            .navigationTitle("Quantity")
-        }
-    }
-    
-    var mockMeals: [DayMeal] {
-        [
-            DayMeal(
-                name: "Breakfast",
-                time: 0,
-                goalSet: nil,
-                foodItems: []
-            ),
-            DayMeal(
-                name: "Lunch",
-                time: 0,
-                goalSet: nil,
-                foodItems: []
-            ),
-            DayMeal(
-                name: "Dinner",
-                time: 0,
-                goalSet: nil,
-                foodItems: []
-            ),
-            DayMeal(
-                name: "Supper",
-                time: 0,
-                goalSet: nil,
-                foodItems: [
-                    MealFoodItem(
-                        food: FoodMock.wheyProtein,
-                        amount: FoodValue(30, .g)
-                    )
-                ]
-            )
-        ]
-    }
-    
-    var mockDay: Day {
-        Day(
-            id: Date().calendarDayString,
-            calendarDayString: Date().calendarDayString,
-            goalSet: DietMock.cutting,
-            bodyProfile: BodyProfileMock.calculated,
-            meals: mockMeals,
-            syncStatus: .notSynced,
-            updatedAt: 0
-        )
-    }
-    
-    var metersSection: some View {
-        MealItemMeters(
-            foodItem: foodItemBinding,
-//            meal: DayMeal(from: MealMock.preWorkoutWithItems),
-            meal: mealBinding,
-            day: mockDay,
-//            day: nil,
-            userUnits: .standard,
-            bodyProfile: BodyProfileMock.calculated
-        )
-    }
-    
-    var mealBinding: Binding<DayMeal?> {
-        Binding<DayMeal?>(
-            get: {
-                DayMeal(
-                    name: "Temp meal",
-                    time: 0
-                )
-            },
-            set: { _ in }
-        )
-    }
-    
-    var foodItemBinding: Binding<MealFoodItem> {
-        Binding<MealFoodItem>(
-            get: {
-                MealFoodItem(
-                    food: FoodMock.carrots,
-                    amount: FoodValue(value: value ?? 0, unitType: .weight, weightUnit: weightUnit)
-                )
-            },
-            set: { _ in }
-        )
-    }
-    
-    @State var weightUnit: WeightUnit = .oz
-    @State var value: Double? = 20
-    @State var valueString: String = "20"
-
-    var valueBinding: Binding<String> {
-        Binding<String>(
-            get: { valueString },
-            set: { newValue in
-                guard !newValue.isEmpty else {
-                    value = nil
-                    valueString = newValue
-                    return
-                }
-                guard let value = Double(newValue) else {
-                    return
-                }
-                self.value = value
-                withAnimation {
-                    self.valueString = newValue
-                }
-            }
-        )
-    }
-    
-    var textFieldSection: some View {
-        var unitPicker: some View {
-            Button {
-                weightUnit = weightUnit == .g ? .oz : .g
-            } label: {
-                HStack(spacing: 5) {
-                    Text(weightUnit == .g ? "g" : "oz")
-                    Image(systemName: "chevron.up.chevron.down")
-                        .imageScale(.small)
-                }
-            }
-            .buttonStyle(.borderless)
-        }
-        
-        return FormStyledSection(header: Text("Weight")) {
-            HStack {
-                TextField("Required", text: valueBinding)
-                    .keyboardType(.decimalPad)
-                unitPicker
-            }
-        }
-    }
-
-}
-
-struct MealItemNutrientMeters_Previews: PreviewProvider {
-    static var previews: some View {
-        MealItemNutrientMetersPreview()
     }
 }
