@@ -47,8 +47,11 @@ public struct MealItemMeters: View {
         .onChange(of: foodItem) { newFoodItem in
             withAnimation {
                 viewModel.foodItem.amount = newFoodItem.amount
+            }
+        }
+        .onChange(of: meal) { newValue in
+            withAnimation {
                 viewModel.meal = meal
-//                viewModel.foodItem = newFoodItem
             }
         }
     }
