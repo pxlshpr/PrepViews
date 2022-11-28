@@ -52,7 +52,8 @@ extension MealItemMeters.Meters {
             
             var convertedValue: (value: Double, unit: NutrientUnit) {
                 let value: Double?
-                if viewModel.day?.meals.isEmpty == true {
+//                if viewModel.day?.meals.isEmpty == true {
+                if type == .nutrients {
                     value = meterViewModel.eaten
                 } else {
                     value = meterViewModel.increment
