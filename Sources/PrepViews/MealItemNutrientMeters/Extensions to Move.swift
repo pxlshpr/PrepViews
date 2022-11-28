@@ -20,6 +20,7 @@ extension Day {
         meals.filter { !$0.isPlannedOrWithType }
     }
     
+    
     func existingAmount(for component: NutrientMeterComponent, lowerBound: Bool, params: GoalCalcParams) -> Double {
         meals.reduce(0) { partialResult, meal in
             let value = meal.plannedOrTypeValue(for: component, lowerBound: lowerBound, params: params) ?? 0
