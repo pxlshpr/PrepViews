@@ -619,9 +619,9 @@ public struct MealItemNutrientMetersPreview: View {
     var metersSection: some View {
         MealItemMeters(
             foodItem: foodItemBinding,
-            meal: DayMeal(from: MealMock.preWorkoutWithItems),
+//            meal: DayMeal(from: MealMock.preWorkoutWithItems),
+            meal: nil,
             day: mockDay,
-//            meal: nil,
 //            day: nil,
             userUnits: .standard,
             bodyProfile: BodyProfileMock.calculated
