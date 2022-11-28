@@ -9,19 +9,22 @@ public struct MealItemMeters: View {
     @StateObject var viewModel: ViewModel
 
     @Binding var foodItem: MealFoodItem
-    
+    @Binding var meal: DayMeal?
+
     public init(
         foodItem: Binding<MealFoodItem>,
-        meal: DayMeal?,
+        meal: Binding<DayMeal?>,
         day: Day?,
         userUnits: UserUnits,
         bodyProfile: BodyProfile?,
         shouldCreateSubgoals: Bool = true
     ) {
         _foodItem = foodItem
+        _meal = meal
+        
         let viewModel = ViewModel(
             foodItem: foodItem.wrappedValue,
-            meal: meal,
+            meal: meal.wrappedValue,
             day: day,
             userUnits: userUnits,
             bodyProfile: bodyProfile,
@@ -44,6 +47,7 @@ public struct MealItemMeters: View {
         .onChange(of: foodItem) { newFoodItem in
             withAnimation {
                 viewModel.foodItem.amount = newFoodItem.amount
+                viewModel.meal = meal
 //                viewModel.foodItem = newFoodItem
             }
         }

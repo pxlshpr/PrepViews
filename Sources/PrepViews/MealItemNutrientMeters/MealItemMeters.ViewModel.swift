@@ -16,7 +16,11 @@ extension MealItemMeters {
             }
         }
         
-        let meal: DayMeal?
+        @Published var meal: DayMeal? {
+            didSet {
+                mealChanged()
+            }
+        }
         let day: Day?
         let userUnits: UserUnits
         let bodyProfile: BodyProfile?
@@ -70,6 +74,10 @@ extension MealItemMeters {
 }
 
 extension MealItemMeters.ViewModel {
+    
+    func mealChanged() {
+        foodItemChanged()
+    }
     
     func foodItemChanged() {
         self.nutrientMeterViewModels = calculatedNutrientMeterViewModels

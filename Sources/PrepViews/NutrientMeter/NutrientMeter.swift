@@ -620,11 +620,23 @@ public struct MealItemNutrientMetersPreview: View {
         MealItemMeters(
             foodItem: foodItemBinding,
 //            meal: DayMeal(from: MealMock.preWorkoutWithItems),
-            meal: nil,
+            meal: mealBinding,
             day: mockDay,
 //            day: nil,
             userUnits: .standard,
             bodyProfile: BodyProfileMock.calculated
+        )
+    }
+    
+    var mealBinding: Binding<DayMeal?> {
+        Binding<DayMeal?>(
+            get: {
+                DayMeal(
+                    name: "Temp meal",
+                    time: 0
+                )
+            },
+            set: { _ in }
         )
     }
     
