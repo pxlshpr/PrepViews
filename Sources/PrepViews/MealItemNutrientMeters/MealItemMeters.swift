@@ -43,7 +43,7 @@ public struct MealItemMeters: View {
         }
         .onChange(of: foodItem) { newFoodItem in
             withAnimation {
-                viewModel.foodItem.amount.value = newFoodItem.amount.value
+                viewModel.foodItem.amount = newFoodItem.amount
 //                viewModel.foodItem = newFoodItem
             }
         }
@@ -315,16 +315,16 @@ public struct MealItemNutrientMetersPreview: View {
     var foodItemBinding: Binding<MealFoodItem> {
         Binding<MealFoodItem>(
             get: {
-                print("Returning")
-                return MealFoodItem(
+                MealFoodItem(
                     food: FoodMock.peanutButter,
-                    amount: FoodValue(value: value ?? 0, unitType: .weight, weightUnit: .g)
+                    amount: FoodValue(value: value ?? 0, unitType: .weight, weightUnit: weightUnit)
                 )
             },
             set: { _ in }
         )
     }
     
+    @State var weightUnit: WeightUnit = .g
     @State var value: Double? = 20
     @State var valueString: String = "20"
 
@@ -349,19 +349,24 @@ public struct MealItemNutrientMetersPreview: View {
     }
     
     var textFieldSection: some View {
-        FormStyledSection(header: Text("Weight")) {
+        var unitPicker: some View {
+            Button {
+                weightUnit = weightUnit == .g ? .oz : .g
+            } label: {
+                HStack(spacing: 5) {
+                    Text(weightUnit == .g ? "g" : "oz")
+                    Image(systemName: "chevron.up.chevron.down")
+                        .imageScale(.small)
+                }
+            }
+            .buttonStyle(.borderless)
+        }
+        
+        return FormStyledSection(header: Text("Weight")) {
             HStack {
                 TextField("Required", text: valueBinding)
                     .keyboardType(.decimalPad)
-                Button {
-                } label: {
-                    HStack(spacing: 5) {
-                        Text("g")
-                        Image(systemName: "chevron.up.chevron.down")
-                            .imageScale(.small)
-                    }
-                }
-                .buttonStyle(.borderless)
+                unitPicker
             }
         }
     }

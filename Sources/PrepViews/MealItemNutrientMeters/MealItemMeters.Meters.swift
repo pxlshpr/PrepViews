@@ -56,7 +56,7 @@ extension MealItemMeters.Meters {
                     return value.rounded().cleanAmount
                 }
             }
-
+            
             return HStack(alignment: .firstTextBaseline, spacing: 2) {
                 Text(valueString)
                     .font(.callout)
