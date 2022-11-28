@@ -30,7 +30,7 @@ enum MetersType: Int, CaseIterable {
     var footerString: String {
         switch self {
         case .nutrients:
-            return "Each bar shows the portion of the recommended daily allowance that this food will add. You can customise how these are calculated in settings."
+            return "Each bar shows the portion of the recommended daily allowance that this food will add. You can customise these in settings."
         default:
             return "Each bar shows the relative increase from what you've added so far."
         }

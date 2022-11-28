@@ -35,14 +35,14 @@ public struct MealItemMeters: View {
     
     public var body: some View {
         Group {
-            arrow
+//            arrow
             VStack(spacing: 7) {
                 typePickerRow
                 header
                 pager
                 footer
             }
-            .padding(.top, 10)
+//            .padding(.top, 10)
         }
         .onChange(of: foodItem) { newFoodItem in
             withAnimation {
