@@ -186,8 +186,10 @@ extension NutrientMeter.ViewModel {
         switch goalBoundsType {
             
         case .lowerAndUpper:
-            /// Always shows
-            return true
+            /// Show as long as its not at 100%
+            return lowerGoalPercentage < 1.0
+//            /// Always shows
+//            return true
             
         case .lowerOnly:
             /// Shows if the endPoint exceeds the lower mark
