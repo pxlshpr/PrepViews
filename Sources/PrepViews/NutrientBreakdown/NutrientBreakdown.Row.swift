@@ -121,7 +121,7 @@ extension NutrientBreakdown.Row {
                 .fontWeight(.bold)
 //            if !showingDetails {
             //TODO: have units provided by FoodMeterComponent, utilising associated value for micro
-            Text(foodMeterViewModel.component.unit)
+            Text(foodMeterViewModel.component.unit.shortestDescription)
 //                Text(macro == nil ? "kcal" : "g")
                     .font(.footnote)
 //            }

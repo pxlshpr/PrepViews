@@ -1,6 +1,7 @@
 import SwiftUI
 import PrepDataTypes
 import SwiftUIPager
+import SwiftHaptics
 
 let MeterSpacing = 5.0
 let MeterHeight = 20.0
@@ -11,9 +12,7 @@ extension MealItemMeters {
         
         @Published var foodItem: MealFoodItem {
             didSet {
-                self.nutrientMeterViewModels = calculatedNutrientMeterViewModels
-                self.dietMeterViewModels = calculatedDietMeterViewModels
-                self.mealMeterViewModels = calculatedMealMeterViewModels
+                foodItemChanged()
             }
         }
         
@@ -47,17 +46,17 @@ extension MealItemMeters {
             self.bodyProfile = bodyProfile
             self.shouldCreateSubgoals = shouldCreateSubgoals
             
-            if day?.goalSet != nil {
-//                self.metersType = .meal
-//                //TODO: If we have a meal.goalSet, add any rows from there that aren't in the day.goalSet
-//                self.page = Page.withIndex(2)
-                self.metersType = .diet
-                self.page = Page.withIndex(1)
-
-            } else {
+//            if day?.goalSet != nil {
+////                self.metersType = .meal
+////                //TODO: If we have a meal.goalSet, add any rows from there that aren't in the day.goalSet
+////                self.page = Page.withIndex(2)
+//                self.metersType = .diet
+//                self.page = Page.withIndex(1)
+//
+//            } else {
                 self.metersType = .nutrients
                 self.page = Page.first()
-            }
+//            }
             self.pagerHeight = 0
             
             let numberOfRows = self.numberOfRows(for: self.metersType)
@@ -71,6 +70,71 @@ extension MealItemMeters {
 }
 
 extension MealItemMeters.ViewModel {
+    
+    func foodItemChanged() {
+        self.nutrientMeterViewModels = calculatedNutrientMeterViewModels
+        let dietMeterViewModels = calculatedDietMeterViewModels
+        let mealMeterViewModels = calculatedMealMeterViewModels
+        
+        var hasNewCompletion = false
+        var hasNewExcess = false
+        switch metersType {
+        case .diet:
+            for viewModel in dietMeterViewModels {
+                if viewModel.percentageType == .complete {
+                    /// Check if it was complete before
+                    if let previous = self.dietMeterViewModels.first(where: { $0.component == viewModel.component }),
+                       previous.percentageType != .complete
+                    {
+                        hasNewCompletion = true
+                    }
+                }
+                if viewModel.percentageType == .excess {
+                    /// Check if it was excess before
+                    if let previous = self.dietMeterViewModels.first(where: { $0.component == viewModel.component }),
+                       previous.percentageType != .excess
+                    {
+                        hasNewExcess = true
+                    }
+                }
+            }
+        case .meal:
+            for viewModel in mealMeterViewModels {
+                if viewModel.percentageType == .complete {
+                    /// Check if it was complete before
+                    if let previous = self.mealMeterViewModels.first(where: { $0.component == viewModel.component }),
+                       previous.percentageType != .complete
+                    {
+                        hasNewCompletion = true
+                    }
+                }
+                if viewModel.percentageType == .excess {
+                    /// Check if it was excess before
+                    if let previous = self.mealMeterViewModels.first(where: { $0.component == viewModel.component }),
+                       previous.percentageType != .excess
+                    {
+                        hasNewExcess = true
+                    }
+                }
+            }
+        default:
+            break
+        }
+        
+        if hasNewExcess {
+            Haptics.errorFeedback()
+        } else if hasNewCompletion {
+            Haptics.successFeedback()
+        }
+//        else {
+//            Haptics.selectionFeedback()
+//        }
+        
+        self.dietMeterViewModels = dietMeterViewModels
+        self.mealMeterViewModels = mealMeterViewModels
+        
+    }
+    
     var diet: GoalSet? {
         day?.goalSet
     }

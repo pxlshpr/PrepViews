@@ -39,21 +39,6 @@ public extension NutrientMeterComponent {
         }
     }
     
-    var name: String {
-        switch self {
-        case .energy:
-            return "Energy"
-        case .carb:
-            return "Carb"
-        case .fat:
-            return "Fat"
-        case .protein:
-            return "Protein"
-        case .micro(let nutrientType, _):
-            return nutrientType.description
-        }
-    }
-    
     var initial: String {
         guard let firstCharacter = name.first else { return "" }
         return String(firstCharacter)
@@ -71,19 +56,6 @@ public extension NutrientMeterComponent {
             return Color("StatsProteinText", bundle: .module)
         case .micro:
             return Color("StatsMicroText", bundle: .module)
-        }
-    }
-    
-    var unit: String {
-        switch self {
-        //TODO: Handle kJ preference
-        case .energy:
-            return "kcal"
-        case .micro(_, let nutrientUnit):
-            return nutrientUnit.shortDescription
-        default:
-            /// Implies it's a macro
-            return "g"
         }
     }
     
@@ -175,6 +147,35 @@ public extension NutrientMeterComponent {
             self = .fat
         case .protein:
             self = .protein
+        }
+    }
+    
+    var name: String {
+        switch self {
+        case .energy:
+            //TODO: Handle kJ preference (return Kilojules or Energy)
+            return "Calories"
+        case .carb:
+            return "Carb"
+        case .fat:
+            return "Fat"
+        case .protein:
+            return "Protein"
+        case .micro(let nutrientType, _):
+            return nutrientType.shortestDescription
+        }
+    }
+    
+    
+    var unit: NutrientUnit {
+        switch self {
+        case .energy:
+            //TODO: Handle kJ preference
+            return .kcal
+        case .micro(_, let nutrientUnit):
+            return nutrientUnit
+        default:
+            return .g
         }
     }
 }
