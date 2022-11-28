@@ -319,13 +319,13 @@ extension MealItemMeters.ViewModel {
         func lowerGoal(for component: NutrientMeterComponent) -> Double? {
             switch component {
             case .energy:
-                return 1000
+                return 2500
             case .carb:
-                return 100
+                return 325
             case .fat:
-                return 20
+                return 100
             case .protein:
-                return 50
+                return 250
             case .micro(let nutrientType, _):
                 return nutrientType.dailyValue?.0
             }
@@ -334,13 +334,13 @@ extension MealItemMeters.ViewModel {
         func upperGoal(for component: NutrientMeterComponent) -> Double? {
             switch component {
             case .energy:
-                return 2000
+                return 2500
             case .carb:
-                return 300
+                return 325
             case .fat:
-                return 60
+                return 100
             case .protein:
-                return nil
+                return 250
             case .micro(let nutrientType, _):
                 return nutrientType.dailyValueMax?.0
             }
