@@ -15,7 +15,7 @@ let package = Package(
             targets: ["PrepViews"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/pxlshpr/PrepDataTypes", from: "0.0.197"),
+        .package(url: "https://github.com/pxlshpr/PrepDataTypes", from: "0.0.199"),
         .package(url: "https://github.com/pxlshpr/PrepMocks", from: "0.0.3"),
         .package(url: "https://github.com/pxlshpr/SwiftUISugar", from: "0.0.234"),
         

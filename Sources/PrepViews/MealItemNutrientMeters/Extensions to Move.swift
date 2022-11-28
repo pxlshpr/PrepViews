@@ -28,6 +28,7 @@ extension Day {
     }
 }
 
+
 extension DayMeal {
     func plannedValue(for component: NutrientMeterComponent) -> Double {
         foodItems.reduce(0) { partialResult, mealFoodItem in
