@@ -76,6 +76,11 @@ extension MealItemMeters {
 
 extension MealItemMeters.ViewModel {
     
+    func recalculateHeight() {
+        let numberOfRows = numberOfRows(for: metersType)
+        pagerHeight = calculateHeight(numberOfRows: numberOfRows)
+    }
+    
     func mealChanged() {
         foodItemChanged()
     }

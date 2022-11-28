@@ -47,6 +47,7 @@ public struct MealItemMeters: View {
         .onChange(of: foodItem) { newFoodItem in
             withAnimation {
                 viewModel.foodItem = newFoodItem
+                viewModel.recalculateHeight()
 //                viewModel.foodItem.amount = newFoodItem.amount
             }
         }
