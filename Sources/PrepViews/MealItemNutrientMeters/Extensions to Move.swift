@@ -96,7 +96,7 @@ extension Goal {
     }
 }
 
-extension Food {
+public extension Food {
     var numberOfMicros: Int {
         info.nutrients.micros.count
     }
@@ -141,7 +141,7 @@ extension NutrientMeterComponent {
     }
 }
 
-extension MealFoodItem {
+public extension MealFoodItem {
     
     var nutrientScaleFactor: Double {
         guard let foodQuantity = food.quantity(for: amount) else { return 0 }
@@ -154,7 +154,7 @@ extension MealFoodItem {
     }
 }
 
-extension FoodNutrients {
+public extension FoodNutrients {
     func value(for component: NutrientMeterComponent) -> Double? {
         //TODO: Complete this by doing the following
         /// [x] Account for `FoodValue` and multiply the values accordingly
