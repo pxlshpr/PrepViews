@@ -525,8 +525,8 @@ extension MealItemMeters.ViewModel {
             return true
         }
         
-        /// Or have more than 1 meal
-        guard let day else { return false }
+        /// Or have more than 1 meal (and a diet, since there's no meal type)
+        guard let day, day.goalSet != nil else { return false }
         return day.meals.count > 1
     }
 }

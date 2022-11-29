@@ -44,11 +44,10 @@ public struct MealItemMeters: View {
         var types = [MetersType.nutrients]
         if day.wrappedValue != nil {
             types.append(.diet)
-        }
-        
-        if meal.wrappedValue.goalSet != nil {
-            types.append(.meal)
-        } else if let mealsCount = day.wrappedValue?.meals.count, mealsCount > 1 {
+            if let mealsCount = day.wrappedValue?.meals.count, mealsCount > 1 {
+                types.append(.meal)
+            }
+        } else if meal.wrappedValue.goalSet != nil {
             types.append(.meal)
         }
         _metersTypes = State(initialValue: types)
