@@ -593,7 +593,10 @@ public struct MealItemNutrientMetersPreview: View {
             day: mockDay,
 //            day: nil,
             userUnits: .standard,
-            bodyProfile: BodyProfileMock.calculated
+            bodyProfile: BodyProfileMock.calculated,
+            didTapGoalSetButton: { forMeal in
+                
+            }
         )
     }
     

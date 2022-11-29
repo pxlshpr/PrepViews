@@ -11,13 +11,16 @@ public struct MealItemMeters: View {
     @Binding var foodItem: MealFoodItem
     @Binding var meal: DayMeal?
 
+    let didTapGoalSetButton: (Bool) -> ()
+    
     public init(
         foodItem: Binding<MealFoodItem>,
         meal: Binding<DayMeal?>,
         day: Day?,
         userUnits: UserUnits,
         bodyProfile: BodyProfile?,
-        shouldCreateSubgoals: Bool = true
+        shouldCreateSubgoals: Bool = true,
+        didTapGoalSetButton: @escaping (Bool) -> ()
     ) {
         _foodItem = foodItem
         _meal = meal
@@ -31,6 +34,8 @@ public struct MealItemMeters: View {
             shouldCreateSubgoals: shouldCreateSubgoals
         )
         _viewModel = StateObject(wrappedValue: viewModel)
+        
+        self.didTapGoalSetButton = didTapGoalSetButton
     }
     
     public var body: some View {
@@ -190,35 +195,32 @@ public struct MealItemMeters: View {
     }
     
     var dietPicker: some View {
-        picker()
+        picker(for: viewModel.day?.goalSet)
     }
     
     var mealTypePicker: some View {
-        picker()
+        picker(for: viewModel.meal?.goalSet)
     }
     
-    func picker() -> some View {
-        HStack(spacing: 2) {
-            Text("🫃🏽")
-                .font(.footnote)
-            Text("Cutting")
-                .font(.footnote)
-                .foregroundColor(.accentColor)
-//                .bold()
-//                .foregroundColor(.accentColor)
-            Image(systemName: "chevron.up.chevron.down")
-                .foregroundColor(.accentColor)
-                .foregroundColor(Color(.tertiaryLabel))
-                .font(.footnote)
-                .imageScale(.small)
+    /// We're allowing nil to be passed into this so it can be used as a transparent placeholder
+    func picker(for goalSet: GoalSet? = nil) -> some View {
+        Button {
+            didTapGoalSetButton(viewModel.metersType == .meal)
+        } label: {
+            HStack(spacing: 2) {
+                Text(goalSet?.emoji ?? "🫃🏽")
+                    .font(.footnote)
+                Text(goalSet?.name ?? "Cutting")
+                    .font(.footnote)
+                    .foregroundColor(.accentColor)
+                Image(systemName: "chevron.up.chevron.down")
+                    .foregroundColor(.accentColor)
+                    .foregroundColor(Color(.tertiaryLabel))
+                    .font(.footnote)
+                    .imageScale(.small)
+            }
+            .padding(.trailing, 20)
         }
-        .padding(.trailing, 20)
-//        .padding(.vertical, 5.5)
-//        .padding(.horizontal, 10)
-//        .background(
-//            RoundedRectangle(cornerRadius: 7)
-//                .foregroundColor(Color(.tertiarySystemFill))
-//        )
     }
     
     func picker_legacy() -> some View {
