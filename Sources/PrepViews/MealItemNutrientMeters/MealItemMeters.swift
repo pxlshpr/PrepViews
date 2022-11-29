@@ -39,6 +39,8 @@ public struct MealItemMeters: View {
         _viewModel = StateObject(wrappedValue: viewModel)
         
         self.didTapGoalSetButton = didTapGoalSetButton
+        
+        _metersTypes = State(initialValue: determineMetersTypes)
     }
     
     public var body: some View {
@@ -67,11 +69,14 @@ public struct MealItemMeters: View {
         .onChange(of: day) { newValue in
             withAnimation {
                 viewModel.day = day
+                metersTypes = determineMetersTypes
             }
         }
     }
     
-    var metersTypes: [MetersType] {
+    @State var metersTypes: [MetersType] = []
+    
+    var determineMetersTypes: [MetersType] {
         var types = [MetersType.nutrients]
         if viewModel.day != nil {
             types.append(.diet)
