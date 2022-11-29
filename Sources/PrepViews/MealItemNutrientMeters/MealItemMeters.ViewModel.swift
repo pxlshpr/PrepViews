@@ -21,7 +21,13 @@ extension MealItemMeters {
                 mealChanged()
             }
         }
-        let day: Day?
+        
+        @Published var day: Day? {
+            didSet {
+                dayChanged()
+            }
+        }
+        
         let userUnits: UserUnits
         let bodyProfile: BodyProfile?
         let shouldCreateSubgoals: Bool
@@ -82,6 +88,10 @@ extension MealItemMeters.ViewModel {
     }
     
     func mealChanged() {
+        foodItemChanged()
+    }
+    
+    func dayChanged() {
         foodItemChanged()
     }
     
@@ -593,7 +603,7 @@ public struct MealItemNutrientMetersPreview: View {
 //            meal: DayMeal(from: MealMock.preWorkoutWithItems),
             meal: mealBinding,
 //            meal: .constant(nil),
-            day: mockDay,
+            day: .constant(mockDay),
 //            day: nil,
             userUnits: .standard,
             bodyProfile: BodyProfileMock.calculated,

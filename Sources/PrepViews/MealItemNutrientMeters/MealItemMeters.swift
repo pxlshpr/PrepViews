@@ -10,13 +10,15 @@ public struct MealItemMeters: View {
 
     @Binding var foodItem: MealFoodItem
     @Binding var meal: DayMeal
+    @Binding var day: Day?
+//    var day: Binding<Day?>
 
     let didTapGoalSetButton: (Bool) -> ()
     
     public init(
         foodItem: Binding<MealFoodItem>,
         meal: Binding<DayMeal>,
-        day: Day?,
+        day: Binding<Day?>,
         userUnits: UserUnits,
         bodyProfile: BodyProfile?,
         shouldCreateSubgoals: Bool = true,
@@ -24,11 +26,12 @@ public struct MealItemMeters: View {
     ) {
         _foodItem = foodItem
         _meal = meal
+        _day = day
         
         let viewModel = ViewModel(
             foodItem: foodItem.wrappedValue,
             meal: meal.wrappedValue,
-            day: day,
+            day: day.wrappedValue,
             userUnits: userUnits,
             bodyProfile: bodyProfile,
             shouldCreateSubgoals: shouldCreateSubgoals
@@ -59,6 +62,11 @@ public struct MealItemMeters: View {
         .onChange(of: meal) { newValue in
             withAnimation {
                 viewModel.meal = meal
+            }
+        }
+        .onChange(of: day) { newValue in
+            withAnimation {
+                viewModel.day = day
             }
         }
     }
