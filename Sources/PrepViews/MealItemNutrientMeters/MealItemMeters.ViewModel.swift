@@ -182,10 +182,10 @@ extension MealItemMeters.ViewModel {
         case .nutrients:
             return foodItem.food.numberOfNonZeroNutrients
         case .diet:
-            return day?.numberOfGoals(with: goalCalcParams) ?? 0
+//            return day?.numberOfGoals(with: goalCalcParams) ?? 0
+            return calculatedDietMeterViewModels.count
         case .meal:
-            //TODO: Add MealType goals we may not have in Diet
-            return day?.numberOfGoals(with: goalCalcParams) ?? 0
+            return calculatedMealMeterViewModels.count
         }
     }
     
@@ -427,7 +427,11 @@ extension MealItemMeters.ViewModel {
         var viewModels: [NutrientMeter.ViewModel] = []
         
         /// First get any explicit goals we have for the `mealType`
-        
+        if let mealType = meal.goalSet {
+            viewModels.append(contentsOf: mealType.goals.map {
+                nutrientMeterViewModel(for: $0, metersType: .meal)
+            })
+        }
         
         let subgoals: [NutrientMeter.ViewModel] = dietMeterViewModels.compactMap { dietMeterViewModel in
             
@@ -482,14 +486,6 @@ extension MealItemMeters.ViewModel {
             ///         let amountToSpread = bound - existingAmount
             ///         let subgoal bound = amountToSpread / numberOfMealsToSpreadOver
         }
-//        var viewModels = diet.goals.map {
-//            nutrientMeterViewModel(for: $0)
-//        }
-//        if let implicitGoal = diet.implicitGoal(with: goalCalcParams) {
-//            var viewModel = nutrientMeterViewModel(for: implicitGoal)
-//            viewModel.isGenerated = true
-//            viewModels.append(viewModel)
-//        }
         
         viewModels.append(contentsOf: subgoals)
         
@@ -604,11 +600,12 @@ public struct MealItemNutrientMetersPreview: View {
     var mealBinding: Binding<DayMeal?> {
         Binding<DayMeal?>(
             get: {
-                DayMeal(
-                    name: "Temp meal",
-                    time: 0,
-                    goalSet: MealTypeMock.preWorkout
-                )
+                DayMeal(from: MealMock.preWorkoutWithItems)
+//                DayMeal(
+//                    name: "Temp meal",
+//                    time: 0,
+//                    goalSet: MealTypeMock.preWorkout
+//                )
             },
             set: { _ in }
         )
