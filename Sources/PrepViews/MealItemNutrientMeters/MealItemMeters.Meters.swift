@@ -102,7 +102,7 @@ struct MeterRow: View {
             .frame(height: MeterHeight)
     }
     
-    var quantityLabel: some View {
+    var quantityLabel_new: some View {
 //        HStack(alignment: .bottom, spacing: 2) {
             /// Using an animated number here
             Color.clear
@@ -119,7 +119,7 @@ struct MeterRow: View {
 //        }
     }
 
-    var quantityLabel_legacy: some View {
+    var quantityLabel: some View {
         HStack(alignment: .firstTextBaseline, spacing: 2) {
             Text(value.formattedNutrient)
                 .font(.callout)

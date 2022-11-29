@@ -178,7 +178,7 @@ public struct NutritionSummary<Provider: NutritionSummaryProvider>: View {
         dataProvider.forMeal && !dataProvider.isMarkedAsCompleted
     }
     
-    var nutrientsEnergy: some View {
+    var nutrientsEnergy_new: some View {
         Color.clear
             .animatedEnergy(value: dataProvider.energyAmount,
                             unit: .kcal,
@@ -186,7 +186,7 @@ public struct NutritionSummary<Provider: NutritionSummaryProvider>: View {
             )
     }
     
-    var nutrientsEnergy_legacy: some View {
+    var nutrientsEnergy: some View {
         HStack(alignment: .top, spacing: 1) {
             Text("\(Int(dataProvider.energyAmount))")
                 .font(.subheadline)
@@ -265,12 +265,12 @@ public struct NutritionSummary<Provider: NutritionSummaryProvider>: View {
             : Colors.Nutrient.Muted.Zero.Unit.colorScheme(colorScheme)
         }
         
-        var valueText: some View {
+        var valueText_new: some View {
             Color.clear
                 .animatedMacro(value: amount, color: valueColor)
         }
 
-        var valueText_legacy: some View {
+        var valueText: some View {
             Text(string)
                 .font(.subheadline)
                 .foregroundColor(valueColor)
