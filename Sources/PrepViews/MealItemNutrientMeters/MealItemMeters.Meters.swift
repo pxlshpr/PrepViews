@@ -22,78 +22,190 @@ extension MealItemMeters.Meters {
     var body: some View {
         VStack {
             Grid(alignment: .leading, verticalSpacing: MeterSpacing) {
-                ForEach(viewModel.meterViewModels(for: type), id: \.self.component) { meterViewModel in
-                    meterRow(for: meterViewModel)
-                }
+                rows
+            }
+        }
+    }
+    
+    @ViewBuilder
+    var rows: some View {
+//        ForEach(viewModel.meterViewModels(for: type), id: \.self.component) { meterViewModel in
+//            meterRow(for: meterViewModel)
+//        }
+        switch type {
+        case .nutrients:
+            ForEach(viewModel.nutrientMeterViewModels.indices, id: \.self) { index in
+                MeterRow(meterViewModel: $viewModel.nutrientMeterViewModels[index])
+            }
+        case .diet:
+            ForEach(viewModel.dietMeterViewModels.indices, id: \.self) { index in
+                MeterRow(meterViewModel: $viewModel.dietMeterViewModels[index])
+            }
+        case .meal:
+            ForEach(viewModel.mealMeterViewModels.indices, id: \.self) { index in
+                MeterRow(meterViewModel: $viewModel.mealMeterViewModels[index])
+            }
+        }
+    }
+}
+
+extension NutrientMeter.ViewModel {
+    var convertedQuantity: (value: Double, unit: NutrientUnit) {
+        guard let value = increment else { return (0, .g) }
+        let unit = component.unit
+        return unit.convertingLargeValue(value)
+    }
+}
+
+struct MeterRow: View {
+    @Binding var meterViewModel: NutrientMeter.ViewModel
+    @State var value: Double
+    @State var unit: NutrientUnit
+    
+    init(meterViewModel: Binding<NutrientMeter.ViewModel>) {
+        _meterViewModel = meterViewModel
+        _value = State(initialValue: meterViewModel.wrappedValue.convertedQuantity.value)
+        _unit = State(initialValue: meterViewModel.wrappedValue.convertedQuantity.unit)
+    }
+    
+    var body: some View {
+        GridRow {
+            label
+            meter
+            quantityLabel
+        }
+        .onChange(of: meterViewModel.increment, perform: incrementChanged)
+    }
+    
+    func incrementChanged(to newValue: Double?) {
+        withAnimation {
+            self.value = meterViewModel.convertedQuantity.value
+            self.unit = meterViewModel.convertedQuantity.unit
+        }
+    }
+    
+    var label: some View {
+        HStack {
+            Text(meterViewModel.component.description)
+                .foregroundColor(meterViewModel.labelTextColor)
+                .font(.system(.callout, design: .rounded, weight: .light))
+            if meterViewModel.isGenerated {
+                Image(systemName: "sparkles")
+                    .font(.caption2)
+                    .foregroundColor(meterViewModel.labelTextColor.opacity(0.5))
+            }
+        }
+    }
+    
+    var meter: some View {
+        NutrientMeter(viewModel: .constant(meterViewModel))
+            .frame(height: MeterHeight)
+    }
+    
+    var quantityLabel: some View {
+        HStack(alignment: .bottom, spacing: 2) {
+            /// Using an animated number here
+            Color.clear
+                .animatingOverlay(for: value, fontSize: 16, fontWeight: .medium)
+                .foregroundColor(meterViewModel.labelTextColor)
+            if unit != .kcal {
+                Text(unit.shortestDescription)
+                    .font(.caption)
+                    .fontWeight(.medium)
+                    .foregroundColor(meterViewModel.labelTextColor.opacity(0.5))
+                    .offset(y: -0.5)
             }
         }
     }
 
-    func meterRow(for meterViewModel: NutrientMeter.ViewModel) -> some View {
-        var label: some View {
-            HStack {
-                Text(meterViewModel.component.description)
-                    .foregroundColor(meterViewModel.labelTextColor)
-                    .font(.system(.callout, design: .rounded, weight: .light))
-                if meterViewModel.isGenerated {
-                    Image(systemName: "sparkles")
-                        .font(.caption2)
-                        .foregroundColor(meterViewModel.labelTextColor.opacity(0.5))
-                }
-            }
-        }
-        
-        var meter: some View {
-            NutrientMeter(viewModel: .constant(meterViewModel))
-                .frame(height: MeterHeight)
-        }
-
-        var quantity: some View {
-            
-            var convertedValue: (value: Double, unit: NutrientUnit) {
-                let value: Double?
-//                if viewModel.day?.meals.isEmpty == true {
-//                if type == .nutrients {
-//                    value = meterViewModel.eaten
-//                } else {
-                    value = meterViewModel.increment
-//                }
-                guard let value else { return (0, .g) }
-                let unit = meterViewModel.component.unit
-                return unit.convertingLargeValue(value)
-            }
-            
-            var valueString: String {
-//                guard let value = meterViewModel.increment else { return "" }
-                let value = convertedValue.value
-                let rounded: Double
-                if value < 50 {
-                    rounded = value.rounded(toPlaces: 1)
-                } else {
-                    rounded = value.rounded()
-                }
-                return rounded.formattedWithCommas
-            }
-            
-            return HStack(alignment: .firstTextBaseline, spacing: 2) {
-                Text(valueString)
-                    .font(.callout)
+    var quantityLabel_legacy: some View {
+        HStack(alignment: .firstTextBaseline, spacing: 2) {
+            Text(value.formattedNutrient)
+                .font(.callout)
+                .fontWeight(.medium)
+                .foregroundColor(meterViewModel.labelTextColor)
+            if unit != .kcal {
+                Text(unit.shortestDescription)
+                    .font(.caption)
                     .fontWeight(.medium)
-                    .foregroundColor(meterViewModel.labelTextColor)
-                if convertedValue.unit != .kcal {
-                    Text(convertedValue.unit.shortestDescription)
-                        .font(.caption)
-                        .fontWeight(.medium)
-                        .foregroundColor(meterViewModel.labelTextColor.opacity(0.5))
-                }
+                    .foregroundColor(meterViewModel.labelTextColor.opacity(0.5))
             }
         }
-               
-        return GridRow {
-            label
-            meter
-            quantity
+    }
+}
+
+extension Double {
+    var formattedNutrient: String {
+        let rounded: Double
+        if self < 50 {
+            rounded = self.rounded(toPlaces: 1)
+        } else {
+            rounded = self.rounded()
         }
+        return rounded.formattedWithCommas
+    }
+}
+
+extension Font.Weight {
+    var uiFontWeight: UIFont.Weight {
+        switch self {
+        case .medium:
+            return .medium
+        case .black:
+            return .black
+        case .bold:
+            return .bold
+        case .heavy:
+            return .heavy
+        case .light:
+            return .light
+        case .regular:
+            return .regular
+        case .semibold:
+            return .semibold
+        case .thin:
+            return .thin
+        case .ultraLight:
+            return .ultraLight
+        default:
+            return .regular
+        }
+    }
+}
+struct AnimatableNumberModifier: AnimatableModifier {
+    
+    var number: Double
+    var fontSize: CGFloat
+    var fontWeight: Font.Weight
+    
+    var animatableData: Double {
+        get { number }
+        set { number = newValue }
+    }
+    
+    var uiFont: UIFont {
+        UIFont.systemFont(ofSize: fontSize, weight: fontWeight.uiFontWeight)
+    }
+    
+    var size: CGSize {
+        uiFont.fontSize(for: number.formattedNutrient)
+    }
+    
+    func body(content: Content) -> some View {
+        content
+            .frame(width: size.width, height: size.height)
+            .overlay(
+                Text(number.formattedNutrient)
+                    .font(.system(size: fontSize, weight: fontWeight, design: .default))
+                    .multilineTextAlignment(.leading)
+            )
+//            .background(.green.opacity(0.5))
+    }
+}
+
+extension View {
+    func animatingOverlay(for number: Double, fontSize: CGFloat, fontWeight: Font.Weight) -> some View {
+        modifier(AnimatableNumberModifier(number: number, fontSize: fontSize, fontWeight: fontWeight))
     }
 }
 

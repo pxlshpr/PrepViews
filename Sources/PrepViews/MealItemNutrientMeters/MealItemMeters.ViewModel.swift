@@ -200,7 +200,7 @@ extension MealItemMeters.ViewModel {
             break
         }
     }
-    
+
     func calculateHeight(numberOfRows: Int) -> CGFloat {
         let rows = CGFloat(integerLiteral: numberOfRows)
         let meters = rows * MeterHeight
