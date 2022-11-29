@@ -16,7 +16,7 @@ extension MealItemMeters {
             }
         }
         
-        @Published var meal: DayMeal? {
+        @Published var meal: DayMeal {
             didSet {
                 mealChanged()
             }
@@ -37,7 +37,7 @@ extension MealItemMeters {
 
         init(
             foodItem: MealFoodItem,
-            meal: DayMeal?,
+            meal: DayMeal,
             day: Day?,
             userUnits: UserUnits,
             bodyProfile: BodyProfile?,
@@ -279,13 +279,14 @@ extension MealItemMeters.ViewModel {
         switch type {
         case .nutrients, .diet:
             guard let day else { return 0 }
-            if let meal {
+//            if let meal {
                 return day.plannedValue(for: component, ignoring: meal.id) + meal.plannedValue(for: component)
-            } else {
-                return day.plannedValue(for: component, ignoring: UUID())
-            }
+//            } else {
+//                return day.plannedValue(for: component, ignoring: UUID())
+//            }
         case .meal:
-            return meal?.plannedValue(for: component) ?? 0
+//            return meal?.plannedValue(for: component) ?? 0
+            return meal.plannedValue(for: component)
         }
     }
     
@@ -422,8 +423,9 @@ extension MealItemMeters.ViewModel {
     //MARK: Meal MeterViewModels
     var calculatedMealMeterViewModels: [NutrientMeter.ViewModel] {
 
-        guard let meal, let day else { return [] }
-        
+//        guard let meal, let day else { return [] }
+        guard let day else { return [] }
+
         var viewModels: [NutrientMeter.ViewModel] = []
         
         /// First get any explicit goals we have for the `mealType`
@@ -507,7 +509,8 @@ extension MealItemMeters.ViewModel {
     
     var shouldShowMealGoals: Bool {
         /// If we have a `MealType` associated
-        if meal?.goalSet != nil {
+//        if meal?.goalSet != nil {
+        if meal.goalSet != nil {
             return true
         }
         
@@ -600,8 +603,8 @@ public struct MealItemNutrientMetersPreview: View {
         )
     }
     
-    var mealBinding: Binding<DayMeal?> {
-        Binding<DayMeal?>(
+    var mealBinding: Binding<DayMeal> {
+        Binding<DayMeal>(
             get: {
                 DayMeal(from: MealMock.preWorkoutWithItems)
 //                DayMeal(

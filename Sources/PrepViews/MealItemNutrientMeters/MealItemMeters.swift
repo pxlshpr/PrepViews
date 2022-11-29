@@ -9,13 +9,13 @@ public struct MealItemMeters: View {
     @StateObject var viewModel: ViewModel
 
     @Binding var foodItem: MealFoodItem
-    @Binding var meal: DayMeal?
+    @Binding var meal: DayMeal
 
     let didTapGoalSetButton: (Bool) -> ()
     
     public init(
         foodItem: Binding<MealFoodItem>,
-        meal: Binding<DayMeal?>,
+        meal: Binding<DayMeal>,
         day: Day?,
         userUnits: UserUnits,
         bodyProfile: BodyProfile?,
@@ -199,7 +199,7 @@ public struct MealItemMeters: View {
     }
     
     var mealTypePicker: some View {
-        picker(for: viewModel.meal?.goalSet, forMeal: true)
+        picker(for: viewModel.meal.goalSet, forMeal: true)
     }
     
     /// We're allowing nil to be passed into this so it can be used as a transparent placeholder
