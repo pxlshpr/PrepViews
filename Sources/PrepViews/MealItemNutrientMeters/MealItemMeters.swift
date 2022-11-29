@@ -40,7 +40,18 @@ public struct MealItemMeters: View {
         
         self.didTapGoalSetButton = didTapGoalSetButton
         
-        _metersTypes = State(initialValue: determineMetersTypes)
+        
+        var types = [MetersType.nutrients]
+        if day.wrappedValue != nil {
+            types.append(.diet)
+        }
+        
+        if meal.wrappedValue.goalSet != nil {
+            types.append(.meal)
+        } else if let mealsCount = day.wrappedValue?.meals.count, mealsCount > 1 {
+            types.append(.meal)
+        }
+        _metersTypes = State(initialValue: types)
     }
     
     public var body: some View {
