@@ -4,7 +4,6 @@ import PrepDataTypes
 public protocol NutritionSummaryProvider: ObservableObject {
     var forMeal: Bool { get }
     var isMarkedAsCompleted: Bool { get }
-    var showQuantityAsSummaryDetail: Bool { get }
 
     var energyAmount: Double { get }
     var carbAmount: Double { get }
@@ -18,6 +17,8 @@ public protocol NutritionSummaryProvider: ObservableObject {
 }
 
 public extension NutritionSummaryProvider {
+    var forMeal: Bool { false }
+    var isMarkedAsCompleted: Bool { false }
     var haveMicros: Bool { false }
     var haveCustomMicros: Bool { false }
     func nutrient(ofType type: NutrientType) -> Double? { nil }

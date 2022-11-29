@@ -1,49 +1,110 @@
 import SwiftUI
 import PrepDataTypes
 
+struct AnimatableEnergyModifier: AnimatableModifier {
+    
+    var value: Double
+    var unit: EnergyUnit
+    var shouldHighlight: Bool
+    
+    let fontSize: CGFloat = 14
+    let fontWeight: Font.Weight = .regular
+    
+    var animatableData: Double {
+        get { value }
+        set { value = newValue }
+    }
+    
+    var uiFont: UIFont {
+        UIFont.systemFont(ofSize: fontSize, weight: fontWeight.uiFontWeight)
+    }
+    
+    var size: CGSize {
+        uiFont.fontSize(for: value.formattedNutrient)
+    }
+    
+    let unitFontSize: CGFloat = 10
+    let unitFontWeight: Font.Weight = .regular
+    
+    var unitUIFont: UIFont {
+        UIFont.systemFont(ofSize: unitFontSize, weight: unitFontWeight.uiFontWeight)
+    }
+    
+    var unitWidth: CGFloat {
+        unitUIFont.fontSize(for: unit.shortDescription).width
+    }
+    
+    var textColor: Color {
+        shouldHighlight ? .white : .secondary
+    }
+    
+    var unitcolor: Color {
+        shouldHighlight ? Color(hex: "C4C4C6") : Color(.tertiaryLabel)
+    }
+    
+    func body(content: Content) -> some View {
+        content
+            .frame(width: 55 + unitWidth, height: size.height)
+            .overlay(
+                HStack(alignment: .bottom, spacing: 2) {
+                    Spacer()
+                    Text(value.formattedNutrient)
+                        .font(.system(size: fontSize, weight: fontWeight, design: .default))
+                        .foregroundColor(textColor)
+                    Text(unit.shortDescription)
+                        .font(.system(size: unitFontSize, weight: unitFontWeight, design: .default))
+                        .foregroundColor(unitcolor)
+                        .offset(y: -1.5)
+                }
+            )
+    }
+}
+
+extension View {
+    func animatedEnergy(value: Double, unit: EnergyUnit, shouldHighlight: Bool) -> some View {
+        modifier(AnimatableEnergyModifier(value: value, unit: unit, shouldHighlight: shouldHighlight))
+    }
+}
+
 public struct NutritionSummary<Provider: NutritionSummaryProvider>: View {
 
     @Environment(\.colorScheme) var colorScheme: ColorScheme
 
     @ObservedObject var dataProvider: Provider
-    @Binding var showDetails: Bool
     
-    /// For Plate and Recipe types
-    @State var parentMultiplier: Double
-
     let showMacrosIndicator: Bool
     
     public init(
         dataProvider: Provider,
-        showMacrosIndicator: Bool = false,
-        showDetails: Binding<Bool>? = nil,
-        parentMultiplier: Double = 1
+        showMacrosIndicator: Bool = false
     ) {
         self.dataProvider = dataProvider
         self.showMacrosIndicator = showMacrosIndicator
-        self._showDetails = showDetails ?? .constant(true)
-        self._parentMultiplier = State(initialValue: parentMultiplier)
     }
     
     public var body: some View {
         VStack(alignment: .trailing, spacing: 5) {
-            HStack {
+            HStack(spacing: 0) {
                 if showMacrosIndicator {
-                    Spacer()
                     macrosIndicator
+                        .padding(.leading, 2)
+                    Spacer()
                 }
                 nutrientsEnergy
             }
-            if showDetails {
-                nutrientsMacros
-                    .transition(.asymmetric(insertion: .move(edge: .trailing),
-                                            removal: .move(edge: .trailing))
-                                    .combined(with: .opacity)
-                                    .combined(with: .scale)
-                    )
-
-            }
+            nutrientsMacros
+                .transition(.asymmetric(insertion: .move(edge: .trailing),
+                                        removal: .move(edge: .trailing))
+                                .combined(with: .opacity)
+                                .combined(with: .scale)
+                )
         }
+        .fixedSize(horizontal: true, vertical: false)
+        .onChange(of: dataProvider.energyAmount, perform: energyChanged)
+    }
+    
+    func energyChanged(to newValue: Double) {
+        
     }
     
     var macrosIndicator: some View {
@@ -59,29 +120,29 @@ public struct NutritionSummary<Provider: NutritionSummaryProvider>: View {
     }
     
     var nutrientsEnergy: some View {
+        Color.clear
+            .animatedEnergy(value: dataProvider.energyAmount,
+                            unit: .kcal,
+                            shouldHighlight: shouldHighlight
+            )
+    }
+    
+    var nutrientsEnergy_legacy: some View {
         HStack(alignment: .top, spacing: 1) {
-            if !(!dataProvider.showQuantityAsSummaryDetail && showDetails)
-                || !dataProvider.showQuantityAsSummaryDetail {
-                Text("\(Int(dataProvider.energyAmount * parentMultiplier))")
-                    .font(.subheadline)
-                    .foregroundColor(shouldHighlight ?
-                                     Color(.white) : Color(.secondaryLabel))
-            }
-//            if showDetails {
-                Text("kcal")
-                    .font(.caption)
-                    .foregroundColor(shouldHighlight ? Color(hex: "C4C4C6") : Color(.tertiaryLabel))
-//                    .transition(.asymmetric(insertion: .move(edge: .trailing),
-//                                            removal: .move(edge: .trailing))
-//                                    .combined(with: .opacity))
-//            }
+            Text("\(Int(dataProvider.energyAmount))")
+                .font(.subheadline)
+                .foregroundColor(shouldHighlight ?
+                                 Color(.white) : Color(.secondaryLabel))
+            Text("kcal")
+                .font(.caption)
+                .foregroundColor(shouldHighlight ? Color(hex: "C4C4C6") : Color(.tertiaryLabel))
         }
     }
     
     var nutrientsMacros: some View {
-        let carb = dataProvider.carbAmount * parentMultiplier
-        let fat = dataProvider.fatAmount * parentMultiplier
-        let protein = dataProvider.proteinAmount * parentMultiplier
+        let carb = dataProvider.carbAmount
+        let fat = dataProvider.fatAmount
+        let protein = dataProvider.proteinAmount
         let carbCalories = carb * 4.0
         let fatCalories = fat * 9.0
         let proteinCalories = protein * 4.0
@@ -164,142 +225,91 @@ public struct NutritionSummary<Provider: NutritionSummaryProvider>: View {
     }
 }
 
-struct Colors {
-    struct Nutrient {
-        struct Highlighted {
-            struct Value {
-                static let light = Color(.label)
-                static let dark = Color(.label)
-                static func colorScheme(_ colorScheme: ColorScheme) -> Color {
-                    colorScheme == .light ? light : dark
-                }
-            }
-            struct Background {
-                struct Carb {
-                    static let light = Color(hex: "FFE798")
-                    static let dark = Color(hex: "987A20")
-                    static func colorScheme(_ colorScheme: ColorScheme) -> Color {
-                        colorScheme == .light ? light : dark
-                    }
-                }
-                struct Fat {
-                    static let light = Color(hex: "EAB0FF")
-                    static let dark = Color(hex: "740773")
-                    static func colorScheme(_ colorScheme: ColorScheme) -> Color {
-                        colorScheme == .light ? light : dark
-                    }
-                }
-                struct Protein {
-                    static let light = Color(hex: "BAE2E3")
-                    static let dark = Color(hex: "3D969A")
-                    static func colorScheme(_ colorScheme: ColorScheme) -> Color {
-                        colorScheme == .light ? light : dark
-                    }
-                }
-            }
-            struct Unit {
-                static let light = Color(.secondaryLabel)
-                static let dark = Color(.secondaryLabel)
-                static func colorScheme(_ colorScheme: ColorScheme) -> Color {
-                    colorScheme == .light ? light : dark
-                }
-            }
-        }
+import SwiftUISugar
 
-        struct Regular {
-            struct Value {
-                static let light = Color(hex: "DFD6FF")
-                static let dark = Color(hex: "DFD6FF")
-                static func colorScheme(_ colorScheme: ColorScheme) -> Color {
-                    colorScheme == .light ? light : dark
+struct NutritionSummaryPreview: View {
+    @StateObject var viewModel = ViewModel()
+    var body: some View {
+        ZStack {
+            FormStyledScrollView {
+                FormStyledSection {
+                    NutritionSummary(
+                        dataProvider: viewModel,
+                        showMacrosIndicator: true
+                    )
                 }
             }
-            struct Background {
-                static let light = Color(hex: "9678FF")
-                static let dark = Color(hex: "A78EFF")
-                static func colorScheme(_ colorScheme: ColorScheme) -> Color {
-                    colorScheme == .light ? light : dark
-                }
-            }
-            struct Unit {
-                static let light = Color(hex: "C9BAFF")
-                static let dark = Color(hex: "C9BAFF")
-                static func colorScheme(_ colorScheme: ColorScheme) -> Color {
-                    colorScheme == .light ? light : dark
-                }
+            VStack {
+                Spacer()
+                bottomButtons
             }
         }
-        struct Zero {
-            struct Value {
-                static let light = Color(hex: "DFD6FF")
-                static let dark = Color(hex: "DFD6FF")
-                static func colorScheme(_ colorScheme: ColorScheme) -> Color {
-                    colorScheme == .light ? light : dark
-                }
+    }
+    
+    var bottomButtons: some View {
+        HStack {
+            Button {
+                viewModel.decrement()
+            } label: {
+                Text("- 50")
+                    .foregroundColor(.white)
+                    .padding(10)
+                    .background(
+                        RoundedRectangle(cornerRadius: 10)
+                            .foregroundColor(.accentColor)
+                    )
             }
-            struct Background {
-                static let light = Color(hex: "8562FF")
-                static let dark = Color(hex: "9678FF")
-                static func colorScheme(_ colorScheme: ColorScheme) -> Color {
-                    colorScheme == .light ? light : dark
-                }
+            Button {
+                viewModel.increment()
+            } label: {
+                Text("+ 50")
+                    .foregroundColor(.white)
+                    .padding(10)
+                    .background(
+                        RoundedRectangle(cornerRadius: 10)
+                            .foregroundColor(.accentColor)
+                    )
             }
-            struct Unit {
-                static let light = Color(hex: "C9BAFF")
-                static let dark = Color(hex: "C9BAFF")
-                static func colorScheme(_ colorScheme: ColorScheme) -> Color {
-                    colorScheme == .light ? light : dark
-                }
+
+        }
+    }
+    
+    
+    class ViewModel: ObservableObject {
+        @Published var energy: Double = 1240
+        @Published var carb: Double = 69
+        @Published var fat: Double = 30
+        @Published var protein: Double = 12.5
+        
+        func increment() {
+            withAnimation {
+                energy += 100
+                carb += 50
+                fat += 5
+                protein += 20
             }
         }
         
-        struct Muted {
-            struct Regular {
-                struct Value {
-                    static let light = Color(.secondaryLabel)
-                    static let dark = Color(.secondaryLabel)
-                    static func colorScheme(_ colorScheme: ColorScheme) -> Color {
-                        colorScheme == .light ? light : dark
-                    }
-                }
-                struct Background {
-                    static let light = Color(hex: "E9E9EB")
-                    static let dark = Color(hex: "39393D")
-                    static func colorScheme(_ colorScheme: ColorScheme) -> Color {
-                        colorScheme == .light ? light : dark
-                    }
-                }
-                struct Unit {
-                    static let light = Color(.tertiaryLabel)
-                    static let dark = Color(.tertiaryLabel)
-                    static func colorScheme(_ colorScheme: ColorScheme) -> Color {
-                        colorScheme == .light ? light : dark
-                    }
-                }
-            }
-            struct Zero {
-                struct Value {
-                    static let light = Color(.tertiaryLabel)
-                    static let dark = Color(.tertiaryLabel)
-                    static func colorScheme(_ colorScheme: ColorScheme) -> Color {
-                        colorScheme == .light ? light : dark
-                    }
-                }
-                struct Background {
-                    static let light = Color(hex: "EEEEF0")
-                    static let dark = Color(hex: "313135")
-                    static func colorScheme(_ colorScheme: ColorScheme) -> Color {
-                        colorScheme == .light ? light : dark
-                    }
-                }
-                struct Unit {
-                    static let light = Color(.quaternaryLabel)
-                    static let dark = Color(.quaternaryLabel)
-                    static func colorScheme(_ colorScheme: ColorScheme) -> Color {
-                        colorScheme == .light ? light : dark
-                    }
-                }
+        func decrement() {
+            withAnimation {
+                energy = max(energy - 100, 0)
+                carb = max(carb - 50, 0)
+                fat = max(fat - 5, 0)
+                protein = max(protein - 20, 0)
             }
         }
+    }
+}
+
+extension NutritionSummaryPreview.ViewModel: NutritionSummaryProvider {
+    var energyAmount: Double { energy }
+    var carbAmount: Double { carb }
+    var fatAmount: Double { fat }
+    var proteinAmount: Double { protein }
+}
+
+struct NutritionSummary_Previews: PreviewProvider {
+    static var previews: some View {
+        NutritionSummaryPreview()
     }
 }
