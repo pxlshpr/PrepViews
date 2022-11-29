@@ -103,19 +103,20 @@ struct MeterRow: View {
     }
     
     var quantityLabel: some View {
-        HStack(alignment: .bottom, spacing: 2) {
+//        HStack(alignment: .bottom, spacing: 2) {
             /// Using an animated number here
             Color.clear
-                .animatingOverlay(for: value, fontSize: 16, fontWeight: .medium)
-                .foregroundColor(meterViewModel.labelTextColor)
-            if unit != .kcal {
-                Text(unit.shortestDescription)
-                    .font(.caption)
-                    .fontWeight(.medium)
-                    .foregroundColor(meterViewModel.labelTextColor.opacity(0.5))
-                    .offset(y: -0.5)
-            }
-        }
+                .animatedNutrient(value: value, unit: unit, color: meterViewModel.labelTextColor)
+//                .animatingOverlay(for: value, fontSize: 16, fontWeight: .medium)
+//                .foregroundColor(meterViewModel.labelTextColor)
+//            if unit != .kcal {
+//                Text(unit.shortestDescription)
+//                    .font(.caption)
+//                    .fontWeight(.medium)
+//                    .foregroundColor(meterViewModel.labelTextColor.opacity(0.5))
+//                    .offset(y: -0.5)
+//            }
+//        }
     }
 
     var quantityLabel_legacy: some View {
@@ -172,15 +173,18 @@ extension Font.Weight {
         }
     }
 }
-struct AnimatableNumberModifier: AnimatableModifier {
+struct AnimatableNutrientModifier: AnimatableModifier {
     
-    var number: Double
-    var fontSize: CGFloat
-    var fontWeight: Font.Weight
+    var value: Double
+    var unit: NutrientUnit
+    var color: Color
+    
+    let fontSize: CGFloat = 16
+    let fontWeight: Font.Weight = .medium
     
     var animatableData: Double {
-        get { number }
-        set { number = newValue }
+        get { value }
+        set { value = newValue }
     }
     
     var uiFont: UIFont {
@@ -188,24 +192,47 @@ struct AnimatableNumberModifier: AnimatableModifier {
     }
     
     var size: CGSize {
-        uiFont.fontSize(for: number.formattedNutrient)
+        uiFont.fontSize(for: value.formattedNutrient)
+    }
+    
+    let unitFontSize: CGFloat = 12
+    let unitFontWeight: Font.Weight = .medium
+    
+    var unitUIFont: UIFont {
+        UIFont.systemFont(ofSize: unitFontSize, weight: unitFontWeight.uiFontWeight)
+    }
+    
+    var unitWidth: CGFloat {
+        unitUIFont.fontSize(for: unit.shortDescription).width
     }
     
     func body(content: Content) -> some View {
         content
-            .frame(width: size.width, height: size.height)
+//            .frame(width: size.width, height: size.height)
+            .frame(width: 50 + unitWidth, height: size.height)
             .overlay(
-                Text(number.formattedNutrient)
-                    .font(.system(size: fontSize, weight: fontWeight, design: .default))
-                    .multilineTextAlignment(.leading)
+                HStack(alignment: .bottom, spacing: 2) {
+                    Text(value.formattedNutrient)
+                        .font(.system(size: fontSize, weight: fontWeight, design: .default))
+                        .multilineTextAlignment(.leading)
+                        .foregroundColor(color)
+                    if unit != .kcal {
+                        Text(unit.shortestDescription)
+                            .font(.system(size: unitFontSize, weight: unitFontWeight, design: .default))
+//                            .font(.caption)
+//                            .fontWeight(.medium)
+                            .foregroundColor(color.opacity(0.5))
+                            .offset(y: -0.5)
+                    }
+                    Spacer()
+                }
             )
-//            .background(.green.opacity(0.5))
     }
 }
 
 extension View {
-    func animatingOverlay(for number: Double, fontSize: CGFloat, fontWeight: Font.Weight) -> some View {
-        modifier(AnimatableNumberModifier(number: number, fontSize: fontSize, fontWeight: fontWeight))
+    func animatedNutrient(value: Double, unit: NutrientUnit, color: Color) -> some View {
+        modifier(AnimatableNutrientModifier(value: value, unit: unit, color: color))
     }
 }
 
