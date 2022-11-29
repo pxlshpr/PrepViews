@@ -72,7 +72,8 @@ struct MeterRow: View {
         GridRow {
             label
             meter
-            quantityLabel
+//            quantityLabel
+            quantityLabel_animated
         }
         .onChange(of: meterViewModel.increment, perform: incrementChanged)
     }
@@ -102,7 +103,7 @@ struct MeterRow: View {
             .frame(height: MeterHeight)
     }
     
-    var quantityLabel_new: some View {
+    var quantityLabel_animated: some View {
 //        HStack(alignment: .bottom, spacing: 2) {
             /// Using an animated number here
             Color.clear

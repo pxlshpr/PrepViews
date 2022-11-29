@@ -157,15 +157,15 @@ public extension NutrientMeter {
     //MARK: - 🎞 Animations
     var animation: Animation {
         
-        .default
+//        .default
         
-//        let shouldBounce = !viewModel.isCloseToEdges || !viewModel.haveGoal
-//        if shouldBounce {
-//            return .interactiveSpring(response: 0.35, dampingFraction: 0.66, blendDuration: 0.35)
-//        } else {
-//            /// don't bounce the bar if we're going to 0 or going close to 1
-//            return .interactiveSpring()
-//        }
+        let shouldBounce = !viewModel.isCloseToEdges || !viewModel.haveGoal
+        if shouldBounce {
+            return .interactiveSpring(response: 0.35, dampingFraction: 0.66, blendDuration: 0.35)
+        } else {
+            /// don't bounce the bar if we're going to 0 or going close to 1
+            return .interactiveSpring()
+        }
     }
     
     //MARK: - Enums

@@ -148,7 +148,8 @@ public struct NutritionSummary<Provider: NutritionSummaryProvider>: View {
 //                        .background(.green)
                     Spacer()
                 }
-                nutrientsEnergy
+//                nutrientsEnergy
+                nutrientsEnergy_animated
 //                    .background(.blue)
             }
             nutrientsMacros
@@ -178,7 +179,7 @@ public struct NutritionSummary<Provider: NutritionSummaryProvider>: View {
         dataProvider.forMeal && !dataProvider.isMarkedAsCompleted
     }
     
-    var nutrientsEnergy_new: some View {
+    var nutrientsEnergy_animated: some View {
         Color.clear
             .animatedEnergy(value: dataProvider.energyAmount,
                             unit: .kcal,
@@ -265,7 +266,7 @@ public struct NutritionSummary<Provider: NutritionSummaryProvider>: View {
             : Colors.Nutrient.Muted.Zero.Unit.colorScheme(colorScheme)
         }
         
-        var valueText_new: some View {
+        var valueText_animated: some View {
             Color.clear
                 .animatedMacro(value: amount, color: valueColor)
         }
@@ -282,7 +283,8 @@ public struct NutritionSummary<Provider: NutritionSummaryProvider>: View {
                     .font(.caption2)
                     .foregroundColor(Color(.quaternaryLabel))
             }
-            valueText
+//            valueText
+            valueText_animated
             Text(macro.initial)
                 .font(.caption)
                 .foregroundColor(unitLabelColor)
