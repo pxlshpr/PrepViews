@@ -63,11 +63,12 @@ public struct MealItemMeters: View {
         if viewModel.day != nil {
             types.append(.diet)
         }
-        if viewModel.meal != nil {
+        if viewModel.shouldShowMealGoals {
             types.append(.meal)
         }
         return types
     }
+    
     //MARK: Pager
     
     var pager: some View {

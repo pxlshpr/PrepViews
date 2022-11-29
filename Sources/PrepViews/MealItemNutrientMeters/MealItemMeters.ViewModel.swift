@@ -291,11 +291,11 @@ extension MealItemMeters.ViewModel {
     
     //MARK: Nutrient MeterViewModels
     var calculatedNutrientMeterViewModels: [NutrientMeter.ViewModel] {
-        if let meals = day?.meals, !meals.isEmpty {
-            return calculatedNutrientViewModelsRelativeToDay
-        } else {
+//        if let meals = day?.meals, !meals.isEmpty {
+//            return calculatedNutrientViewModelsRelativeToDay
+//        } else {
             return calculatedNutrientViewModelsRelativeToRDA
-        }
+//        }
     }
     
     var calculatedNutrientViewModelsRelativeToRDA: [NutrientMeter.ViewModel] {
@@ -303,61 +303,36 @@ extension MealItemMeters.ViewModel {
             foodItem.scaledValue(for: component)
         }
         
+//        func p(_ component: NutrientMeterComponent) -> Double {
+//            let scaledValue = s(component)
+//            let scaledEnergy = foodItem.scaledValue(for: .energy)
+//            switch component {
+//            case .energy:
+//                return scaledValue / 2000
+//            case .carb:
+//                return (scaledValue * KcalsPerGramOfCarb) / scaledEnergy
+//            case .fat:
+//                return  (scaledValue * KcalsPerGramOfFat) / scaledEnergy
+//            case .protein:
+//                return  (scaledValue * KcalsPerGramOfProtein) / scaledEnergy
+//            case .micro(let nutrientType, _):
+////                return foodItem.food.percentOfMicroComparedToHighest(nutrientType) ?? 0
+//                return foodItem.food.percentOfMicroComparedToRDA(nutrientType) ?? 0
+//            }
+//        }
+        
         func p(_ component: NutrientMeterComponent) -> Double {
-            let scaledValue = s(component)
-            let scaledEnergy = foodItem.scaledValue(for: .energy)
-            switch component {
-            case .energy:
-                return scaledValue / 2000
-            case .carb:
-                return (scaledValue * KcalsPerGramOfCarb) / scaledEnergy
-            case .fat:
-                return  (scaledValue * KcalsPerGramOfFat) / scaledEnergy
-            case .protein:
-                return  (scaledValue * KcalsPerGramOfProtein) / scaledEnergy
-            case .micro(let nutrientType, _):
-//                return foodItem.food.percentOfMicroComparedToHighest(nutrientType) ?? 0
-                return foodItem.food.percentOfMicroComparedToRDA(nutrientType) ?? 0
-            }
+            plannedValue(for: component, type: .nutrients)
         }
-        
-        func lowerGoal(for component: NutrientMeterComponent) -> Double? {
-            switch component {
-            case .energy:
-                return 2500
-            case .carb:
-                return 325
-            case .fat:
-                return 100
-            case .protein:
-                return 250
-            case .micro(let nutrientType, _):
-                return nutrientType.dailyValue?.0
-            }
-        }
-        
-        func upperGoal(for component: NutrientMeterComponent) -> Double? {
-            switch component {
-            case .energy:
-                return 2500
-            case .carb:
-                return 325
-            case .fat:
-                return 100
-            case .protein:
-                return 250
-            case .micro(let nutrientType, _):
-                return nutrientType.dailyValueMax?.0
-            }
-        }
-        
+
         func vm(_ component: NutrientMeterComponent) -> NutrientMeter.ViewModel {
             NutrientMeter.ViewModel(
                 component: component,
-                goalLower: lowerGoal(for: component),
-                goalUpper: upperGoal(for: component),
-                planned: s(component),
-                eaten: s(component)
+                goalLower: component.defaultLowerGoal,
+                goalUpper: component.defaultUpperGoal,
+                planned: p(component),
+                increment: s(component)
+//                eaten: s(component)
             )
         }
 
@@ -533,6 +508,17 @@ extension MealItemMeters.ViewModel {
             return mealMeterViewModels
         }
     }
+    
+    var shouldShowMealGoals: Bool {
+        /// If we have a `MealType` associated
+        if meal?.goalSet != nil {
+            return true
+        }
+        
+        /// Or have more than 1 meal
+        guard let day else { return false }
+        return day.meals.count > 1
+    }
 }
 
 
@@ -552,7 +538,7 @@ public struct MealItemNutrientMetersPreview: View {
                 textFieldSection
                 metersSection
             }
-            .navigationTitle("Quantity")
+            .navigationTitle("Log Food")
         }
     }
     
@@ -620,7 +606,8 @@ public struct MealItemNutrientMetersPreview: View {
             get: {
                 DayMeal(
                     name: "Temp meal",
-                    time: 0
+                    time: 0,
+                    goalSet: MealTypeMock.preWorkout
                 )
             },
             set: { _ in }
@@ -631,7 +618,7 @@ public struct MealItemNutrientMetersPreview: View {
         Binding<MealFoodItem>(
             get: {
                 MealFoodItem(
-                    food: FoodMock.carrots,
+                    food: FoodMock.wheyProtein,
                     amount: FoodValue(value: value ?? 0, unitType: .weight, weightUnit: weightUnit)
                 )
             },
@@ -639,9 +626,9 @@ public struct MealItemNutrientMetersPreview: View {
         )
     }
     
-    @State var weightUnit: WeightUnit = .oz
-    @State var value: Double? = 20
-    @State var valueString: String = "20"
+    @State var weightUnit: WeightUnit = .g
+    @State var value: Double? = 30.4
+    @State var valueString: String = "30.4"
 
     var valueBinding: Binding<String> {
         Binding<String>(
@@ -691,5 +678,37 @@ public struct MealItemNutrientMetersPreview: View {
 struct MealItemNutrientMeters_Previews: PreviewProvider {
     static var previews: some View {
         MealItemNutrientMetersPreview()
+    }
+}
+
+extension NutrientMeterComponent {
+    var defaultLowerGoal: Double? {
+        switch self {
+        case .energy:
+            return 2500
+        case .carb:
+            return 325
+        case .fat:
+            return 100
+        case .protein:
+            return 250
+        case .micro(let nutrientType, _):
+            return nutrientType.dailyValue?.0
+        }
+    }
+
+    var defaultUpperGoal: Double? {
+        switch self {
+        case .energy:
+            return 2500
+        case .carb:
+            return 325
+        case .fat:
+            return 100
+        case .protein:
+            return 250
+        case .micro(let nutrientType, _):
+            return nutrientType.dailyValueMax?.0
+        }
     }
 }
