@@ -199,18 +199,19 @@ public struct MealItemMeters: View {
     }
     
     var mealTypePicker: some View {
-        picker(for: viewModel.meal?.goalSet)
+        picker(for: viewModel.meal?.goalSet, forMeal: true)
     }
     
     /// We're allowing nil to be passed into this so it can be used as a transparent placeholder
-    func picker(for goalSet: GoalSet? = nil) -> some View {
+    func picker(for goalSet: GoalSet? = nil, forMeal: Bool = false) -> some View {
         Button {
             didTapGoalSetButton(viewModel.metersType == .meal)
         } label: {
             HStack(spacing: 2) {
                 Text(goalSet?.emoji ?? "🫃🏽")
+                    .opacity(goalSet == nil ? 0 : 1)
                     .font(.footnote)
-                Text(goalSet?.name ?? "Cutting")
+                Text(goalSet?.name ?? "Select \(forMeal ? "Meal Type" : "Diet")")
                     .font(.footnote)
                     .foregroundColor(.accentColor)
                 Image(systemName: "chevron.up.chevron.down")
