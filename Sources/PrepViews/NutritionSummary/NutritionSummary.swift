@@ -44,10 +44,9 @@ struct AnimatableEnergyModifier: AnimatableModifier {
     
     func body(content: Content) -> some View {
         content
-            .frame(width: 55 + unitWidth, height: size.height)
+            .frame(width: size.width + 5 + 2 + unitWidth, height: size.height)
             .overlay(
                 HStack(alignment: .bottom, spacing: 2) {
-                    Spacer()
                     Text(value.formattedNutrient)
                         .font(.system(size: fontSize, weight: fontWeight, design: .default))
                         .foregroundColor(textColor)
@@ -88,9 +87,11 @@ public struct NutritionSummary<Provider: NutritionSummaryProvider>: View {
                 if showMacrosIndicator {
                     macrosIndicator
                         .padding(.leading, 2)
+//                        .background(.green)
                     Spacer()
                 }
                 nutrientsEnergy
+//                    .background(.blue)
             }
             nutrientsMacros
                 .transition(.asymmetric(insertion: .move(edge: .trailing),
@@ -276,7 +277,7 @@ struct NutritionSummaryPreview: View {
     
     
     class ViewModel: ObservableObject {
-        @Published var energy: Double = 1240
+        @Published var energy: Double = 40
         @Published var carb: Double = 69
         @Published var fat: Double = 30
         @Published var protein: Double = 12.5
