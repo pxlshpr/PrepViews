@@ -1,6 +1,63 @@
 import SwiftUI
 import PrepDataTypes
 
+struct AnimatableMacroModifier: AnimatableModifier {
+    
+    var value: Double
+    var color: Color
+    
+    let fontSize: CGFloat = 14
+    let fontWeight: Font.Weight = .regular
+    
+    var animatableData: Double {
+        get { value }
+        set { value = newValue }
+    }
+    
+    var uiFont: UIFont {
+        UIFont.systemFont(ofSize: fontSize, weight: fontWeight.uiFontWeight)
+    }
+    
+    var size: CGSize {
+        uiFont.fontSize(for: value.formattedNutrient)
+    }
+    
+//    let unitFontSize: CGFloat = 10
+//    let unitFontWeight: Font.Weight = .regular
+//
+//    var unitUIFont: UIFont {
+//        UIFont.systemFont(ofSize: unitFontSize, weight: unitFontWeight.uiFontWeight)
+//    }
+//
+//    var unitWidth: CGFloat {
+//        unitUIFont.fontSize(for: unit.shortDescription).width
+//    }
+//
+//    var textColor: Color {
+//        shouldHighlight ? .white : .secondary
+//    }
+//
+//    var unitcolor: Color {
+//        shouldHighlight ? Color(hex: "C4C4C6") : Color(.tertiaryLabel)
+//    }
+    
+    func body(content: Content) -> some View {
+        content
+            .frame(width: 28, height: size.height)
+            .overlay(
+                Text(value.formattedNutritionViewMacro)
+                    .font(.system(size: fontSize, weight: fontWeight, design: .default))
+                    .foregroundColor(color)
+            )
+    }
+}
+
+extension View {
+    func animatedMacro(value: Double, color: Color) -> some View {
+        modifier(AnimatableMacroModifier(value: value, color: color))
+    }
+}
+
 struct AnimatableEnergyModifier: AnimatableModifier {
     
     var value: Double
@@ -64,6 +121,7 @@ extension View {
         modifier(AnimatableEnergyModifier(value: value, unit: unit, shouldHighlight: shouldHighlight))
     }
 }
+
 
 public struct NutritionSummary<Provider: NutritionSummaryProvider>: View {
 
@@ -207,15 +265,24 @@ public struct NutritionSummary<Provider: NutritionSummaryProvider>: View {
             : Colors.Nutrient.Muted.Zero.Unit.colorScheme(colorScheme)
         }
         
+        var valueText: some View {
+            Color.clear
+                .animatedMacro(value: amount, color: valueColor)
+        }
+
+        var valueText_legacy: some View {
+            Text(string)
+                .font(.subheadline)
+                .foregroundColor(valueColor)
+        }
+
         return HStack(alignment: .bottom, spacing: 1) {
             if amount == -1 || (amount > 0 && amount < 1) {
                 Text("<")
                     .font(.caption2)
                     .foregroundColor(Color(.quaternaryLabel))
             }
-            Text(string)
-                .font(.subheadline)
-                .foregroundColor(valueColor)
+            valueText
             Text(macro.initial)
                 .font(.caption)
                 .foregroundColor(unitLabelColor)
