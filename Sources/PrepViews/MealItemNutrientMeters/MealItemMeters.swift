@@ -85,7 +85,7 @@ public struct MealItemMeters: View {
                 Meters(metersType)
                     .environmentObject(viewModel)
                     .frame(maxWidth: .infinity)
-                    .padding(.horizontal, 17)
+                    .padding(.leading, 17)
                     .padding(.vertical, 15)
                     .background(
                         RoundedRectangle(cornerRadius: 10)
