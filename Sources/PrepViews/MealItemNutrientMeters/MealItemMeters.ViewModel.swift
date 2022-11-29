@@ -445,7 +445,8 @@ extension MealItemMeters.ViewModel {
             })
         }
         
-        let subgoals: [NutrientMeter.ViewModel] = dietMeterViewModels.compactMap { dietMeterViewModel in
+        let subgoals: [NutrientMeter.ViewModel] = calculatedDietMeterViewModels.compactMap { dietMeterViewModel in
+//        let subgoals: [NutrientMeter.ViewModel] = dietMeterViewModels.compactMap { dietMeterViewModel in
             
             let component = dietMeterViewModel.component
             /// Make sure we don't already have a ViewModel for this
