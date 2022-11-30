@@ -182,7 +182,8 @@ public struct MealItemMeters: View {
             showCompletion: viewModel.showCompletionLegendBinding,
             showExcess: viewModel.showExcessLegendBinding,
             showRemainder: viewModel.showRemainderLegendBinding,
-            showRemainderWithLowerBound: viewModel.showRemainderWithLowerBoundLegendBinding
+            showRemainderWithLowerBound: viewModel.showRemainderWithLowerBoundLegendBinding,
+            showingLegend: viewModel.showingLegendBinding
         )
     }
     
@@ -376,6 +377,17 @@ extension MealItemMeters.ViewModel {
         }
         return components
     }
+    
+    var showingLegendBinding: Binding<Bool> {
+        Binding<Bool>(
+            get: {
+                UserDefaults.standard.object(forKey: "showingLegend") as? Bool ?? false
+            },
+            set: { newValue in
+                UserDefaults.standard.setValue(newValue, forKey: "showingLegend")
+            }
+        )
+    }
 }
 
 extension NutrientMeterComponent {
@@ -417,8 +429,6 @@ extension MealItemMeters {
         let barCornerRadius: CGFloat = 3.5
         let barHeight: CGFloat = 14
 
-        @State var showingLegend: Bool = true
-        
         @Binding var metersType: MetersType
         @Binding var componentsWithTotals: [NutrientMeterComponent]
         @Binding var componentsFromFood: [NutrientMeterComponent]
@@ -427,6 +437,9 @@ extension MealItemMeters {
         @Binding var showRemainder: Bool
         @Binding var showRemainderWithLowerBound: Bool
         
+        @Binding var showingLegendBinding: Bool
+        @State var showingLegend: Bool
+        
         init(
             metersType: Binding<MetersType>,
             componentsWithTotals: Binding<[NutrientMeterComponent]>,
@@ -434,7 +447,8 @@ extension MealItemMeters {
             showCompletion: Binding<Bool>,
             showExcess: Binding<Bool>,
             showRemainder: Binding<Bool>,
-            showRemainderWithLowerBound: Binding<Bool>
+            showRemainderWithLowerBound: Binding<Bool>,
+            showingLegend: Binding<Bool>
         ) {
             _metersType = metersType
             _componentsWithTotals = componentsWithTotals
@@ -443,6 +457,9 @@ extension MealItemMeters {
             _showExcess = showExcess
             _showRemainder = showRemainder
             _showRemainderWithLowerBound = showRemainderWithLowerBound
+            _showingLegendBinding = showingLegend
+            
+            _showingLegend = State(initialValue: showingLegend.wrappedValue)
         }
     }
 }
@@ -451,7 +468,7 @@ extension MealItemMeters.Legend {
     
     var body: some View {
         VStack(alignment: .leading) {
-//            legendButton
+            legendButton
             if showingLegend {
                 grid
             }
@@ -470,45 +487,53 @@ extension MealItemMeters.Legend {
         .onTapGesture {
             withAnimation {
                 showingLegend.toggle()
+                /// Set the binding too so it's saved to `UserDefaults`
+                showingLegendBinding = showingLegend
             }
         }
     }
     
-    var totalString: String {
+    var totalText: Text {
         switch metersType {
         case .nutrients, .diet:
-            return "Today's total"
+            return Text("Nutrient totals for **today**")
         case .meal:
-            return "This meal's total"
+            return Text("Nutrients totals for **this meal**")
         }
     }
     
-    var foodString: String {
-        "How much this food adds"
+    var foodText: Text {
+        Text("Nutrient totals for **this food**")
     }
     
-    var remainderString: String {
-        return "Remainder to upper limit"
-//        switch metersType {
-//        case .nutrients:
-//            return "Remainder to stay within daily recommended allowances"
-//        case .diet:
-//            return "Remainder to stay within diet allowances"
-//        case .meal:
-//            return "Remainder to stay within meal allowances"
-//        }
+    var remainderText: some View {
+        Group {
+            switch metersType {
+            case .nutrients:
+                HStack(alignment: .top, spacing: 1) {
+                    Text("Remainder to RDA")
+                    Text("*")
+                        .offset(y: -1)
+                }
+            default:
+                Text("Remainder to upper limit")
+            }
+        }
     }
     
-    var remainderWithLowerBoundString: String {
-        return "Remainder to minimum goal"
-//        switch metersType {
-//        case .nutrients:
-//            return "Minimum to meet your daily recommended goals"
-//        case .diet:
-//            return "Minimum to meet your diet goals"
-//        case .meal:
-//            return "Minimum to meet your meal goals"
-//        }
+    var remainderWithLowerBoundText: some View {
+        Group {
+            switch metersType {
+            case .nutrients:
+                HStack(alignment: .top, spacing: 1) {
+                    Text("Remainder to minimum RDA")
+                    Text("*")
+                        .offset(y: -1)
+                }
+            default:
+                Text("Remainder to minimum goal")
+            }
+        }
     }
     
     var completeGoalsString: String {
@@ -562,7 +587,7 @@ extension MealItemMeters.Legend {
             if !componentsWithTotals.isEmpty {
                 GridRow {
                     totalColors
-                    Text(totalString)
+                    totalText
                 }
             }
         }
@@ -572,7 +597,7 @@ extension MealItemMeters.Legend {
             if !componentsFromFood.isEmpty {
                 GridRow {
                     foodColors
-                    Text(foodString)
+                    foodText
                 }
             }
         }
@@ -584,7 +609,7 @@ extension MealItemMeters.Legend {
                     NutrientMeter.ViewModel.Colors.Empty.fill
                         .frame(width: barWidth, height: barHeight)
                         .cornerRadius(barCornerRadius)
-                    Text(remainderString)
+                    remainderText
                 }
             }
         }
@@ -606,7 +631,7 @@ extension MealItemMeters.Legend {
                             .foregroundColor(Color(.systemGroupedBackground))
                             .offset(x: barWidth / 2.0)
                     }
-                    Text(remainderWithLowerBoundString)
+                    remainderWithLowerBoundText
                 }
             }
         }
@@ -624,14 +649,29 @@ extension MealItemMeters.Legend {
                 goalCompletionBar(isExcess: true)
             }
         }
-
-        return Grid(alignment: .leading) {
-            totalRow
-            foodRow
-            completionRow
-            excessRow
-            remainderRow
-            remainderWithLowerBound
+        
+        @ViewBuilder
+        var rdaExplanation: some View {
+            if metersType == .nutrients && (showRemainder || showRemainderWithLowerBound) {
+                HStack(alignment: .firstTextBaseline, spacing: 5) {
+                    Text("*")
+                        .font(.callout)
+                        .offset(y: 3)
+                    Text("**Recommended Dietary Allowance (RDA)**: Average daily level of intake sufficient to meet your nutrient requirements. [You can customise this in settings.](http://something.com)")
+                }
+            }
+        }
+        
+        return VStack(alignment: .leading) {
+            Grid(alignment: .leading) {
+                totalRow
+                foodRow
+                completionRow
+                excessRow
+                remainderRow
+                remainderWithLowerBound
+            }
+            rdaExplanation
         }
     }
     

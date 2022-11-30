@@ -41,6 +41,9 @@ extension MealItemMeters {
         @Published var dietMeterViewModels: [NutrientMeter.ViewModel] = []
         @Published var mealMeterViewModels: [NutrientMeter.ViewModel] = []
 
+        /// Save this as a UserDefault first when set to persist it, spawning a task to sync with `User` model
+        @Published var showingLegend: Bool = false
+        
         init(
             foodItem: MealFoodItem,
             meal: DayMeal,
