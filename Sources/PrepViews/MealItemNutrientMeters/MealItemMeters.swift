@@ -181,8 +181,8 @@ public struct MealItemMeters: View {
             componentsFromFood: viewModel.componentsFromFoodBinding,
             showCompletion: viewModel.showCompletionLegendBinding,
             showExcess: viewModel.showExcessLegendBinding,
-            showRemainder: viewModel.showRemainderLegendBinding,
-            showRemainderWithLowerBound: viewModel.showRemainderWithLowerBoundLegendBinding,
+            showUnboundedRemainder: viewModel.showUnboundedRemainderLegendBinding,
+            showBoundedRemainder: viewModel.showBoundedRemainderLegendBinding,
             showingLegend: viewModel.showingLegendBinding
         )
     }
@@ -320,15 +320,15 @@ extension MealItemMeters.ViewModel {
             set: { _ in }
         )
     }
-    var showRemainderLegendBinding: Binding<Bool> {
+    var showUnboundedRemainderLegendBinding: Binding<Bool> {
         Binding<Bool>(
-            get: { self.shouldShowRemainderInLegend },
+            get: { self.shouldShowUnboundedRemainderInLegend },
             set: { _ in }
         )
     }
-    var showRemainderWithLowerBoundLegendBinding: Binding<Bool> {
+    var showBoundedRemainderLegendBinding: Binding<Bool> {
         Binding<Bool>(
-            get: { self.shouldShowRemainderWithLowerBoundInLegend },
+            get: { self.shouldShowBoundedRemainderInLegend },
             set: { _ in }
         )
     }
@@ -345,18 +345,12 @@ extension MealItemMeters.ViewModel {
         }
     }
     
-    var shouldShowRemainderInLegend: Bool {
-        currentMeterViewModels.contains {
-            $0.goalBoundsType == .upperOnly
-            && ($0.percentageType == .empty || $0.percentageType == .regular)
-        }
+    var shouldShowUnboundedRemainderInLegend: Bool {
+        currentMeterViewModels.contains { $0.showsRemainderWithoutLowerBound }
     }
     
-    var shouldShowRemainderWithLowerBoundInLegend: Bool {
-        currentMeterViewModels.contains {
-            $0.goalBoundsType == .lowerAndUpper
-            && ($0.percentageType == .empty || $0.percentageType == .regular)
-        }
+    var shouldShowBoundedRemainderInLegend: Bool {
+        currentMeterViewModels.contains { $0.showsRemainderWithoutLowerBound }
     }
     
     var componentsFromFood: [NutrientMeterComponent] {
@@ -387,6 +381,26 @@ extension MealItemMeters.ViewModel {
                 UserDefaults.standard.setValue(newValue, forKey: "showingLegend")
             }
         )
+    }
+}
+
+extension PercentageType {
+    var isPastCompletion: Bool {
+        self == .complete || self == .excess
+    }
+}
+
+extension NutrientMeter.ViewModel {
+    var showsRemainderWithoutLowerBound: Bool {
+        guard !percentageType.isPastCompletion else { return false }
+        guard goalBoundsType != .lowerAndUpper else {
+            return goalLower != goalUpper
+        }
+        return true
+    }
+
+    var showsBoundedRemainder: Bool {
+        !percentageType.isPastCompletion && goalBoundsType == .lowerAndUpper
     }
 }
 
@@ -436,8 +450,8 @@ extension MealItemMeters {
         @Binding var componentsFromFood: [NutrientMeterComponent]
         @Binding var showCompletion: Bool
         @Binding var showExcess: Bool
-        @Binding var showRemainder: Bool
-        @Binding var showRemainderWithLowerBound: Bool
+        @Binding var showUnboundedRemainder: Bool
+        @Binding var showBoundedRemainder: Bool
         
         @Binding var showingLegendBinding: Bool
         @State var showingLegend: Bool
@@ -448,8 +462,8 @@ extension MealItemMeters {
             componentsFromFood: Binding<[NutrientMeterComponent]>,
             showCompletion: Binding<Bool>,
             showExcess: Binding<Bool>,
-            showRemainder: Binding<Bool>,
-            showRemainderWithLowerBound: Binding<Bool>,
+            showUnboundedRemainder: Binding<Bool>,
+            showBoundedRemainder: Binding<Bool>,
             showingLegend: Binding<Bool>
         ) {
             _metersType = metersType
@@ -457,8 +471,8 @@ extension MealItemMeters {
             _componentsFromFood = componentsFromFood
             _showCompletion = showCompletion
             _showExcess = showExcess
-            _showRemainder = showRemainder
-            _showRemainderWithLowerBound = showRemainderWithLowerBound
+            _showUnboundedRemainder = showUnboundedRemainder
+            _showBoundedRemainder = showBoundedRemainder
             _showingLegendBinding = showingLegend
             
             _showingLegend = State(initialValue: showingLegend.wrappedValue)
@@ -508,25 +522,49 @@ extension MealItemMeters.Legend {
         Text("Nutrient totals for **this food**")
     }
     
-    var remainderText: some View {
+    var unboundedRemainderText: some View {
         Group {
             switch metersType {
             case .nutrients:
-                Text("Remainder to **maximum** RDA*")
+                VStack(alignment: .leading) {
+                    Text("Remainder till your RDA* is reached:")
+                    HStack(spacing: 2) {
+                        Text("•")
+                            .foregroundColor(Color(.quaternaryLabel))
+                        Text("If the bar is in green, this is your **upper limit**")
+                    }
+                    HStack(spacing: 2) {
+                        Text("•")
+                            .foregroundColor(Color(.quaternaryLabel))
+                        Text("Otherwise, it's your **minimum**")
+                    }
+                }
             default:
                 Text("Remainder to upper limit")
             }
         }
     }
     
-    var remainderWithLowerBoundText: some View {
+    var boundedRemainderText: some View {
         var prefix: String {
-            "\(colorScheme == .dark ? "Black" : "White") line marks your"
+            "Solid line marks your"
         }
         return Group {
             switch metersType {
             case .nutrients:
-                Text("\(prefix) **minimum** RDA*")
+                VStack(alignment: .leading) {
+                    Text("Lines mark your RDA* goals:")
+                    HStack(spacing: 2) {
+                        Text("•")
+                            .foregroundColor(Color(.quaternaryLabel))
+                        Text("Solid and first dotted — **minimum**")
+                    }
+                    HStack(spacing: 2) {
+                        Text("•")
+                            .foregroundColor(Color(.quaternaryLabel))
+                        Text("Second dotted — **upper limit**")
+                    }
+                }
             default:
                 Text("\(prefix) **minimum** goal")
             }
@@ -600,21 +638,24 @@ extension MealItemMeters.Legend {
         }
         
         @ViewBuilder
-        var remainderRow: some View {
-            if showRemainder {
-                GridRow {
+        var unboundedRemainderRow: some View {
+            if showUnboundedRemainder {
+                GridRow(alignment: .top) {
+//                GridRow {
                     NutrientMeter.ViewModel.Colors.Empty.fill
                         .frame(width: barWidth, height: barHeight)
                         .cornerRadius(barCornerRadius)
-                    remainderText
+                        .offset(y: 1)
+                    unboundedRemainderText
                 }
             }
         }
         
         @ViewBuilder
-        var remainderWithLowerBound: some View {
-            if showRemainderWithLowerBound {
-                GridRow {
+        var boundedRemainder: some View {
+            if showBoundedRemainder {
+                GridRow(alignment: .top) {
+//                GridRow {
                     ZStack(alignment: .leading) {
                         NutrientMeter.ViewModel.Colors.Empty.fill
                             .frame(width: barWidth, height: barHeight)
@@ -626,9 +667,19 @@ extension MealItemMeters.Legend {
                             )
                             .frame(width: 1)
                             .foregroundColor(Color(.systemGroupedBackground))
-                            .offset(x: barWidth / 2.0)
+                            .offset(x: barWidth / 3.0)
+                        DottedLine()
+                            .stroke(style: StrokeStyle(
+                                lineWidth: 2,
+                                dash: [2])
+                            )
+                            .frame(width: 1)
+                            .foregroundColor(Color(.systemGroupedBackground))
+                            .offset(x: barWidth / 1.5)
                     }
-                    remainderWithLowerBoundText
+                    .fixedSize(horizontal: false, vertical: true)
+                    .offset(y: 1)
+                    boundedRemainderText
                 }
             }
         }
@@ -649,7 +700,7 @@ extension MealItemMeters.Legend {
         
         @ViewBuilder
         var rdaExplanation: some View {
-            if metersType == .nutrients && (showRemainder || showRemainderWithLowerBound) {
+            if metersType == .nutrients && (showUnboundedRemainder || showBoundedRemainder) {
                 HStack(alignment: .firstTextBaseline, spacing: 5) {
                     Text("*")
                         .font(.callout)
@@ -665,8 +716,8 @@ extension MealItemMeters.Legend {
                 foodRow
                 completionRow
                 excessRow
-                remainderRow
-                remainderWithLowerBound
+                unboundedRemainderRow
+                boundedRemainder
             }
             rdaExplanation
         }
