@@ -484,16 +484,22 @@ extension MealItemMeters.Legend {
     }
     
     var totalText: Text {
+        var relativeColor: String {
+            return colorScheme == .light ? "lighter" : "darker"
+        }
         switch viewModel.metersType {
         case .nutrients, .diet:
-            return Text("**Today's** nutrient totals")
+            return Text("**Today's** total so far (\(relativeColor))")
         case .meal:
-            return Text("**This meal's** nutrient totals")
+            return Text("This **meal's** total so far (\(relativeColor))")
         }
     }
     
     var foodText: Text {
-        Text("**This food's** nutrient totals")
+        var relativeColor: String {
+            return colorScheme == .light ? "darker" : "lighter"
+        }
+        return Text("What this **food** adds (\(relativeColor))")
     }
     
     var unboundedRemainderText: some View {
