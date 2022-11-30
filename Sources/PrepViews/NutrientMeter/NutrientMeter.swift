@@ -263,6 +263,10 @@ extension NutrientMeter.ViewModel {
     }
     
     var incrementPercentageForMeter: Double {
+        incrementPercentage
+    }
+    
+    var incrementPercentageForMeter_legacy: Double {
         guard let increment = increment, increment > 0 else { return 0 }
         //        guard let increment = increment?.wrappedValue, totalGoal != 0 else { return 0 }
         
