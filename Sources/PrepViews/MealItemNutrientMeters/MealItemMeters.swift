@@ -347,14 +347,14 @@ extension MealItemMeters.ViewModel {
     
     var shouldShowRemainderInLegend: Bool {
         currentMeterViewModels.contains {
-            $0.goalUpper == nil
+            $0.goalBoundsType == .upperOnly
             && ($0.percentageType == .empty || $0.percentageType == .regular)
         }
     }
     
     var shouldShowRemainderWithLowerBoundInLegend: Bool {
         currentMeterViewModels.contains {
-            $0.goalLower != nil
+            $0.goalBoundsType == .lowerAndUpper
             && ($0.percentageType == .empty || $0.percentageType == .regular)
         }
     }
