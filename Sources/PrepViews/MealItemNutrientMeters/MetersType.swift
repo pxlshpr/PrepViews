@@ -1,9 +1,9 @@
 import Foundation
 
 enum MetersType: Int, CaseIterable {
-    case nutrients = 1
+    case meal = 1
     case diet
-    case meal
+    case nutrients
     
     var description: String {
         switch self {

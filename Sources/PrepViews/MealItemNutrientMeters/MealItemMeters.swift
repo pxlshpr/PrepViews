@@ -7,12 +7,12 @@ import SwiftUIPager
 public struct MealItemMeters: View {
     
     @StateObject var viewModel: ViewModel
-
+    
     @Binding var foodItem: MealFoodItem
     @Binding var meal: DayMeal
     @Binding var day: Day?
-//    var day: Binding<Day?>
-
+    //    var day: Binding<Day?>
+    
     let didTapGoalSetButton: (Bool) -> ()
     
     public init(
@@ -41,16 +41,30 @@ public struct MealItemMeters: View {
         self.didTapGoalSetButton = didTapGoalSetButton
         
         
-        var types = [MetersType.nutrients]
-        if day.wrappedValue != nil {
-            types.append(.diet)
-            if let mealsCount = day.wrappedValue?.meals.count, mealsCount > 1 {
-                types.append(.meal)
-            }
-        } else if meal.wrappedValue.goalSet != nil {
+//        var types: [MetersType] = []
+//        if meal.wrappedValue.goalSet != nil {
+//            types.append(.meal)
+//        } else if day.wrappedValue != nil {
+//            if let mealsCount = day.wrappedValue?.meals.count, mealsCount > 1 {
+//                types.append(.meal)
+//            }
+//            types.append(.diet)
+//        }
+//        types.append(.nutrients)
+//        _metersTypes = State(initialValue: types)
+    }
+    
+    
+    var determineMetersTypes: [MetersType] {
+        var types: [MetersType] = []
+        if viewModel.shouldShowMealGoals {
             types.append(.meal)
         }
-        _metersTypes = State(initialValue: types)
+        if viewModel.day != nil {
+            types.append(.diet)
+        }
+        types.append(.nutrients)
+        return types
     }
     
     public var body: some View {
@@ -79,22 +93,10 @@ public struct MealItemMeters: View {
         .onChange(of: day) { newValue in
             withAnimation {
                 viewModel.day = day
-                metersTypes = determineMetersTypes
+//                metersTypes = determineMetersTypes
+                viewModel.metersTypes = MetersType.types(for: day, meal: meal)
             }
         }
-    }
-    
-    @State var metersTypes: [MetersType] = []
-    
-    var determineMetersTypes: [MetersType] {
-        var types = [MetersType.nutrients]
-        if viewModel.day != nil {
-            types.append(.diet)
-        }
-        if viewModel.shouldShowMealGoals {
-            types.append(.meal)
-        }
-        return types
     }
     
     //MARK: Pager
@@ -102,7 +104,7 @@ public struct MealItemMeters: View {
     var pager: some View {
         Pager(
             page: viewModel.page,
-            data: metersTypes,
+            data: viewModel.metersTypes,
             id: \.self,
             content: { metersType in
                 Meters(metersType)
@@ -141,7 +143,7 @@ public struct MealItemMeters: View {
     
     @ViewBuilder
     var typePickerRow: some View {
-        if metersTypes.count > 1 {
+        if viewModel.metersTypes.count > 1 {
             typePicker
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal, 20)
@@ -176,15 +178,17 @@ public struct MealItemMeters: View {
     
     var legend: some View {
         Legend(
-            metersType: $viewModel.metersType,
-            componentsWithTotals: viewModel.componentsWithTotalBinding,
-            componentsFromFood: viewModel.componentsFromFoodBinding,
-            showCompletion: viewModel.showCompletionLegendBinding,
-            showExcess: viewModel.showExcessLegendBinding,
-            showUnboundedRemainder: viewModel.showUnboundedRemainderLegendBinding,
-            showBoundedRemainder: viewModel.showBoundedRemainderLegendBinding,
-            showingLegend: viewModel.showingLegendBinding
+//            metersType: $viewModel.metersType,
+//            componentsWithTotals: viewModel.componentsWithTotalBinding,
+//            componentsFromFood: viewModel.componentsFromFoodBinding,
+//            showCompletion: viewModel.showCompletionLegendBinding,
+//            showExcess: viewModel.showExcessLegendBinding,
+//            showSolidLine: viewModel.showSolidLineLegendBinding,
+//            showFirstDashedLine: viewModel.showFirstDashedLineLegendBinding,
+//            showSecondDashedLine: viewModel.showSecondDashedLineLegendBinding,
+//            showLegend: viewModel.showingLegendBinding
         )
+        .environmentObject(viewModel)
     }
     
     var footer_legacy: some View {
@@ -200,7 +204,7 @@ public struct MealItemMeters: View {
 
     var typePicker: some View {
         Picker("", selection: viewModel.metersTypeBinding) {
-            ForEach(metersTypes, id: \.self) {
+            ForEach(viewModel.metersTypes, id: \.self) {
                 Text($0.description).tag($0)
             }
         }
@@ -296,63 +300,55 @@ public struct MealItemMeters: View {
 //MARK: - MealItemMeters.ViewModel (Legend)
 
 extension MealItemMeters.ViewModel {
-    var componentsWithTotalBinding: Binding<[NutrientMeterComponent]> {
-        Binding<[NutrientMeterComponent]>(
-            get: { self.componentsWithTotal },
-            set: { _ in }
-        )
-    }
-    var componentsFromFoodBinding: Binding<[NutrientMeterComponent]> {
-        Binding<[NutrientMeterComponent]>(
-            get: { self.componentsFromFood },
-            set: { _ in }
-        )
-    }
-    var showCompletionLegendBinding: Binding<Bool> {
-        Binding<Bool>(
-            get: { self.shouldShowCompletionInLegend },
-            set: { _ in }
-        )
-    }
-    var showExcessLegendBinding: Binding<Bool> {
-        Binding<Bool>(
-            get: { self.shouldShowExcessInLegend },
-            set: { _ in }
-        )
-    }
-    var showUnboundedRemainderLegendBinding: Binding<Bool> {
-        Binding<Bool>(
-            get: { self.shouldShowUnboundedRemainderInLegend },
-            set: { _ in }
-        )
-    }
-    var showBoundedRemainderLegendBinding: Binding<Bool> {
-        Binding<Bool>(
-            get: { self.shouldShowBoundedRemainderInLegend },
-            set: { _ in }
-        )
+    
+    var showMealSubgoals: Bool {
+        guard metersType == .meal else { return false }
+        return currentMeterViewModels.contains {
+            $0.isGenerated
+        }
     }
     
-    var shouldShowCompletionInLegend: Bool {
+    var showDietAutoGoals: Bool {
+        guard metersType == .diet else { return false }
+        return currentMeterViewModels.contains {
+            $0.isGenerated
+        }
+    }
+
+    var showCompletion: Bool {
         currentMeterViewModels.contains {
             $0.percentageType == .complete
         }
     }
     
-    var shouldShowExcessInLegend: Bool {
+    var showExcess: Bool {
         currentMeterViewModels.contains {
             $0.percentageType == .excess
         }
     }
     
-    var shouldShowUnboundedRemainderInLegend: Bool {
-        currentMeterViewModels.contains { $0.showsRemainderWithoutLowerBound }
+    var showSolidLine: Bool {
+        currentMeterViewModels.contains {
+            $0.goalBoundsType == .lowerAndUpper
+            && !$0.percentageType.isPastCompletion
+        }
     }
     
-    var shouldShowBoundedRemainderInLegend: Bool {
-        currentMeterViewModels.contains { $0.showsRemainderWithoutLowerBound }
+    var showFirstDashedLine: Bool {
+        currentMeterViewModels.contains {
+            $0.goalBoundsType == .lowerAndUpper
+            &&
+            ($0.percentageType == .complete || $0.percentageType == .excess)
+        }
     }
-    
+
+    var showSecondDashedLine: Bool {
+        currentMeterViewModels.contains {
+            $0.goalBoundsType == .lowerAndUpper
+            && $0.percentageType == .excess
+        }
+    }
+
     var componentsFromFood: [NutrientMeterComponent] {
 //        foodItem.food.componentsForLegend
         let viewModelsWithTotal = currentMeterViewModels.filter {
@@ -370,7 +366,7 @@ extension MealItemMeters.ViewModel {
         return components
     }
     
-    var componentsWithTotal: [NutrientMeterComponent] {
+    var componentsWithTotals: [NutrientMeterComponent] {
         let viewModelsWithTotal = currentMeterViewModels.filter {
             $0.planned > 0 && !$0.percentageType.isPastCompletion
         }
@@ -385,15 +381,13 @@ extension MealItemMeters.ViewModel {
         return components
     }
     
-    var showingLegendBinding: Binding<Bool> {
-        Binding<Bool>(
-            get: {
-                UserDefaults.standard.object(forKey: "showingLegend") as? Bool ?? false
-            },
-            set: { newValue in
-                UserDefaults.standard.setValue(newValue, forKey: "showingLegend")
-            }
-        )
+    var showingLegend: Bool {
+        get {
+            return UserDefaults.standard.object(forKey: "showingLegend") as? Bool ?? false
+        }
+        set(newValue) {
+            UserDefaults.standard.setValue(newValue, forKey: "showingLegend")
+        }
     }
 }
 
@@ -458,38 +452,8 @@ extension MealItemMeters {
         let barCornerRadius: CGFloat = 3.5
         let barHeight: CGFloat = 14
 
-        @Binding var metersType: MetersType
-        @Binding var componentsWithTotals: [NutrientMeterComponent]
-        @Binding var componentsFromFood: [NutrientMeterComponent]
-        @Binding var showCompletion: Bool
-        @Binding var showExcess: Bool
-        @Binding var showUnboundedRemainder: Bool
-        @Binding var showBoundedRemainder: Bool
-        
-        @Binding var showingLegendBinding: Bool
-        @State var showingLegend: Bool
-        
-        init(
-            metersType: Binding<MetersType>,
-            componentsWithTotals: Binding<[NutrientMeterComponent]>,
-            componentsFromFood: Binding<[NutrientMeterComponent]>,
-            showCompletion: Binding<Bool>,
-            showExcess: Binding<Bool>,
-            showUnboundedRemainder: Binding<Bool>,
-            showBoundedRemainder: Binding<Bool>,
-            showingLegend: Binding<Bool>
-        ) {
-            _metersType = metersType
-            _componentsWithTotals = componentsWithTotals
-            _componentsFromFood = componentsFromFood
-            _showCompletion = showCompletion
-            _showExcess = showExcess
-            _showUnboundedRemainder = showUnboundedRemainder
-            _showBoundedRemainder = showBoundedRemainder
-            _showingLegendBinding = showingLegend
-            
-            _showingLegend = State(initialValue: showingLegend.wrappedValue)
-        }
+        @EnvironmentObject var viewModel: ViewModel
+        @State var showingLegend: Bool = false
     }
 }
 
@@ -502,6 +466,7 @@ extension MealItemMeters.Legend {
                 grid
             }
         }
+        .onAppear { showingLegend = viewModel.showingLegend }
     }
     
     var legendButton: some View {
@@ -517,13 +482,13 @@ extension MealItemMeters.Legend {
             withAnimation {
                 showingLegend.toggle()
                 /// Set the binding too so it's saved to `UserDefaults`
-                showingLegendBinding = showingLegend
+                viewModel.showingLegend = showingLegend
             }
         }
     }
     
     var totalText: Text {
-        switch metersType {
+        switch viewModel.metersType {
         case .nutrients, .diet:
             return Text("**Today's** nutrient totals")
         case .meal:
@@ -553,7 +518,7 @@ extension MealItemMeters.Legend {
     
     var boundedRemainderText: some View {
         var goalDescription: String {
-            switch metersType {
+            switch viewModel.metersType {
             case .nutrients:
                 return "RDA*"
             case .meal:
@@ -563,25 +528,51 @@ extension MealItemMeters.Legend {
             }
         }
 
+        var showMinimumGoal: Bool {
+            viewModel.showFirstDashedLine || viewModel.showSolidLine
+        }
+        
         return Group {
             VStack(alignment: .leading) {
 //                Text("Lines marking your \(goalDescription)")
-                HStack(spacing: 2) {
-                    Text("•")
-                        .foregroundColor(Color(.tertiaryLabel))
-                    Text("Solid or first dotted line — **minimum** \(goalDescription)")
+                if showMinimumGoal {
+                    HStack(spacing: 2) {
+//                        if viewModel.showSecondDashedLine {
+//                            Text("•")
+//                                .foregroundColor(Color(.tertiaryLabel))
+//                        }
+                        if viewModel.showFirstDashedLine && viewModel.showSolidLine {
+                            if viewModel.showSecondDashedLine {
+                                Text("Solid or first dotted line — **minimum** \(goalDescription)")
+                            } else {
+                                Text("Solid or dotted line — **minimum** \(goalDescription)")
+                            }
+                        } else if viewModel.showFirstDashedLine {
+                            if viewModel.showSecondDashedLine {
+                                Text("First dotted line — **minimum** \(goalDescription)")
+                            } else {
+                                Text("Dotted line — **minimum** \(goalDescription)")
+                            }
+                        } else if viewModel.showSolidLine {
+                            Text("Solid line — **minimum** \(goalDescription)")
+                        }
+                    }
                 }
-                HStack(spacing: 2) {
-                    Text("•")
-                        .foregroundColor(Color(.tertiaryLabel))
-                    Text("Second dotted line — **upper limit**")
+                if viewModel.showSecondDashedLine {
+                    HStack(spacing: 2) {
+//                        if showMinimumGoal {
+//                            Text("•")
+//                                .foregroundColor(Color(.tertiaryLabel))
+//                        }
+                        Text("Second dotted line — **upper limit**")
+                    }
                 }
             }
         }
     }
     
     var completeGoalsText: Text {
-        switch metersType {
+        switch viewModel.metersType {
         case .nutrients:
             return Text("RDA* met")
         case .meal:
@@ -620,7 +611,7 @@ extension MealItemMeters.Legend {
                     ZStack(alignment: .leading) {
                         RoundedRectangle(cornerRadius: barCornerRadius)
                             .fill(fillColor.gradient)
-                        if !componentsWithTotals.isEmpty {
+                        if !viewModel.componentsWithTotals.isEmpty {
                             RoundedRectangle(cornerRadius: barCornerRadius)
                                 .fill(placeholderColor.gradient)
                                 .frame(width: barWidth / 2.0)
@@ -635,7 +626,7 @@ extension MealItemMeters.Legend {
         
         @ViewBuilder
         var totalRow: some View {
-            if !componentsWithTotals.isEmpty {
+            if !viewModel.componentsWithTotals.isEmpty {
                 GridRow {
                     totalColors
                     totalText
@@ -645,7 +636,7 @@ extension MealItemMeters.Legend {
         
         @ViewBuilder
         var foodRow: some View {
-            if !componentsFromFood.isEmpty {
+            if !viewModel.componentsFromFood.isEmpty {
                 GridRow {
                     foodColors
                     foodText
@@ -653,45 +644,46 @@ extension MealItemMeters.Legend {
             }
         }
         
-        @ViewBuilder
-        var unboundedRemainderRow: some View {
-            if showUnboundedRemainder {
-                GridRow(alignment: .top) {
-//                GridRow {
-                    NutrientMeter.ViewModel.Colors.Empty.fill
-                        .frame(width: barWidth, height: barHeight)
-                        .cornerRadius(barCornerRadius)
-                        .offset(y: 1)
-                    unboundedRemainderText
-                }
-            }
+        var showLinesRow: Bool {
+            viewModel.showSolidLine ||
+            viewModel.showFirstDashedLine ||
+            viewModel.showSecondDashedLine
+        }
+        
+        var showDashedLine: Bool {
+            viewModel.showFirstDashedLine ||
+            viewModel.showSecondDashedLine
         }
         
         @ViewBuilder
-        var boundedRemainder: some View {
-            if showBoundedRemainder {
+        var linesRow: some View {
+            if showLinesRow {
                 GridRow(alignment: .top) {
 //                GridRow {
                     ZStack(alignment: .leading) {
                         NutrientMeter.ViewModel.Colors.Empty.fill
                             .frame(width: barWidth, height: barHeight)
                             .cornerRadius(barCornerRadius)
-                        DottedLine()
-                            .stroke(style: StrokeStyle(
-                                lineWidth: 2,
-                                dash: [100])
-                            )
-                            .frame(width: 1)
-                            .foregroundColor(Color(.systemGroupedBackground))
-                            .offset(x: barWidth / 3.0)
-                        DottedLine()
-                            .stroke(style: StrokeStyle(
-                                lineWidth: 2,
-                                dash: [2])
-                            )
-                            .frame(width: 1)
-                            .foregroundColor(Color(.systemGroupedBackground))
-                            .offset(x: barWidth / 1.5)
+                        if viewModel.showSolidLine {
+                            DottedLine()
+                                .stroke(style: StrokeStyle(
+                                    lineWidth: 2,
+                                    dash: [100])
+                                )
+                                .frame(width: 1)
+                                .foregroundColor(Color(.systemGroupedBackground))
+                                .offset(x: barWidth / (showDashedLine ? 3.0 : 2.0))
+                        }
+                        if viewModel.showFirstDashedLine || viewModel.showSecondDashedLine {
+                            DottedLine()
+                                .stroke(style: StrokeStyle(
+                                    lineWidth: 2,
+                                    dash: [2])
+                                )
+                                .frame(width: 1)
+                                .foregroundColor(Color(.systemGroupedBackground))
+                                .offset(x: barWidth / (viewModel.showSolidLine ? 1.5 : 2.0))
+                        }
                     }
                     .fixedSize(horizontal: false, vertical: true)
                     .offset(y: 1)
@@ -702,26 +694,47 @@ extension MealItemMeters.Legend {
         
         @ViewBuilder
         var completionRow: some View {
-            if showCompletion {
+            if viewModel.showCompletion {
                 goalCompletionBar(isExcess: false)
             }
         }
         
         @ViewBuilder
         var excessRow: some View {
-            if showExcess {
+            if viewModel.showExcess {
                 goalCompletionBar(isExcess: true)
             }
         }
         
         @ViewBuilder
         var rdaExplanation: some View {
-            if metersType == .nutrients && (showUnboundedRemainder || showBoundedRemainder) {
+            if viewModel.metersType == .nutrients && showLinesRow {
                 HStack(alignment: .firstTextBaseline, spacing: 5) {
                     Text("*")
                         .font(.callout)
                         .offset(y: 3)
                     Text("**Recommended Dietary Allowance (RDA)**: Average daily level of intake sufficient to meet your nutrient requirements. [You can customise this in settings.](http://something.com)")
+                }
+            }
+        }
+        
+        @ViewBuilder
+        var generatedGoals: some View {
+            if viewModel.showMealSubgoals || viewModel.showDietAutoGoals {
+                GridRow {
+                    Group {
+                        HStack {
+                            Spacer()
+                            Image(systemName: "sparkles")
+                        }
+                        .frame(width: barWidth)
+                        if viewModel.showMealSubgoals {
+                            Text("Generated by remaning goal ÷ unplanned meals")
+                        } else {
+                            Text("Generated using energy equation")
+                        }
+                    }
+                    .padding(.top, 5)
                 }
             }
         }
@@ -732,35 +745,35 @@ extension MealItemMeters.Legend {
                 foodRow
                 completionRow
                 excessRow
-//                unboundedRemainderRow
-                boundedRemainder
+                linesRow
+                generatedGoals
             }
             rdaExplanation
         }
     }
     
-    
-    
     var maxColorCount: Int {
-        var count = max(componentsWithTotals.count, componentsFromFood.count)
-        if showExcess { count += 1 }
-        if showCompletion { count += 1 }
+        var count = max(viewModel.componentsWithTotals.count, viewModel.componentsFromFood.count)
+        if viewModel.showExcess { count += 1 }
+        if viewModel.showCompletion { count += 1 }
         return count
     }
     var barWidth: CGFloat {
+        let MinimumBarWidth: CGFloat = colorSize * 2
         let count = CGFloat(maxColorCount)
-        return (count * colorSize) + ((count - 1) * spacing)
+        let calculated = (count * colorSize) + ((count - 1) * spacing)
+        return max(MinimumBarWidth, calculated)
     }
     
     var totalColors: some View {
         HStack(spacing: spacing) {
-            ForEach(componentsWithTotals, id: \.self) {
+            ForEach(viewModel.componentsWithTotals, id: \.self) {
                 colorBox($0.preppedColor)
             }
-            if showCompletion {
+            if viewModel.showCompletion {
                 colorBox(NutrientMeter.ViewModel.Colors.Complete.placeholder)
             }
-            if showExcess {
+            if viewModel.showExcess {
                 colorBox(NutrientMeter.ViewModel.Colors.Excess.placeholder)
             }
         }
@@ -768,13 +781,13 @@ extension MealItemMeters.Legend {
     
     var foodColors: some View {
         HStack(spacing: spacing) {
-            ForEach(componentsFromFood, id: \.self) {
+            ForEach(viewModel.componentsFromFood, id: \.self) {
                 colorBox($0.eatenColor)
             }
-            if showCompletion {
+            if viewModel.showCompletion {
                 colorBox(NutrientMeter.ViewModel.Colors.Complete.fill)
             }
-            if showExcess {
+            if viewModel.showExcess {
                 colorBox(NutrientMeter.ViewModel.Colors.Excess.fill)
             }
         }
@@ -845,8 +858,8 @@ public struct MealItemNutrientMetersPreview: View {
         Day(
             id: Date().calendarDayString,
             calendarDayString: Date().calendarDayString,
-//            goalSet: DietMock.cutting,
-            goalSet: nil,
+            goalSet: DietMock.cutting,
+//            goalSet: nil,
             bodyProfile: BodyProfileMock.calculated,
             meals: mockMeals,
             syncStatus: .notSynced,
@@ -857,11 +870,8 @@ public struct MealItemNutrientMetersPreview: View {
     var metersSection: some View {
         MealItemMeters(
             foodItem: foodItemBinding,
-//            meal: DayMeal(from: MealMock.preWorkoutWithItems),
             meal: mealBinding,
-//            meal: .constant(nil),
             day: .constant(mockDay),
-//            day: nil,
             userUnits: .standard,
             bodyProfile: BodyProfileMock.calculated,
             didTapGoalSetButton: { forMeal in
@@ -877,7 +887,7 @@ public struct MealItemNutrientMetersPreview: View {
 //                DayMeal(
 //                    name: "Temp meal",
 //                    time: 0,
-//                    goalSet: MealTypeMock.preWorkout
+//                    goalSet: nil
 //                )
             },
             set: { _ in }

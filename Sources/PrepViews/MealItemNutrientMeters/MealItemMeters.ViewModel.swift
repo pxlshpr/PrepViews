@@ -41,8 +41,7 @@ extension MealItemMeters {
         @Published var dietMeterViewModels: [NutrientMeter.ViewModel] = []
         @Published var mealMeterViewModels: [NutrientMeter.ViewModel] = []
 
-        /// Save this as a UserDefault first when set to persist it, spawning a task to sync with `User` model
-        @Published var showingLegend: Bool = false
+        @Published var metersTypes: [MetersType] = []
         
         init(
             foodItem: MealFoodItem,
@@ -59,6 +58,8 @@ extension MealItemMeters {
             self.bodyProfile = bodyProfile
             self.shouldCreateSubgoals = shouldCreateSubgoals
             
+            let metersTypes = MetersType.types(for: day, meal: meal)
+            self.metersTypes = metersTypes
 //            if day?.goalSet != nil {
 ////                self.metersType = .meal
 ////                //TODO: If we have a meal.goalSet, add any rows from there that aren't in the day.goalSet
@@ -67,8 +68,8 @@ extension MealItemMeters {
 //                self.page = Page.withIndex(1)
 //
 //            } else {
-                self.metersType = .nutrients
-                self.page = Page.first()
+            self.metersType =  metersTypes.first ?? .nutrients
+            self.page = Page.first()
 //            }
             self.pagerHeight = 0
             
@@ -78,13 +79,50 @@ extension MealItemMeters {
             self.nutrientMeterViewModels = calculatedNutrientMeterViewModels
             self.dietMeterViewModels = calculatedDietMeterViewModels
             self.mealMeterViewModels = calculatedMealMeterViewModels
+            
         }
     }
 }
 
+extension MetersType {
+    static func types(for day: Day?, meal: DayMeal) -> [MetersType] {
+        
+        var shouldShowMealGoals: Bool {
+            if meal.goalSet != nil {
+                return true
+            }
+            
+            /// Or have more than 1 meal (and a diet, since there's no meal type)
+            guard let day, day.goalSet != nil else { return false }
+            return day.meals.count > 1
+        }
+        
+        var types: [MetersType] = []
+        if shouldShowMealGoals {
+            types.append(.meal)
+        }
+        if day != nil {
+            types.append(.diet)
+        }
+        types.append(.nutrients)
+        return types
+    }
+}
 
 extension MealItemMeters.ViewModel {
     
+    var shouldShowMealGoals: Bool {
+        /// If we have a `MealType` associated
+//        if meal?.goalSet != nil {
+        if meal.goalSet != nil {
+            return true
+        }
+        
+        /// Or have more than 1 meal (and a diet, since there's no meal type)
+        guard let day, day.goalSet != nil else { return false }
+        return day.meals.count > 1
+    }
+
     func recalculateHeight() {
         let numberOfRows = numberOfRows(for: metersType)
         pagerHeight = calculateHeight(numberOfRows: numberOfRows)
@@ -174,13 +212,26 @@ extension MealItemMeters.ViewModel {
         meal.goalSet != nil
     }
     
+    func pageIndex(for type: MetersType) -> Int {
+        if metersTypes.count == 3 {
+            return type.rawValue - 1
+        } else if metersTypes.count == 2 {
+            /// Shift the back 1 more to account for missing `meal` type
+            return type.rawValue - 2
+        } else {
+            print("Not supported")
+            return 1
+        }
+    }
+    
     var metersTypeBinding: Binding<MetersType> {
         Binding<MetersType>(
             get: { self.metersType },
             set: { newType in
                 withAnimation {
                     self.metersType = newType
-                    self.page.update(.new(index: newType.rawValue - 1))
+                    
+                    self.page.update(.new(index: self.pageIndex(for: newType)))
                     self.pagerHeight = self.calculateHeight(numberOfRows: self.numberOfRows(for: newType))
                 }
             }
@@ -528,18 +579,6 @@ extension MealItemMeters.ViewModel {
         case .meal:
             return mealMeterViewModels
         }
-    }
-    
-    var shouldShowMealGoals: Bool {
-        /// If we have a `MealType` associated
-//        if meal?.goalSet != nil {
-        if meal.goalSet != nil {
-            return true
-        }
-        
-        /// Or have more than 1 meal (and a diet, since there's no meal type)
-        guard let day, day.goalSet != nil else { return false }
-        return day.meals.count > 1
     }
 }
 
