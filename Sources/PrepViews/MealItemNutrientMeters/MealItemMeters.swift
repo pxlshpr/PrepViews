@@ -477,7 +477,7 @@ extension MealItemMeters.Legend {
     
     var legendButton: some View {
         HStack(spacing: 5) {
-            Text("Legend")
+            Text("\(showingLegend ? "Hide" : "Show") Legend")
             Image(systemName: "chevron.right")
                 .rotationEffect(showingLegend ? .degrees(90) : .degrees(0))
                 .font(.caption2)
