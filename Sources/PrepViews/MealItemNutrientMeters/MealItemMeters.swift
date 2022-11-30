@@ -422,6 +422,8 @@ extension Food {
 extension MealItemMeters {
     struct Legend: View {
         
+        @Environment(\.colorScheme) var colorScheme
+        
         let spacing: CGFloat = 2
         let colorSize: CGFloat = 10
         let cornerRadius: CGFloat = 2
@@ -510,11 +512,7 @@ extension MealItemMeters.Legend {
         Group {
             switch metersType {
             case .nutrients:
-                HStack(alignment: .top, spacing: 1) {
-                    Text("Remainder to RDA")
-                    Text("*")
-                        .offset(y: -1)
-                }
+                Text("Remainder to **maximum** RDA*")
             default:
                 Text("Remainder to upper limit")
             }
@@ -522,26 +520,25 @@ extension MealItemMeters.Legend {
     }
     
     var remainderWithLowerBoundText: some View {
-        Group {
+        var prefix: String {
+            "\(colorScheme == .dark ? "Black" : "White") line marks your"
+        }
+        return Group {
             switch metersType {
             case .nutrients:
-                HStack(alignment: .top, spacing: 1) {
-                    Text("Remainder to minimum RDA")
-                    Text("*")
-                        .offset(y: -1)
-                }
+                Text("\(prefix) **minimum** RDA*")
             default:
-                Text("Remainder to minimum goal")
+                Text("\(prefix) **minimum** goal")
             }
         }
     }
     
-    var completeGoalsString: String {
-        "Completed goals"
+    var completeGoalsText: Text {
+        Text("**Completed** goals")
     }
     
-    var excessGoalsString: String {
-        "Exceeded goals"
+    var excessGoalsText: Text {
+        Text("Goals in **excess**")
     }
     
     var grid: some View {
@@ -558,10 +555,10 @@ extension MealItemMeters.Legend {
                 : NutrientMeter.ViewModel.Colors.Complete.placeholder
             }
             
-            var string: String {
+            var text: Text {
                 isExcess
-                ? excessGoalsString
-                : completeGoalsString
+                ? excessGoalsText
+                : completeGoalsText
             }
             
             return GridRow {
@@ -578,7 +575,7 @@ extension MealItemMeters.Legend {
                 }
                 .frame(width: barWidth, height: barHeight)
                 .cornerRadius(barCornerRadius)
-                Text(string)
+                text
             }
         }
         
