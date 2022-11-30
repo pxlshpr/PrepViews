@@ -558,6 +558,7 @@ extension MealItemMeters.Legend {
                         }
                     }
                 }
+                
                 if viewModel.showSecondDashedLine {
                     HStack(spacing: 2) {
 //                        if showMinimumGoal {
