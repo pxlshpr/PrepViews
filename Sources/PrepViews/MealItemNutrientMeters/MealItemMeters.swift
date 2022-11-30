@@ -673,7 +673,7 @@ extension MealItemMeters.Legend {
                                 )
                                 .frame(width: 1)
                                 .foregroundColor(Color(.systemGroupedBackground))
-                                .offset(x: barWidth / (showDashedLine ? 3.0 : 2.0))
+                                .offset(x: (barWidth / (showDashedLine ? 3.0 : 2.0)) - 1.0)
                         }
                         if viewModel.showFirstDashedLine || viewModel.showSecondDashedLine {
                             DottedLine()
@@ -683,7 +683,7 @@ extension MealItemMeters.Legend {
                                 )
                                 .frame(width: 1)
                                 .foregroundColor(Color(.systemGroupedBackground))
-                                .offset(x: barWidth / (viewModel.showSolidLine ? 1.5 : 2.0))
+                                .offset(x: (barWidth / (viewModel.showSolidLine ? 1.5 : 2.0)) - 1.0)
                         }
                     }
                     .fixedSize(horizontal: false, vertical: true)
