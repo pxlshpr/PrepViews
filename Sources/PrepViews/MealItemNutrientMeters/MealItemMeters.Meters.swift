@@ -22,16 +22,35 @@ extension MealItemMeters.Meters {
     var body: some View {
         VStack {
             Grid(alignment: .leading, verticalSpacing: MeterSpacing) {
-                rows
+                if shouldShowEmptyRows {
+                    emptyRows
+                } else {
+                    rows
+                }
             }
+        }
+    }
+    
+    var shouldShowEmptyRows: Bool {
+        switch type {
+        case .diet:
+            return !viewModel.hasDiet
+        case .meal:
+            return !(viewModel.hasDiet || viewModel.hasMealType)
+        case .nutrients:
+            return false
+        }
+    }
+    
+    var emptyRows: some View {
+        let components: [NutrientMeterComponent] = [.energy, .carb, .fat, .protein]
+        return ForEach(components, id: \.self) { component in
+            MeterRow(emptyRowFor: component)
         }
     }
     
     @ViewBuilder
     var rows: some View {
-//        ForEach(viewModel.meterViewModels(for: type), id: \.self.component) { meterViewModel in
-//            meterRow(for: meterViewModel)
-//        }
         switch type {
         case .nutrients:
             ForEach(viewModel.nutrientMeterViewModels.indices, id: \.self) { index in
@@ -58,24 +77,37 @@ extension NutrientMeter.ViewModel {
 }
 
 struct MeterRow: View {
+    
     @Binding var meterViewModel: NutrientMeter.ViewModel
     @State var value: Double
     @State var unit: NutrientUnit
+    
+    let styleAsPlaceholder: Bool
+    
+    init(emptyRowFor component: NutrientMeterComponent) {
+        _meterViewModel = .constant(.init(component: component, customPercentage: 0, customValue: 0))
+        _value = State(initialValue: 100)
+        _unit = State(initialValue: .mg)
+        styleAsPlaceholder = true
+    }
     
     init(meterViewModel: Binding<NutrientMeter.ViewModel>) {
         _meterViewModel = meterViewModel
         _value = State(initialValue: meterViewModel.wrappedValue.convertedQuantity.value)
         _unit = State(initialValue: meterViewModel.wrappedValue.convertedQuantity.unit)
+        styleAsPlaceholder = false
     }
     
     var body: some View {
         GridRow {
             label
             meter
-//            quantityLabel
             quantityLabel_animated
         }
         .onChange(of: meterViewModel.increment, perform: incrementChanged)
+        .if(styleAsPlaceholder) { view in
+            view.redacted(reason: .placeholder)
+        }
     }
     
     func incrementChanged(to newValue: Double?) {

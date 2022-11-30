@@ -167,6 +167,10 @@ extension MealItemMeters.ViewModel {
         diet != nil
     }
     
+    var hasMealType: Bool {
+        meal.goalSet != nil
+    }
+    
     var metersTypeBinding: Binding<MetersType> {
         Binding<MetersType>(
             get: { self.metersType },
@@ -192,9 +196,10 @@ extension MealItemMeters.ViewModel {
         case .nutrients:
             return foodItem.food.numberOfNonZeroNutrients
         case .diet:
-//            return day?.numberOfGoals(with: goalCalcParams) ?? 0
+            guard hasDiet else { return 4 }
             return calculatedDietMeterViewModels.count
         case .meal:
+            guard (hasDiet || hasMealType) else { return 4 }
             return calculatedMealMeterViewModels.count
         }
     }
@@ -507,6 +512,10 @@ extension MealItemMeters.ViewModel {
         return viewModels
     }
     
+    var currentMeterViewModels: [NutrientMeter.ViewModel] {
+        meterViewModels(for: metersType)
+    }
+    
     func meterViewModels(for type: MetersType) -> [NutrientMeter.ViewModel] {
         switch type {
         case .nutrients:
@@ -528,170 +537,6 @@ extension MealItemMeters.ViewModel {
         /// Or have more than 1 meal (and a diet, since there's no meal type)
         guard let day, day.goalSet != nil else { return false }
         return day.meals.count > 1
-    }
-}
-
-
-
-//MARK: - 👁‍🗨 Previews
-import SwiftUISugar
-import PrepDataTypes
-import PrepMocks
-
-public struct MealItemNutrientMetersPreview: View {
-    
-    public init() { }
-    
-    public var body: some View {
-        NavigationView {
-            FormStyledScrollView {
-                textFieldSection
-                metersSection
-            }
-            .navigationTitle("Log Food")
-        }
-    }
-    
-    var mockMeals: [DayMeal] {
-        [
-//            DayMeal(
-//                name: "Breakfast",
-//                time: 0,
-//                goalSet: nil,
-//                foodItems: []
-//            ),
-//            DayMeal(
-//                name: "Lunch",
-//                time: 0,
-//                goalSet: nil,
-//                foodItems: []
-//            ),
-//            DayMeal(
-//                name: "Dinner",
-//                time: 0,
-//                goalSet: nil,
-//                foodItems: []
-//            ),
-//            DayMeal(
-//                name: "Supper",
-//                time: 0,
-//                goalSet: nil,
-//                foodItems: [
-//                    MealFoodItem(
-//                        food: FoodMock.wheyProtein,
-//                        amount: FoodValue(30, .g)
-//                    )
-//                ]
-//            )
-        ]
-    }
-    
-    var mockDay: Day {
-        Day(
-            id: Date().calendarDayString,
-            calendarDayString: Date().calendarDayString,
-            goalSet: DietMock.cutting,
-            bodyProfile: BodyProfileMock.calculated,
-            meals: mockMeals,
-            syncStatus: .notSynced,
-            updatedAt: 0
-        )
-    }
-    
-    var metersSection: some View {
-        MealItemMeters(
-            foodItem: foodItemBinding,
-//            meal: DayMeal(from: MealMock.preWorkoutWithItems),
-            meal: mealBinding,
-//            meal: .constant(nil),
-            day: .constant(mockDay),
-//            day: nil,
-            userUnits: .standard,
-            bodyProfile: BodyProfileMock.calculated,
-            didTapGoalSetButton: { forMeal in
-                
-            }
-        )
-    }
-    
-    var mealBinding: Binding<DayMeal> {
-        Binding<DayMeal>(
-            get: {
-                DayMeal(from: MealMock.preWorkoutWithItems)
-//                DayMeal(
-//                    name: "Temp meal",
-//                    time: 0,
-//                    goalSet: MealTypeMock.preWorkout
-//                )
-            },
-            set: { _ in }
-        )
-    }
-    
-    var foodItemBinding: Binding<MealFoodItem> {
-        Binding<MealFoodItem>(
-            get: {
-                MealFoodItem(
-                    food: FoodMock.wheyProtein,
-                    amount: FoodValue(value: value ?? 0, unitType: .weight, weightUnit: weightUnit)
-                )
-            },
-            set: { _ in }
-        )
-    }
-    
-    @State var weightUnit: WeightUnit = .g
-    @State var value: Double? = 30.4
-    @State var valueString: String = "30.4"
-
-    var valueBinding: Binding<String> {
-        Binding<String>(
-            get: { valueString },
-            set: { newValue in
-                guard !newValue.isEmpty else {
-                    value = nil
-                    valueString = newValue
-                    return
-                }
-                guard let value = Double(newValue) else {
-                    return
-                }
-                self.value = value
-                withAnimation {
-                    self.valueString = newValue
-                }
-            }
-        )
-    }
-    
-    var textFieldSection: some View {
-        var unitPicker: some View {
-            Button {
-                weightUnit = weightUnit == .g ? .oz : .g
-            } label: {
-                HStack(spacing: 5) {
-                    Text(weightUnit == .g ? "g" : "oz")
-                    Image(systemName: "chevron.up.chevron.down")
-                        .imageScale(.small)
-                }
-            }
-            .buttonStyle(.borderless)
-        }
-        
-        return FormStyledSection(header: Text("Weight")) {
-            HStack {
-                TextField("Required", text: valueBinding)
-                    .keyboardType(.decimalPad)
-                unitPicker
-            }
-        }
-    }
-
-}
-
-struct MealItemNutrientMeters_Previews: PreviewProvider {
-    static var previews: some View {
-        MealItemNutrientMetersPreview()
     }
 }
 
