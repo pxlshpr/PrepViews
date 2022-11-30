@@ -354,12 +354,25 @@ extension MealItemMeters.ViewModel {
     }
     
     var componentsFromFood: [NutrientMeterComponent] {
-        foodItem.food.componentsForLegend
+//        foodItem.food.componentsForLegend
+        let viewModelsWithTotal = currentMeterViewModels.filter {
+            guard let increment = $0.increment else { return false }
+            return increment > 0 && !$0.percentageType.isPastCompletion
+        }
+        
+        /// Get components except for micro first (because there may be multiples of those)
+        var components = viewModelsWithTotal
+            .filter { !$0.component.isMicro }
+            .map { $0.component }
+        if viewModelsWithTotal.contains(where: { $0.component.isMicro }) {
+            components.append(.micro(nutrientType: .sodium, nutrientUnit: .mg))
+        }
+        return components
     }
     
     var componentsWithTotal: [NutrientMeterComponent] {
         let viewModelsWithTotal = currentMeterViewModels.filter {
-            $0.planned > 0
+            $0.planned > 0 && !$0.percentageType.isPastCompletion
         }
         
         /// Get components except for micro first (because there may be multiples of those)
@@ -512,71 +525,74 @@ extension MealItemMeters.Legend {
     var totalText: Text {
         switch metersType {
         case .nutrients, .diet:
-            return Text("Nutrient totals for **today**")
+            return Text("**Today's** nutrient totals")
         case .meal:
-            return Text("Nutrients totals for **this meal**")
+            return Text("**This meal's** nutrient totals")
         }
     }
     
     var foodText: Text {
-        Text("Nutrient totals for **this food**")
+        Text("**This food's** nutrient totals")
     }
     
     var unboundedRemainderText: some View {
-        Group {
-            switch metersType {
-            case .nutrients:
-                VStack(alignment: .leading) {
-                    Text("Remainder till your RDA* is reached:")
-                    HStack(spacing: 2) {
-                        Text("•")
-                            .foregroundColor(Color(.quaternaryLabel))
-                        Text("If the bar is in green, this is your **upper limit**")
-                    }
-                    HStack(spacing: 2) {
-                        Text("•")
-                            .foregroundColor(Color(.quaternaryLabel))
-                        Text("Otherwise, it's your **minimum**")
-                    }
-                }
-            default:
-                Text("Remainder to upper limit")
+        VStack(alignment: .leading) {
+            Text("Remainder till your RDA* is reached:")
+            HStack(spacing: 2) {
+                Text("•")
+                    .foregroundColor(Color(.quaternaryLabel))
+                Text("If the bar is in green, this is your **upper limit**")
+            }
+            HStack(spacing: 2) {
+                Text("•")
+                    .foregroundColor(Color(.quaternaryLabel))
+                Text("Otherwise, it's your **minimum**")
             }
         }
     }
     
     var boundedRemainderText: some View {
-        var prefix: String {
-            "Solid line marks your"
-        }
-        return Group {
+        var goalDescription: String {
             switch metersType {
             case .nutrients:
-                VStack(alignment: .leading) {
-                    Text("Lines mark your RDA* goals:")
-                    HStack(spacing: 2) {
-                        Text("•")
-                            .foregroundColor(Color(.quaternaryLabel))
-                        Text("Solid and first dotted — **minimum**")
-                    }
-                    HStack(spacing: 2) {
-                        Text("•")
-                            .foregroundColor(Color(.quaternaryLabel))
-                        Text("Second dotted — **upper limit**")
-                    }
+                return "RDA*"
+            case .meal:
+                return "meal goal"
+            case .diet:
+                return "daily goal"
+            }
+        }
+
+        return Group {
+            VStack(alignment: .leading) {
+//                Text("Lines marking your \(goalDescription)")
+                HStack(spacing: 2) {
+                    Text("•")
+                        .foregroundColor(Color(.tertiaryLabel))
+                    Text("Solid or first dotted line — **minimum** \(goalDescription)")
                 }
-            default:
-                Text("\(prefix) **minimum** goal")
+                HStack(spacing: 2) {
+                    Text("•")
+                        .foregroundColor(Color(.tertiaryLabel))
+                    Text("Second dotted line — **upper limit**")
+                }
             }
         }
     }
     
     var completeGoalsText: Text {
-        Text("**Completed** goals")
+        switch metersType {
+        case .nutrients:
+            return Text("RDA* met")
+        case .meal:
+            return Text("Meal goal met")
+        case .diet:
+            return Text("Daily goal met")
+        }
     }
     
     var excessGoalsText: Text {
-        Text("Goals in **excess**")
+        Text("Upper limit exceeded")
     }
     
     var grid: some View {
@@ -716,7 +732,7 @@ extension MealItemMeters.Legend {
                 foodRow
                 completionRow
                 excessRow
-                unboundedRemainderRow
+//                unboundedRemainderRow
                 boundedRemainder
             }
             rdaExplanation
@@ -881,8 +897,8 @@ public struct MealItemNutrientMetersPreview: View {
     }
     
     @State var weightUnit: WeightUnit = .g
-    @State var value: Double? = 300.4
-    @State var valueString: String = "300.4"
+    @State var value: Double? = 500
+    @State var valueString: String = "500"
 
     var valueBinding: Binding<String> {
         Binding<String>(

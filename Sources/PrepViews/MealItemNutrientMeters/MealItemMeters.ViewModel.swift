@@ -547,13 +547,13 @@ extension NutrientMeterComponent {
     var defaultLowerGoal: Double? {
         switch self {
         case .energy:
-            return 2500
+            return 2000
         case .carb:
-            return 325
+            return 50
         case .fat:
-            return 100
+            return 35
         case .protein:
-            return 250
+            return 50
         case .micro(let nutrientType, _):
             return nutrientType.dailyValue?.0
         }

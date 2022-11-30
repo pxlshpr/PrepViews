@@ -34,5 +34,5 @@ enum MetersType: Int, CaseIterable {
         default:
             return "Each bar shows the relative increase from what you've added so far."
         }
-    }
+    }    
 }
