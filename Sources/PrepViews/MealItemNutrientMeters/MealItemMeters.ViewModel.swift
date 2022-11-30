@@ -134,9 +134,16 @@ extension MealItemMeters.ViewModel {
     
     func dayChanged() {
         foodItemChanged()
+        metersTypes = MetersType.types(for: day, meal: meal)
+        page = .withIndex(pageIndex(for: self.metersType))
     }
     
     func foodItemChanged() {
+        createViewModels()
+        recalculateHeight()
+    }
+    
+    func createViewModels() {
         self.nutrientMeterViewModels = calculatedNutrientMeterViewModels
         let dietMeterViewModels = calculatedDietMeterViewModels
         let mealMeterViewModels = calculatedMealMeterViewModels
@@ -197,7 +204,6 @@ extension MealItemMeters.ViewModel {
         
         self.dietMeterViewModels = dietMeterViewModels
         self.mealMeterViewModels = mealMeterViewModels
-        
     }
     
     var diet: GoalSet? {

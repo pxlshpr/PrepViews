@@ -81,8 +81,6 @@ public struct MealItemMeters: View {
         .onChange(of: foodItem) { newFoodItem in
             withAnimation {
                 viewModel.foodItem = newFoodItem
-                viewModel.recalculateHeight()
-//                viewModel.foodItem.amount = newFoodItem.amount
             }
         }
         .onChange(of: meal) { newValue in
@@ -93,8 +91,6 @@ public struct MealItemMeters: View {
         .onChange(of: day) { newValue in
             withAnimation {
                 viewModel.day = day
-//                metersTypes = determineMetersTypes
-                viewModel.metersTypes = MetersType.types(for: day, meal: meal)
             }
         }
     }
