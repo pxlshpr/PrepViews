@@ -61,6 +61,7 @@ extension MealItemMeters {
             let metersTypes = MetersType.types(for: day, meal: meal)
             self.metersTypes = metersTypes
             
+            
             if day?.goalSet == nil && meal.goalSet == nil {
                 /// If we have no diet, or meal type, choose the last (`.nutrieints`) `MetersType` to be selected by default
                 self.metersType =  .nutrients
