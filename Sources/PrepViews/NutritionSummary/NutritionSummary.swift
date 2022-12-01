@@ -141,16 +141,11 @@ public struct NutritionSummary<Provider: NutritionSummaryProvider>: View {
     
     public var body: some View {
         VStack(alignment: .trailing, spacing: 5) {
-            HStack(spacing: 0) {
+            HStack(spacing: 2) {
+                nutrientsEnergy_animated
                 if showMacrosIndicator {
                     macrosIndicator
-                        .padding(.leading, 2)
-//                        .background(.green)
-                    Spacer()
                 }
-//                nutrientsEnergy
-                nutrientsEnergy_animated
-//                    .background(.blue)
             }
             nutrientsMacros
                 .transition(.asymmetric(insertion: .move(edge: .trailing),
