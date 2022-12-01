@@ -98,9 +98,9 @@ extension MetersType {
         }
         
         var types: [MetersType] = []
-        if shouldShowMealGoals {
+//        if shouldShowMealGoals {
             types.append(.meal)
-        }
+//        }
 //        if day != nil {
             types.append(.diet)
 //        }
