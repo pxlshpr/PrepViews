@@ -101,9 +101,9 @@ extension MetersType {
         if shouldShowMealGoals {
             types.append(.meal)
         }
-        if day != nil {
+//        if day != nil {
             types.append(.diet)
-        }
+//        }
         types.append(.nutrients)
         return types
     }

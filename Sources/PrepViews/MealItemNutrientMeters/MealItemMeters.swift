@@ -54,19 +54,19 @@ public struct MealItemMeters: View {
 //        _metersTypes = State(initialValue: types)
     }
     
-    
-    var determineMetersTypes: [MetersType] {
-        var types: [MetersType] = []
-        if viewModel.shouldShowMealGoals {
-            types.append(.meal)
-        }
-        if viewModel.day != nil {
-            types.append(.diet)
-        }
-        types.append(.nutrients)
-        return types
-    }
-    
+//
+//    var determineMetersTypes: [MetersType] {
+//        var types: [MetersType] = []
+//        if viewModel.shouldShowMealGoals {
+//            types.append(.meal)
+//        }
+//        if viewModel.day != nil {
+//            types.append(.diet)
+//        }
+//        types.append(.nutrients)
+//        return types
+//    }
+//
     public var body: some View {
         Group {
 //            arrow
