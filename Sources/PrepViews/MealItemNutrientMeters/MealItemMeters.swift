@@ -161,7 +161,7 @@ public struct MealItemMeters: View {
                 if viewModel.hasMealType || viewModel.hasDiet {
                     legend
                 } else {
-                    Text("Pick a diet or meal type to see meal goals for this meal.")
+                    Text("Pick a diet or meal type to see goals for this meal.")
                 }
             }
         }

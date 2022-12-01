@@ -64,7 +64,7 @@ extension MealItemMeters {
             if day?.goalSet == nil && meal.goalSet == nil {
                 /// If we have no diet, or meal type, choose the last (`.nutrieints`) `MetersType` to be selected by default
                 self.metersType =  .nutrients
-                self.page = Page.withIndex(1)
+                self.page = Page.withIndex(2)
             } else {
                 /// Otherwise choose whatever the first tab is
                 self.metersType =  metersTypes.first ?? .nutrients
