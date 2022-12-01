@@ -36,7 +36,7 @@ extension MealItemMeters.Meters {
         case .diet:
             return !viewModel.hasDiet
         case .meal:
-            return !(viewModel.hasDiet || viewModel.hasMealType)
+            return !(viewModel.shouldShowMealContent)
         case .nutrients:
             return false
         }

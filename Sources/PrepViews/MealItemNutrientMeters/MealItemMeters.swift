@@ -155,13 +155,13 @@ public struct MealItemMeters: View {
                 if viewModel.hasDiet {
                     legend
                 } else {
-                    Text("Pick a diet to see your goals for the day.")
+                    Text("Your daily goals will appear once you select a diet for the day.")
                 }
             case .meal:
-                if viewModel.hasMealType || viewModel.hasDiet {
+                if viewModel.shouldShowMealContent {
                     legend
                 } else {
-                    Text("Pick a diet or meal type to see goals for this meal.")
+                    Text(viewModel.emptyMealFooterString)
                 }
             }
         }
@@ -173,18 +173,7 @@ public struct MealItemMeters: View {
     }
     
     var legend: some View {
-        Legend(
-//            metersType: $viewModel.metersType,
-//            componentsWithTotals: viewModel.componentsWithTotalBinding,
-//            componentsFromFood: viewModel.componentsFromFoodBinding,
-//            showCompletion: viewModel.showCompletionLegendBinding,
-//            showExcess: viewModel.showExcessLegendBinding,
-//            showSolidLine: viewModel.showSolidLineLegendBinding,
-//            showFirstDashedLine: viewModel.showFirstDashedLineLegendBinding,
-//            showSecondDashedLine: viewModel.showSecondDashedLineLegendBinding,
-//            showLegend: viewModel.showingLegendBinding
-        )
-        .environmentObject(viewModel)
+        Legend(viewModel: viewModel)
     }
     
     var footer_legacy: some View {
@@ -448,8 +437,19 @@ extension MealItemMeters {
         let barCornerRadius: CGFloat = 3.5
         let barHeight: CGFloat = 14
 
-        @EnvironmentObject var viewModel: ViewModel
-        @State var showingLegend: Bool = false
+        /// Note: We're using an `@ObservedObject` here instead of `@EnvironmentObject` so that
+        /// we are able to set the internal `showingLegend` bool during initialization as opposed to in the
+        /// `onAppear` modifier—which causes it to be temporarily whatever value we set it with and
+        /// then animate to the actual value saved in the `UserDefaults`, causing a jump in the height
+        /// when transitioning between types.
+        @ObservedObject var viewModel: ViewModel
+//        @EnvironmentObject var viewModel: ViewModel
+        @State var showingLegend: Bool
+        
+        init(viewModel: ViewModel) {
+            self.viewModel = viewModel
+            _showingLegend = State(initialValue: viewModel.showingLegend)
+        }
     }
 }
 
@@ -462,7 +462,6 @@ extension MealItemMeters.Legend {
                 grid
             }
         }
-        .onAppear { showingLegend = viewModel.showingLegend }
     }
     
     var legendButton: some View {
@@ -484,22 +483,26 @@ extension MealItemMeters.Legend {
     }
     
     var totalText: Text {
-        var relativeColor: String {
-            return colorScheme == .light ? "lighter" : "darker"
+        var suffix: String {
+            guard !viewModel.componentsFromFood.isEmpty else { return "" }
+            let relativeBrightness = colorScheme == .light ? "lighter" : "darker"
+            return " (\(relativeBrightness))"
         }
         switch viewModel.metersType {
         case .nutrients, .diet:
-            return Text("**Today's** total (\(relativeColor))")
+            return Text("**Today's** total\(suffix)")
         case .meal:
-            return Text("This **meal's** total (\(relativeColor))")
+            return Text("This **meal's** total\(suffix)")
         }
     }
     
     var foodText: Text {
-        var relativeColor: String {
-            return colorScheme == .light ? "darker" : "lighter"
+        var suffix: String {
+            guard !viewModel.componentsWithTotals.isEmpty else { return "" }
+            let relativeBrightness = colorScheme == .light ? "darker" : "lighter"
+            return " (\(relativeBrightness))"
         }
-        return Text("What this **food** adds (\(relativeColor))")
+        return Text("What this **food** adds\(suffix)")
     }
     
     var unboundedRemainderText: some View {
@@ -547,7 +550,7 @@ extension MealItemMeters.Legend {
                             if viewModel.showSecondDashedLine {
                                 Text("Solid or first dotted lines indicate **minimum** \(goalDescription)")
                             } else {
-                                Text("Solid or dotted lines indicate **minimum** \(goalDescription)")
+                                Text("Solid or dotted line indicates **minimum** \(goalDescription)")
                             }
                         } else if viewModel.showFirstDashedLine {
                             if viewModel.showSecondDashedLine {
@@ -577,11 +580,11 @@ extension MealItemMeters.Legend {
     var completeGoalsText: Text {
         switch viewModel.metersType {
         case .nutrients:
-            return Text("RDA* met")
+            return Text("RDA* accomplished")
         case .meal:
-            return Text("Meal goal met")
+            return Text("Meal goal accomplished")
         case .diet:
-            return Text("Daily goal met")
+            return Text("Daily goal accomplished")
         }
     }
     
@@ -639,7 +642,7 @@ extension MealItemMeters.Legend {
         
         @ViewBuilder
         var foodRow: some View {
-            if !viewModel.componentsFromFood.isEmpty {
+            if !viewModel.componentsFromFood.isEmpty && !viewModel.componentsWithTotals.isEmpty {
                 GridRow {
                     foodColors
                     foodText
@@ -728,13 +731,22 @@ extension MealItemMeters.Legend {
                     Group {
                         HStack {
                             Spacer()
-                            Image(systemName: "sparkles")
+                            VStack {
+                                Image(systemName: "sparkles")
+                                Spacer()
+                            }
                         }
                         .frame(width: barWidth)
                         if viewModel.showMealSubgoals {
-                            Text("Generated by remaning goal ÷ unplanned meals")
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("**Meal Subgoals**")
+                                Text("Calculated by taking the remainder of your goals for the day and dividing them by how many more meals your have left to plan (including this one).")
+                            }
                         } else {
-                            Text("Generated using energy equation")
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("**Implied Goal**")
+                                Text("Calculated since you have 3 of the 4 components of the energy equation in this diet. Staying within this goal will help you avoid overshooting them.")
+                            }
                         }
                     }
                     .padding(.top, 5)

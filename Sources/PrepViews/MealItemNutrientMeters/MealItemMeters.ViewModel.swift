@@ -130,10 +130,14 @@ extension MealItemMeters.ViewModel {
     }
     
     func mealChanged() {
-        foodItemChanged()
+        refresh()
     }
     
     func dayChanged() {
+        refresh()
+    }
+    
+    func refresh() {
         foodItemChanged()
         metersTypes = MetersType.types(for: day, meal: meal)
         page = .withIndex(pageIndex(for: self.metersType))
@@ -352,17 +356,20 @@ extension MealItemMeters.ViewModel {
     }
     
     func plannedValue(for component: NutrientMeterComponent, type: MetersType) -> Double {
+        let planned: Double
         switch type {
         case .nutrients, .diet:
             guard let day else { return 0 }
-//            if let meal {
-                return day.plannedValue(for: component, ignoring: meal.id) + meal.plannedValue(for: component)
-//            } else {
-//                return day.plannedValue(for: component, ignoring: UUID())
-//            }
+            planned = day.plannedValue(for: component, ignoring: meal.id) + meal.plannedValue(for: component)
         case .meal:
-//            return meal?.plannedValue(for: component) ?? 0
-            return meal.plannedValue(for: component)
+            planned = meal.plannedValue(for: component)
+        }
+        
+        if meal.foodItems.contains(where: { $0.id == foodItem.id }) {
+            /// If this meal already contains the item (ie. we're editing it), remove its amount from the current total
+            return planned - foodItem.scaledValue(for: component)
+        } else {
+            return planned
         }
     }
     
@@ -554,7 +561,7 @@ extension MealItemMeters.ViewModel {
                 goalLower: subgoalLower,
                 goalUpper: subgoalUpper,
                 burned: 0,
-                planned: meal.plannedValue(for: component),
+                planned: plannedValue(for: component, type: .meal),
                 increment: foodItem.scaledValue(for: component)
             )
             /// Now if we have any `dietMeterViewModels` go through all of them, and add subgoals for any that we don't have an explicit goal for
@@ -586,6 +593,28 @@ extension MealItemMeters.ViewModel {
         case .meal:
             return mealMeterViewModels
         }
+    }
+    
+    var emptyMealFooterString: String {
+        if hasDiet {
+            return "Your meal goals will appear once you select a meal type or add more meals."
+        } else {
+            if dayHasMoreThanOneMeal {
+                return "Your meal goals will appear once you select a meal type or a diet for the day."
+            } else {
+                return "Your meal goals will appear once you select a meal type or a diet for the day (and add more meals)."
+            }
+        }
+    }
+    
+    var shouldShowMealContent: Bool {
+        hasMealType
+        || (hasDiet && dayHasMoreThanOneMeal)
+    }
+    
+    var dayHasMoreThanOneMeal: Bool {
+        guard let day else { return false }
+        return day.meals.count > 1
     }
 }
 
