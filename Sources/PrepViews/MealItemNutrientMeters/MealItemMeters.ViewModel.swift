@@ -60,17 +60,17 @@ extension MealItemMeters {
             
             let metersTypes = MetersType.types(for: day, meal: meal)
             self.metersTypes = metersTypes
-//            if day?.goalSet != nil {
-////                self.metersType = .meal
-////                //TODO: If we have a meal.goalSet, add any rows from there that aren't in the day.goalSet
-////                self.page = Page.withIndex(2)
-//                self.metersType = .diet
-//                self.page = Page.withIndex(1)
-//
-//            } else {
-            self.metersType =  metersTypes.first ?? .nutrients
-            self.page = Page.first()
-//            }
+            
+            if day?.goalSet == nil && meal.goalSet == nil {
+                /// If we have no diet, or meal type, choose the last (`.nutrieints`) `MetersType` to be selected by default
+                self.metersType =  .nutrients
+                self.page = Page.withIndex(1)
+            } else {
+                /// Otherwise choose whatever the first tab is
+                self.metersType =  metersTypes.first ?? .nutrients
+                self.page = Page.first()
+            }
+            
             self.pagerHeight = 0
             
             let numberOfRows = self.numberOfRows(for: self.metersType)
