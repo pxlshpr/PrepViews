@@ -315,11 +315,13 @@ extension NutrientMeter.ViewModel {
     }
     
     var lowerGoalMarkOpacity: CGFloat {
-        lowerGoalMarkOverBar ? 0.5 : 1.0
+//        lowerGoalMarkOverBar ? 0.5 : 1.0
+        1.0
     }
     
     var lowerGoalMarkLineWidth: CGFloat {
-        lowerGoalMarkOverBar ? 1 : 1.5
+//        lowerGoalMarkOverBar ? 1 : 1.5
+        lowerGoalMarkOverBar ? 2 : 1.5
     }
     
     var lowerGoalMarkOverBar: Bool {
@@ -351,11 +353,13 @@ extension NutrientMeter.ViewModel {
     }
     
     var upperGoalMarkOpacity: CGFloat {
-        upperGoalMarkOverBar ? 0.5 : 1.0
+//        upperGoalMarkOverBar ? 0.5 : 1.0
+        1.0
     }
     
     var upperGoalMarkLineWidth: CGFloat {
-        upperGoalMarkOverBar ? 1 : 1.5
+//        upperGoalMarkOverBar ? 1 : 1.5
+        upperGoalMarkOverBar ? 2 : 1.5
     }
     
     var upperGoalMarkOverBar: Bool {

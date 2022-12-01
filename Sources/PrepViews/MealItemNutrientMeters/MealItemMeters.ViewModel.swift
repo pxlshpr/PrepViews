@@ -599,11 +599,7 @@ extension MealItemMeters.ViewModel {
         if hasDiet {
             return "Your meal goals will appear once you select a meal type or add more meals."
         } else {
-            if dayHasMoreThanOneMeal {
-                return "Your meal goals will appear once you select a meal type or a diet for the day."
-            } else {
-                return "Your meal goals will appear once you select a meal type or a diet for the day (and add more meals)."
-            }
+            return "Your meal goals will appear once you select a meal type or a diet for the day."
         }
     }
     
