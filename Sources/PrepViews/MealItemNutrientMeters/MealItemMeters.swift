@@ -489,9 +489,9 @@ extension MealItemMeters.Legend {
         }
         switch viewModel.metersType {
         case .nutrients, .diet:
-            return Text("**Today's** total so far (\(relativeColor))")
+            return Text("**Today's** total (\(relativeColor))")
         case .meal:
-            return Text("This **meal's** total so far (\(relativeColor))")
+            return Text("This **meal's** total (\(relativeColor))")
         }
     }
     
@@ -524,9 +524,9 @@ extension MealItemMeters.Legend {
             case .nutrients:
                 return "RDA*"
             case .meal:
-                return "meal goal"
+                return "meal goals"
             case .diet:
-                return "daily goal"
+                return "daily goals"
             }
         }
 
@@ -535,39 +535,39 @@ extension MealItemMeters.Legend {
         }
         
         return Group {
-            VStack(alignment: .leading) {
+            VStack(alignment: .leading, spacing: 3) {
 //                Text("Lines marking your \(goalDescription)")
                 if showMinimumGoal {
-                    HStack(spacing: 2) {
-//                        if viewModel.showSecondDashedLine {
-//                            Text("•")
-//                                .foregroundColor(Color(.tertiaryLabel))
-//                        }
+                    HStack(alignment: .top, spacing: 2) {
+                        if viewModel.showSecondDashedLine {
+                            Text("•")
+                                .foregroundColor(Color(.tertiaryLabel))
+                        }
                         if viewModel.showFirstDashedLine && viewModel.showSolidLine {
                             if viewModel.showSecondDashedLine {
-                                Text("Solid or first dotted line — **minimum** \(goalDescription)")
+                                Text("Solid or first dotted lines indicate **minimum** \(goalDescription)")
                             } else {
-                                Text("Solid or dotted line — **minimum** \(goalDescription)")
+                                Text("Solid or dotted lines indicate **minimum** \(goalDescription)")
                             }
                         } else if viewModel.showFirstDashedLine {
                             if viewModel.showSecondDashedLine {
-                                Text("First dotted line — **minimum** \(goalDescription)")
+                                Text("First dotted lines indicate **minimum** \(goalDescription)")
                             } else {
-                                Text("Dotted line — **minimum** \(goalDescription)")
+                                Text("Dotted lines indicate **minimum** \(goalDescription)")
                             }
                         } else if viewModel.showSolidLine {
-                            Text("Solid line — **minimum** \(goalDescription)")
+                            Text("Lines indicate **minimum** \(goalDescription)")
                         }
                     }
                 }
                 
                 if viewModel.showSecondDashedLine {
                     HStack(spacing: 2) {
-//                        if showMinimumGoal {
-//                            Text("•")
-//                                .foregroundColor(Color(.tertiaryLabel))
-//                        }
-                        Text("Second dotted line — **upper limit**")
+                        if showMinimumGoal {
+                            Text("•")
+                                .foregroundColor(Color(.tertiaryLabel))
+                        }
+                        Text("Second dotted lines indicate **upper limits**")
                     }
                 }
             }
