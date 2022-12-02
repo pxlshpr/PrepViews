@@ -119,10 +119,10 @@ public extension Food {
         return baseNumberOfNutrients + nonZeroMicros.count
     }
     
-    func quantity(for amount: FoodValue) -> FoodQuantity? {
-        guard let unit = FoodQuantity.Unit(foodValue: amount, in: self) else { return nil }
-        return FoodQuantity(value: amount.value, unit: unit, food: self)
-    }
+//    func quantity(for amount: FoodValue) -> FoodQuantity? {
+//        guard let unit = FoodQuantity.Unit(foodValue: amount, in: self) else { return nil }
+//        return FoodQuantity(value: amount.value, unit: unit, food: self)
+//    }
 }
 
 extension NutrientMeterComponent {
@@ -144,10 +144,10 @@ extension NutrientMeterComponent {
 
 public extension MealFoodItem {
     
-    var nutrientScaleFactor: Double {
-        guard let foodQuantity = food.quantity(for: amount) else { return 0 }
-        return food.nutrientScaleFactor(for: foodQuantity) ?? 0
-    }
+//    var nutrientScaleFactor: Double {
+//        guard let foodQuantity = food.quantity(for: amount) else { return 0 }
+//        return food.nutrientScaleFactor(for: foodQuantity) ?? 0
+//    }
     
     func scaledValue(for component: NutrientMeterComponent) -> Double {
         guard let value = food.info.nutrients.value(for: component) else { return 0 }

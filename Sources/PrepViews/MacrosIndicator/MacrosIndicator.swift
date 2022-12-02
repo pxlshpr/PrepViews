@@ -2,30 +2,34 @@ import SwiftUI
 import PrepDataTypes
 
 public struct MacrosIndicator: View {
-    
+
+    public static let DefaultWidth: CGFloat = 30
+
     @Environment(\.colorScheme) var colorScheme
     
     let carb, fat, protein: Double
-    
+    let width: CGFloat
+
     public init(_ searchResult: FoodSearchResult) {
         self.carb = searchResult.carb
         self.fat = searchResult.fat
         self.protein = searchResult.protein
+        self.width = Self.DefaultWidth
     }
     
     public init(_ food: Food) {
         self.carb = food.info.nutrients.carb
         self.fat = food.info.nutrients.fat
         self.protein = food.info.nutrients.protein
+        self.width = Self.DefaultWidth
     }
 
-    public init(c: Double, f: Double, p: Double) {
+    public init(c: Double, f: Double, p: Double, width: CGFloat = Self.DefaultWidth) {
         self.carb = c
         self.fat = f
         self.protein = p
+        self.width = width
     }
-
-    let width: CGFloat = 30
     
     public var body: some View {
         HStack(spacing: 0) {
