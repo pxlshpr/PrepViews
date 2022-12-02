@@ -264,7 +264,7 @@ extension MealItemMeters.ViewModel {
             guard hasDiet else { return 4 }
             return calculatedDietMeterViewModels.count
         case .meal:
-            guard (hasDiet || hasMealType) else { return 4 }
+            guard (shouldShowMealContent) else { return 4 }
             return calculatedMealMeterViewModels.count
         }
     }
