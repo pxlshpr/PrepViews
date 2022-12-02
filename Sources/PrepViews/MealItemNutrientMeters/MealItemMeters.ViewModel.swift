@@ -61,15 +61,15 @@ extension MealItemMeters {
             let metersTypes = MetersType.types(for: day, meal: meal)
             self.metersTypes = metersTypes
             
-            
-            if day?.goalSet == nil && meal.goalSet == nil {
-                /// If we have no diet, or meal type, choose the last (`.nutrieints`) `MetersType` to be selected by default
-                self.metersType =  .nutrients
+            let initialMetersType = MetersType.initialType(for: day, meal: meal)
+            self.metersType = initialMetersType
+            switch initialMetersType {
+            case .meal:
+                self.page = Page.withIndex(0)
+            case .diet:
+                self.page = Page.withIndex(1)
+            case .nutrients:
                 self.page = Page.withIndex(2)
-            } else {
-                /// Otherwise choose whatever the first tab is
-                self.metersType =  metersTypes.first ?? .nutrients
-                self.page = Page.first()
             }
             
             self.pagerHeight = 0
@@ -86,6 +86,26 @@ extension MealItemMeters {
 }
 
 extension MetersType {
+    static func initialType(for day: Day?, meal: DayMeal) -> MetersType {
+        /// If we have no `Day`, start with `.meal` if we have a meal type, otherwise fall back to `.nutrients`
+        guard let day else {
+            return meal.goalSet != nil ? .meal : .nutrients
+        }
+        
+        /// If we have a `Day`, and have a `meal.goalSet`, start with `.meal`
+        guard meal.goalSet == nil else {
+            return .meal
+        }
+        
+        /// If we have no `day.goalSet`, return `.nutrients`
+        guard day.goalSet != nil else {
+            return .nutrients
+        }
+        
+        /// If we have more than 1 meal (and will show subgoals), start with `.meal`, otherwise start with `.diet`
+        return day.meals.count > 1 ? .meal : .diet
+    }
+
     static func types(for day: Day?, meal: DayMeal) -> [MetersType] {
         
         var shouldShowMealGoals: Bool {
@@ -367,7 +387,8 @@ extension MealItemMeters.ViewModel {
         
         if meal.foodItems.contains(where: { $0.id == foodItem.id }) {
             /// If this meal already contains the item (ie. we're editing it), remove its amount from the current total
-            return planned - foodItem.scaledValue(for: component)
+//            return planned - foodItem.scaledValue(for: component)
+            return planned - meal.plannedValue(for: component)
         } else {
             return planned
         }
