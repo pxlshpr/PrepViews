@@ -266,6 +266,16 @@ public extension NutrientMeter.ViewModel {
             return haveGoal ? Colors.Excess.fill : component.eatenColor
         }
     }
+    
+    var textColor: Color {
+        guard preppedPercentageType != .complete else {
+            return haveGoal ? Colors.Complete.fill : component.eatenColor
+        }
+        
+        /// Override the empty color only
+        if eatenPercentageType == .empty { return component.eatenColor }
+        return eatenColor
+    }
 }
 
 public extension NutrientMeter.ViewModel {

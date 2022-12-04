@@ -1,12 +1,12 @@
 import Foundation
 import PrepDataTypes
 
-extension Day {
+public extension Day {
     func numberOfGoals(with params: GoalCalcParams) -> Int {
         goalSet?.numberOfGoals(with: params) ?? 0
     }
     
-    func plannedValue(for component: NutrientMeterComponent, ignoring mealID: UUID) -> Double {
+    func plannedValue(for component: NutrientMeterComponent, ignoring mealID: UUID? = nil) -> Double {
         meals.reduce(0) { partialResult, dayMeal in
             partialResult + (dayMeal.id != mealID ? dayMeal.plannedValue(for: component) : 0)
         }
@@ -29,7 +29,7 @@ extension Day {
 }
 
 
-extension DayMeal {
+public extension DayMeal {
     func plannedValue(for component: NutrientMeterComponent) -> Double {
         foodItems.reduce(0) { partialResult, mealFoodItem in
             partialResult + mealFoodItem.scaledValue(for: component)
@@ -50,7 +50,7 @@ extension DayMeal {
     }
 }
 
-extension GoalSet {
+public extension GoalSet {
     
     func value(for component: NutrientMeterComponent, lowerBound: Bool, params: GoalCalcParams) -> Double? {
         guard let goal = goals.first(where: { $0.nutrientMeterComponent == component }) else { return nil }
@@ -77,7 +77,7 @@ extension GoalSet {
     }
 }
 
-extension Goal {
+public extension Goal {
     var nutrientMeterComponent: NutrientMeterComponent {
         switch type {
         case .energy:
@@ -125,7 +125,7 @@ public extension Food {
 //    }
 }
 
-extension NutrientMeterComponent {
+public extension NutrientMeterComponent {
     var sortPosition: Int {
         switch self {
         case .energy:
