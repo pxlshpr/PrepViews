@@ -914,7 +914,11 @@ public struct MealItemNutrientMetersPreview: View {
             get: {
                 MealFoodItem(
                     food: FoodMock.wheyProtein,
-                    amount: FoodValue(value: value ?? 0, unitType: .weight, weightUnit: weightUnit)
+                    amount: FoodValue(
+                        value: value ?? 0,
+                        unitType: .weight,
+                        weightUnit: weightUnit),
+                    isSoftDeleted: false
                 )
             },
             set: { _ in }

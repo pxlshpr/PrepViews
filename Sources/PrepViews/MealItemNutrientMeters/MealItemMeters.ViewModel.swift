@@ -376,7 +376,7 @@ extension MealItemMeters.ViewModel {
     }
     
     func plannedValue(for component: NutrientMeterComponent, type: MetersType, forGoal: Bool = false) -> Double {
-        
+
         let currentMealValue = meal.plannedValue(for: component, ignoring: foodItem.id)
         
         let planned: Double
