@@ -375,23 +375,28 @@ extension MealItemMeters.ViewModel {
         foodItem.food.info.nutrients
     }
     
-    func plannedValue(for component: NutrientMeterComponent, type: MetersType) -> Double {
+    func plannedValue(for component: NutrientMeterComponent, type: MetersType, forGoal: Bool = false) -> Double {
+        
+        let currentMealValue = meal.plannedValue(for: component, ignoring: foodItem.id)
+        
         let planned: Double
         switch type {
         case .nutrients, .diet:
             guard let day else { return 0 }
-            planned = day.plannedValue(for: component, ignoring: meal.id) + meal.plannedValue(for: component)
+            planned = day.plannedValue(for: component, ignoring: meal.id) + currentMealValue
         case .meal:
-            planned = meal.plannedValue(for: component)
+            planned = currentMealValue
         }
         
-        if meal.foodItems.contains(where: { $0.id == foodItem.id }) {
-            /// If this meal already contains the item (ie. we're editing it), remove its amount from the current total
-//            return planned - foodItem.scaledValue(for: component)
-            return planned - meal.plannedValue(for: component)
-        } else {
+//        if meal.foodItems.contains(where: { $0.id == foodItem.id }) {
+//            if forGoal {
+//                return planned - meal.plannedValue(for: component)
+//            } else {
+//                return planned - foodItem.scaledValue(for: component)
+//            }
+//        } else {
             return planned
-        }
+//        }
     }
     
     //MARK: Nutrient MeterViewModels
@@ -561,7 +566,11 @@ extension MealItemMeters.ViewModel {
             let subgoalLower: Double?
             if let lower = dietMeterViewModel.goalLower {
                 let existingAmount = day.existingAmount(for: component, lowerBound: true, params: goalCalcParams)
-                let remainingAmount = max(lower - existingAmount, 0)
+                
+                let mealAmount = meal.plannedValue(for: component)
+                let trueExistingAmount = existingAmount - mealAmount
+
+                let remainingAmount = max(lower - trueExistingAmount, 0)
                 subgoalLower = remainingAmount / Double(numberOfRemainingMeals)
             } else {
                 subgoalLower = nil
@@ -569,12 +578,28 @@ extension MealItemMeters.ViewModel {
             
             let subgoalUpper: Double?
             if let upper = dietMeterViewModel.goalUpper {
+                //TODO: We need to subtract the meal's we're adding this to's existing amount (without this item) to get the true subgoal
                 let existingAmount = day.existingAmount(for: component, lowerBound: false, params: goalCalcParams)
-                let remainingAmount = max(upper - existingAmount, 0)
+                
+                let mealAmount = meal.plannedValue(for: component)
+                let trueExistingAmount = existingAmount - mealAmount
+                
+                let remainingAmount = max(upper - trueExistingAmount, 0)
                 subgoalUpper = remainingAmount / Double(numberOfRemainingMeals)
             } else {
                 subgoalUpper = nil
             }
+            
+            let planned = plannedValue(for: component, type: .meal)
+            let increment = foodItem.scaledValue(for: component)
+
+            if component == .energy {
+                print("planned is \(planned)")
+                print("increment is \(increment)")
+                print("subgoalUpper is \(subgoalUpper!)")
+                print(" ")
+            }
+
 
             return NutrientMeter.ViewModel(
                 component: component,
@@ -582,8 +607,8 @@ extension MealItemMeters.ViewModel {
                 goalLower: subgoalLower,
                 goalUpper: subgoalUpper,
                 burned: 0,
-                planned: plannedValue(for: component, type: .meal),
-                increment: foodItem.scaledValue(for: component)
+                planned: planned,
+                increment: increment
             )
             /// Now if we have any `dietMeterViewModels` go through all of them, and add subgoals for any that we don't have an explicit goal for
             /// Do this by:

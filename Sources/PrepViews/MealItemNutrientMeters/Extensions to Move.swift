@@ -30,9 +30,13 @@ public extension Day {
 
 
 public extension DayMeal {
-    func plannedValue(for component: NutrientMeterComponent) -> Double {
+    func plannedValue(for component: NutrientMeterComponent, ignoring idOfFoodItemToIgnore: UUID? = nil) -> Double {
         foodItems.reduce(0) { partialResult, mealFoodItem in
-            partialResult + mealFoodItem.scaledValue(for: component)
+            if let idOfFoodItemToIgnore, mealFoodItem.id == idOfFoodItemToIgnore {
+                return partialResult
+            } else {
+                return partialResult + mealFoodItem.scaledValue(for: component)
+            }
         }
     }
     
