@@ -594,10 +594,10 @@ extension MealItemMeters.ViewModel {
             let increment = foodItem.scaledValue(for: component)
 
             if component == .energy {
-                print("planned is \(planned)")
-                print("increment is \(increment)")
-                print("subgoalUpper is \(subgoalUpper!)")
-                print(" ")
+//                print("planned is \(planned)")
+//                print("increment is \(increment)")
+//                print("subgoalUpper is \(subgoalUpper!)")
+//                print(" ")
             }
 
 

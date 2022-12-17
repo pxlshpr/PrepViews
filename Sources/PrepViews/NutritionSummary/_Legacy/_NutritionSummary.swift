@@ -47,7 +47,7 @@
 //    }
 //    
 //    var macrosIndicator: some View {
-//        MacrosIndicator(
+//        FoodBadge(
 //            c: dataProvider.carbAmount,
 //            f: dataProvider.fatAmount,
 //            p: dataProvider.proteinAmount

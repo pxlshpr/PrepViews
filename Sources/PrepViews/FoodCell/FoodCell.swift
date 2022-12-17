@@ -149,7 +149,7 @@ public struct FoodCell: View {
     }
     
     var macrosIndicatorLabel: some View {
-        MacrosIndicator(c: carb, f: fat, p: protein)
+        FoodBadge(c: carb, f: fat, p: protein)
     }
 }
 

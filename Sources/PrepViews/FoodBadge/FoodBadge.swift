@@ -1,7 +1,7 @@
 import SwiftUI
 import PrepDataTypes
 
-public struct MacrosIndicator: View {
+public struct FoodBadge: View {
 
     public static let DefaultWidth: CGFloat = 30
 
@@ -78,7 +78,7 @@ public struct MacrosIndicator: View {
     }
 }
 
-struct MacrosIndicatorPreview: View {
+struct FoodBadgePreview: View {
     
     struct Food {
         let emoji, name: String
@@ -97,7 +97,7 @@ struct MacrosIndicatorPreview: View {
                         Text(food.emoji)
                         Text(food.name)
                         Spacer()
-                        MacrosIndicator(c: food.c, f: food.f, p: food.p)
+                        FoodBadge(c: food.c, f: food.f, p: food.p)
                     }
                 }
             }
@@ -109,6 +109,6 @@ struct MacrosIndicatorPreview: View {
 
 struct MacrosIndicator_Previews: PreviewProvider {
     static var previews: some View {
-        MacrosIndicatorPreview()
+        FoodBadgePreview()
     }
 }

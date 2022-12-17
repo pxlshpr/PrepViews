@@ -94,6 +94,6 @@ public struct FoodCell_Legacy: View {
     }
     
     var macrosIndicator: some View {
-        MacrosIndicator(c: carb, f: fat, p: protein)
+        FoodBadge(c: carb, f: fat, p: protein)
     }
 }
