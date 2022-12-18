@@ -8,6 +8,8 @@ public struct FoodCell: View {
     /// [ ] Make it optional so that we can disregard it if needed
     /// [ ] Conslidate it by moving it back to `PrepViews`
 
+    @AppStorage(UserDefaultsKeys.showingFoodEmojis) var showingFoodEmojis = true
+
     @Binding var isSelectable: Bool
     @State var isSelected: Bool = false
 
@@ -92,7 +94,9 @@ public struct FoodCell: View {
     
     @ViewBuilder
     var emojiText: some View {
-        Text(emoji)
+        if showingFoodEmojis {
+            Text(emoji)
+        }
     }
     
     var nameTexts: some View {
