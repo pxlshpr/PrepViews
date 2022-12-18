@@ -12,6 +12,12 @@ public extension Day {
         }
     }
     
+    func eatenValue(for component: NutrientMeterComponent, ignoring mealID: UUID? = nil) -> Double {
+        meals.reduce(0) { partialResult, dayMeal in
+            partialResult + (dayMeal.id != mealID ? dayMeal.eatenValue(for: component) : 0)
+        }
+    }
+    
     var mealsPlannedOrWithType: [DayMeal] {
         meals.filter { $0.isPlannedOrWithType }
     }
@@ -28,8 +34,22 @@ public extension Day {
     }
 }
 
+extension MealFoodItem {
+    var isEaten: Bool {
+        markedAsEatenAt != nil && markedAsEatenAt! > 0
+    }
+}
 
 public extension DayMeal {
+    func eatenValue(for component: NutrientMeterComponent) -> Double {
+        foodItems.reduce(0) { partialResult, mealFoodItem in
+            guard !mealFoodItem.isSoftDeleted && mealFoodItem.isEaten else {
+                return partialResult
+            }
+            return partialResult + mealFoodItem.scaledValue(for: component)
+        }
+    }
+    
     func plannedValue(for component: NutrientMeterComponent, ignoring idOfFoodItemToIgnore: UUID? = nil) -> Double {
         foodItems.reduce(0) { partialResult, mealFoodItem in
             
