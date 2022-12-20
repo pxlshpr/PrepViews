@@ -121,7 +121,8 @@ struct MeterRow: View {
         HStack {
             Text(meterViewModel.component.description)
                 .foregroundColor(meterViewModel.labelTextColor)
-                .font(.system(.callout, design: .rounded, weight: .light))
+//                .font(.system(.callout, design: .rounded, weight: .light))
+                .font(.system(size: 13, weight: .light, design: .rounded))
             if meterViewModel.isGenerated {
                 Image(systemName: "sparkles")
                     .font(.caption2)

@@ -11,16 +11,18 @@ public struct NutrientsPicker: View {
     
     /// Returns true if there are unused micronutrients in the specified group matching the search string provided
     //TODO: Do the search on our end
-    let hasUnusedMicros: (NutrientTypeGroup, String) -> Bool
+    let hasUnusedMicros: ((NutrientTypeGroup, String) -> Bool)?
     
     /// Returns true if the specified micronutrient has been added and shouldn't be shown
-    let hasMicronutrient: (NutrientType) -> Bool
+    let hasMicronutrient: ((NutrientType) -> Bool)?
     
     let supportsEnergyAndMacros: Bool
     let shouldShowMacro: ((Macro) -> Bool)?
-    let shouldShowEnergy: Bool
+    let shouldShowEnergy: Bool?
 
     let shouldDisableLastMacroOrEnergy: Bool
+    
+    let supportsMultipleSelections: Bool
     
     @State var energyIsPicked: Bool = false
     @State var pickedMacros: [Macro] = []
@@ -31,16 +33,18 @@ public struct NutrientsPicker: View {
     
     public init(
         supportsEnergyAndMacros: Bool = false,
-        shouldShowEnergy: Bool = false,
+        supportsMultipleSelections: Bool = true,
+        shouldShowEnergy: Bool? = nil,
         shouldShowMacro: ((Macro) -> Bool)? = nil,
         shouldDisableLastMacroOrEnergy: Bool = false,
-        hasUnusedMicros: @escaping (NutrientTypeGroup, String) -> Bool,
-        hasMicronutrient: @escaping (NutrientType) -> Bool,
+        hasUnusedMicros: ((NutrientTypeGroup, String) -> Bool)? = nil,
+        hasMicronutrient: ((NutrientType) -> Bool)? = nil,
         didAddNutrients: @escaping (Bool, [Macro], [NutrientType]) -> Void
     ) {
         self.shouldShowMacro = shouldShowMacro
         self.shouldShowEnergy = shouldShowEnergy
         self.supportsEnergyAndMacros = supportsEnergyAndMacros
+        self.supportsMultipleSelections = supportsMultipleSelections
         self.shouldDisableLastMacroOrEnergy = shouldDisableLastMacroOrEnergy
         self.didAddNutrients = didAddNutrients
         self.hasUnusedMicros = hasUnusedMicros
@@ -48,7 +52,15 @@ public struct NutrientsPicker: View {
     }
     
     var title: String {
-        supportsEnergyAndMacros ? "Nutrients" : "Micronutrients"
+        var subject = supportsEnergyAndMacros ? "Nutrient" : "Micronutrient"
+        let prefix: String
+        if supportsMultipleSelections {
+            prefix = "Add"
+            subject += "s"
+        } else {
+            prefix = "Pick a"
+        }
+        return "\(prefix) \(subject)"
     }
     
     public var body: some View {
@@ -61,7 +73,7 @@ public struct NutrientsPicker: View {
                     form
                 }
             )
-            .navigationTitle("Add \(title)")
+            .navigationTitle(title)
             .navigationBarTitleDisplayMode(.large)
             .toolbar { navigationLeadingContent }
             .toolbar { navigationTrailingContent }
@@ -93,17 +105,31 @@ public struct NutrientsPicker: View {
             return energyIsPicked ? 1 : 0
         }
         
+        var shouldShow: Bool {
+            guard let shouldShowEnergy else {
+                return supportsEnergyAndMacros
+            }
+            return shouldShowEnergy
+        }
+        
         return Group {
-            if shouldShowEnergy {
+            if shouldShow {
                 Section {
                     Button {
-                        Haptics.feedback(style: .soft)
-                        energyIsPicked.toggle()
+                        if supportsMultipleSelections {
+                            Haptics.feedback(style: .soft)
+                            energyIsPicked.toggle()
+                        } else {
+                            energyIsPicked = true
+                            dismissWithSelections()
+                        }
                     } label: {
                         HStack {
-                            Image(systemName: "checkmark")
-                                .opacity(checkmarkOpacity)
-                                .animation(.default, value: energyIsPicked)
+                            if supportsMultipleSelections {
+                                Image(systemName: "checkmark")
+                                    .opacity(checkmarkOpacity)
+                                    .animation(.default, value: energyIsPicked)
+                            }
                             Text("Energy")
                                 .foregroundColor(textColor)
                                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -119,7 +145,7 @@ public struct NutrientsPicker: View {
     var macrosToShow: [Macro] {
         Macro.allCases.filter { macro in
             guard let shouldShowMacro, shouldShowMacro(macro) else {
-                return false
+                return supportsEnergyAndMacros
             }
             if !searchText.isEmpty {
                 return macro.description.lowercased().contains(searchText)
@@ -163,17 +189,24 @@ public struct NutrientsPicker: View {
         }
         
         return Button {
-            Haptics.feedback(style: .soft)
-            if pickedMacros.contains(macro) {
-                pickedMacros.removeAll(where: { $0 == macro })
+            if supportsMultipleSelections {
+                Haptics.feedback(style: .soft)
+                if pickedMacros.contains(macro) {
+                    pickedMacros.removeAll(where: { $0 == macro })
+                } else {
+                    pickedMacros.append(macro)
+                }
             } else {
                 pickedMacros.append(macro)
+                dismissWithSelections()
             }
         } label: {
             HStack {
-                Image(systemName: "checkmark")
-                    .opacity(checkmarkOpacity)
-                    .animation(.default, value: pickedMacros)
+                if supportsMultipleSelections {
+                    Image(systemName: "checkmark")
+                        .opacity(checkmarkOpacity)
+                        .animation(.default, value: pickedMacros)
+                }
                 Text(macro.description)
                     .foregroundColor(textColor)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -182,18 +215,29 @@ public struct NutrientsPicker: View {
         }
         .disabled(shouldDisable)
     }
+    
     var microSections: some View {
-        ForEach(NutrientTypeGroup.allCases) {
-            if hasUnusedMicros($0, searchText) {
+        func shouldShowGroup(_ group: NutrientTypeGroup) -> Bool {
+            guard let hasUnusedMicros else { return true }
+            return hasUnusedMicros(group, searchText)
+        }
+
+        return ForEach(NutrientTypeGroup.allCases) {
+            if shouldShowGroup($0) {
                 sectionForGroup($0)
             }
         }
     }
     
     func sectionForGroup(_ group: NutrientTypeGroup) -> some View {
-        Section(group.description) {
+        func shouldShowNutrient(_ nutrientType: NutrientType) -> Bool {
+            guard let hasMicronutrient else { return true }
+            return !hasMicronutrient(nutrientType)
+        }
+
+        return Section(group.description) {
             ForEach(group.nutrients) {
-                if !hasMicronutrient($0) {
+                if shouldShowNutrient($0) {
                     cell(for: $0)
                 }
             }
@@ -216,17 +260,24 @@ public struct NutrientsPicker: View {
     
     func button(for nutrientType: NutrientType) -> some View {
         Button {
-            Haptics.feedback(style: .soft)
-            if pickedNutrientTypes.contains(nutrientType) {
-                pickedNutrientTypes.removeAll(where: { $0 == nutrientType })
+            if supportsMultipleSelections {
+                Haptics.feedback(style: .soft)
+                if pickedNutrientTypes.contains(nutrientType) {
+                    pickedNutrientTypes.removeAll(where: { $0 == nutrientType })
+                } else {
+                    pickedNutrientTypes.append(nutrientType)
+                }
             } else {
                 pickedNutrientTypes.append(nutrientType)
+                dismissWithSelections()
             }
         } label: {
             HStack {
-                Image(systemName: "checkmark")
-                    .opacity(pickedNutrientTypes.contains(nutrientType) ? 1 : 0)
-                    .animation(.default, value: pickedNutrientTypes)
+                if supportsMultipleSelections {
+                    Image(systemName: "checkmark")
+                        .opacity(pickedNutrientTypes.contains(nutrientType) ? 1 : 0)
+                        .animation(.default, value: pickedNutrientTypes)
+                }
                 Text(nutrientType.description)
                     .foregroundColor(.primary)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -245,13 +296,18 @@ public struct NutrientsPicker: View {
         count += pickedMacros.count + pickedNutrientTypes.count
         return count
     }
+    
+    func dismissWithSelections() {
+        didAddNutrients(energyIsPicked, pickedMacros, pickedNutrientTypes)
+        Haptics.successFeedback()
+        dismiss()
+    }
+    
     var navigationTrailingContent: some ToolbarContent {
         ToolbarItemGroup(placement: .navigationBarTrailing) {
-            if pickedNutrientsCount > 0 {
+            if pickedNutrientsCount > 0, supportsMultipleSelections {
                 Button("Add \(pickedNutrientsCount)") {
-                    didAddNutrients(energyIsPicked, pickedMacros, pickedNutrientTypes)
-                    Haptics.successFeedback()
-                    dismiss()
+                    dismissWithSelections()
                 }
             }
         }
