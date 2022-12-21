@@ -1,6 +1,19 @@
 import Foundation
 import PrepDataTypes
 
+public extension Macro {
+    var nutrientMeterComponent: NutrientMeterComponent {
+        switch self {
+        case .carb:
+            return .carb
+        case .fat:
+            return .fat
+        case .protein:
+            return .protein
+        }
+    }
+}
+
 public extension Day {
     func numberOfGoals(with params: GoalCalcParams) -> Int {
         goalSet?.numberOfGoals(with: params) ?? 0
@@ -10,6 +23,10 @@ public extension Day {
         meals.reduce(0) { partialResult, dayMeal in
             partialResult + (dayMeal.id != mealID ? dayMeal.plannedValue(for: component) : 0)
         }
+    }
+
+    func plannedValue(for macro: Macro, ignoring mealID: UUID? = nil) -> Double {
+        plannedValue(for: macro.nutrientMeterComponent, ignoring: mealID)
     }
     
     func eatenValue(for component: NutrientMeterComponent, ignoring mealID: UUID? = nil) -> Double {
