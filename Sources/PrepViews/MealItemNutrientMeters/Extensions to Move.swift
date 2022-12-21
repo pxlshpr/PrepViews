@@ -14,6 +14,12 @@ public extension Macro {
     }
 }
 
+public extension NutrientType {
+    var nutrientMeterComponent: NutrientMeterComponent {
+        NutrientMeterComponent.micro(nutrientType: self, nutrientUnit: self.units.first ?? .g)
+    }
+}
+
 public extension Day {
     func numberOfGoals(with params: GoalCalcParams) -> Int {
         goalSet?.numberOfGoals(with: params) ?? 0
@@ -28,7 +34,11 @@ public extension Day {
     func plannedValue(for macro: Macro, ignoring mealID: UUID? = nil) -> Double {
         plannedValue(for: macro.nutrientMeterComponent, ignoring: mealID)
     }
-    
+
+    func plannedValue(for nutrientType: NutrientType, ignoring mealID: UUID? = nil) -> Double {
+        plannedValue(for: nutrientType.nutrientMeterComponent, ignoring: mealID)
+    }
+
     func eatenValue(for component: NutrientMeterComponent, ignoring mealID: UUID? = nil) -> Double {
         meals.reduce(0) { partialResult, dayMeal in
             partialResult + (dayMeal.id != mealID ? dayMeal.eatenValue(for: component) : 0)
