@@ -166,6 +166,21 @@ public extension NutrientMeterComponent {
         }
     }
     
+    var fullDescription: String {
+        switch self {
+        case .energy:
+            //TODO: Handle kJ preference (return Kilojules or Energy)
+            return "Calories"
+        case .carb:
+            return "Carbohydrates"
+        case .fat:
+            return "Fat"
+        case .protein:
+            return "Protein"
+        case .micro(let nutrientType, _):
+            return nutrientType.description
+        }
+    }
     
     var unit: NutrientUnit {
         switch self {
