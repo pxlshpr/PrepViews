@@ -55,8 +55,9 @@ public struct FoodBadge: View {
         }
         .frame(width: width, height: 10)
         .cornerRadius(2)
+        /// No shadows 🙅🏽‍♂️ as this causes stuttering while scrolling (even on the most performant devices)
 //        .shadow(radius: 1, x: 0, y: 1.5)
-        .shadow(color: Color(.systemFill), radius: 1, x: 0, y: 1.5)
+//        .shadow(color: Color(.systemFill), radius: 1, x: 0, y: 1.5)
     }
     
     var totalEnergy: CGFloat {
