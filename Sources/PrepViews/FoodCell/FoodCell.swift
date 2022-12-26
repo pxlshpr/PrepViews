@@ -73,7 +73,8 @@ public struct FoodCell: View {
                 macrosIndicator
             }
         }
-        .listRowBackground(Color(.secondarySystemGroupedBackground))
+//        .listRowBackground(Color(.secondarySystemGroupedBackground))
+        .listRowBackground(FormCellBackground())
     }
     
     @ViewBuilder
