@@ -118,7 +118,8 @@ public struct FoodCell: View {
         }
         if let brand = brand, !brand.isEmpty {
             view = view
-            + Text(detail?.isEmpty == false ? ", " : "")
+//            + Text(detail?.isEmpty == true ? "" : ", ")
+            + Text(", ")
                 .font(.callout)
                 .fontWeight(brandWeight)
                 .foregroundColor(brandColor)
