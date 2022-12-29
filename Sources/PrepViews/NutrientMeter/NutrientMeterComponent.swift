@@ -21,7 +21,7 @@ extension NutrientMeterComponent: Hashable {
     }
 }
 
-public enum NutrientMeterComponent {
+public enum NutrientMeterComponent: Codable {
     case energy
     case carb
     case fat
