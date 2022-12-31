@@ -38,6 +38,25 @@ public extension Day {
     func plannedValue(for nutrientType: NutrientType, ignoring mealID: UUID? = nil) -> Double {
         plannedValue(for: nutrientType.nutrientMeterComponent, ignoring: mealID)
     }
+    
+    /// This gets the planned values for each macros, but then returns the portion of each from the true total for energy so that the sum of them equals the energy value.
+    /// This is used for instances such as swapping representations of energy and macro breakdowns on charts.
+    func plannedMacroBreakdown() -> [(macro: Macro, value: Double)] {
+        let energy = plannedValue(for: .energy)
+        
+        let carb = plannedValue(for: Macro.carb) * KcalsPerGramOfCarb
+        let fat = plannedValue(for: Macro.fat) * KcalsPerGramOfFat
+        let protein = plannedValue(for: Macro.protein) * KcalsPerGramOfProtein
+        let calculatedEnergy = carb + fat + protein
+
+        guard calculatedEnergy > 0 else { return [(.fat, 0), (.carb, 0), (.protein, 0)] }
+        
+        return [
+            (.carb, (carb / calculatedEnergy) * energy),
+            (.fat, (fat / calculatedEnergy) * energy),
+            (.protein, (protein / calculatedEnergy) * energy)
+        ]
+    }
 
     func eatenValue(for component: NutrientMeterComponent, ignoring mealID: UUID? = nil) -> Double {
         meals.reduce(0) { partialResult, dayMeal in
@@ -78,6 +97,7 @@ public extension DayMeal {
     }
     
     func plannedValue(for component: NutrientMeterComponent, ignoring idOfFoodItemToIgnore: UUID? = nil) -> Double {
+        
         foodItems.reduce(0) { partialResult, mealFoodItem in
             
             guard !(mealFoodItem.id == idOfFoodItemToIgnore
@@ -91,6 +111,25 @@ public extension DayMeal {
                 return partialResult + mealFoodItem.scaledValue(for: component)
 //            }
         }
+    }
+    
+    /// This gets the planned values for each macros, but then returns the portion of each from the true total for energy so that the sum of them equals the energy value.
+    /// This is used for instances such as swapping representations of energy and macro breakdowns on charts.
+    func plannedMacroBreakdown() -> [(macro: Macro, value: Double)] {
+        let energy = plannedValue(for: .energy)
+        
+        let carb = plannedValue(for: .carb) * KcalsPerGramOfCarb
+        let fat = plannedValue(for: .fat) * KcalsPerGramOfFat
+        let protein = plannedValue(for: .protein) * KcalsPerGramOfProtein
+        let calculatedEnergy = carb + fat + protein
+
+        guard calculatedEnergy > 0 else { return [(.fat, 0), (.carb, 0), (.protein, 0)] }
+        
+        return [
+            (.carb, (carb / calculatedEnergy) * energy),
+            (.fat, (fat / calculatedEnergy) * energy),
+            (.protein, (protein / calculatedEnergy) * energy)
+        ]
     }
     
     func plannedOrTypeValue(for component: NutrientMeterComponent, lowerBound: Bool, params: GoalCalcParams) -> Double? {
