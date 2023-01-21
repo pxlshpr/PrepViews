@@ -144,9 +144,14 @@ public struct NutrientsPicker: View {
     
     var macrosToShow: [Macro] {
         Macro.allCases.filter { macro in
-            guard let shouldShowMacro, shouldShowMacro(macro) else {
+            guard let shouldShowMacro else {
                 return supportsEnergyAndMacros
             }
+            
+            guard shouldShowMacro(macro) else {
+                return false
+            }
+            
             if !searchText.isEmpty {
                 return macro.description.lowercased().contains(searchText)
             } else {
