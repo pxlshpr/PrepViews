@@ -406,10 +406,10 @@ public struct UnitPickerGridTiered: View {
                 switch option.optionType {
                 case .weight:
                     guard let weightUnit = WeightUnit(rawValue: intValue) else { return }
-                    didPickUnit(.weight(weightUnit))
+                    pickedUnit(unit: .weight(weightUnit))
                 case .volume:
                     guard let volumeUnit = VolumeUnit(rawValue: intValue) else { return }
-                    didPickUnit(.volume(volumeUnit))
+                    pickedUnit(unit: .volume(volumeUnit))
                 default:
                     return
                 }
