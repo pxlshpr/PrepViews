@@ -46,6 +46,7 @@ protocol Option {
     var optionId: String { get }
     var optionTitle: String { get }
     var optionDetail: String { get }
+    var optionType: UnitType { get }
 }
 
 extension FormSize: Option {
@@ -59,6 +60,10 @@ extension FormSize: Option {
     
     var optionDetail: String {
         self.scaledAmountString
+    }
+    
+    var optionType: UnitType {
+        .size
     }
 }
 
@@ -85,6 +90,10 @@ extension VolumePrefixedSizeOption: Option {
     
     var optionDetail: String {
         size.scaledAmountString(for: volumeUnit, using: .defaultUnits)
+    }
+    
+    var optionType: UnitType {
+        .size
     }
 }
 
@@ -126,6 +135,10 @@ extension ServingOption: Option {
     
     var optionDetail: String {
         description
+    }
+    
+    var optionType: UnitType {
+        .serving
     }
 }
 

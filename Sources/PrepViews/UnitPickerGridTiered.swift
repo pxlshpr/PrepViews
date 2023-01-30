@@ -90,6 +90,10 @@ extension WeightUnit: Option {
     var optionDetail: String {
         self.description.lowercased()
     }
+    
+    var optionType: UnitType {
+        .weight
+    }
 }
 
 extension VolumeUnit: Option {
@@ -103,6 +107,10 @@ extension VolumeUnit: Option {
     
     var optionDetail: String {
         description.lowercased()
+    }
+    
+    var optionType: UnitType {
+        .volume
     }
 }
 
@@ -394,7 +402,17 @@ public struct UnitPickerGridTiered: View {
             secondaryString: option.optionDetail,
             swapColors: swapColors,
             didTap: {
-//                didPickOption(option)
+                guard let intValue = Int16(option.optionId) else { return }
+                switch option.optionType {
+                case .weight:
+                    guard let weightUnit = WeightUnit(rawValue: intValue) else { return }
+                    didPickUnit(.weight(weightUnit))
+                case .volume:
+                    guard let volumeUnit = VolumeUnit(rawValue: intValue) else { return }
+                    didPickUnit(.volume(volumeUnit))
+                default:
+                    return
+                }
             }
         )
     }
