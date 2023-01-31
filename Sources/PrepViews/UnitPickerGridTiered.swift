@@ -249,7 +249,7 @@ public struct UnitPickerGridTiered: View {
     
     @ViewBuilder
     var primaryUnitsSection: some View {
-        if !standardSizes.isEmpty {
+//        if !standardSizes.isEmpty {
             OptionsSection(
                 header: "Sizes",
                 options: primaryUnitOptions,
@@ -271,7 +271,7 @@ public struct UnitPickerGridTiered: View {
                     pickedUnit(unit: .serving)
                 }
             }
-        }
+//        }
     }
 
     var primaryUnitOptions: [Option] {

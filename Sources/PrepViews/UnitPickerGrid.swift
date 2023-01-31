@@ -706,6 +706,39 @@ struct OptionsSection: View {
         }
     }
     
+    @ViewBuilder
+    var content: some View {
+        if shouldShowAsGrid {
+            grid
+        } else {
+            horizontalScrollView
+        }
+    }
+    
+    var grid: some View {
+        FlowLayout(
+            mode: .scrollable,
+            items: options,
+            itemSpacing: 4,
+            shouldAnimateHeight: .constant(true)
+        ) {
+            button(for: $0)
+        }
+        .padding(.horizontal, 17)
+    }
+    
+    func button(for option: Option) -> some View {
+        PillButton(
+            primaryString: option.optionTitle,
+            secondaryString: option.optionDetail,
+            swapColors: swapColors,
+            didTap: {
+                didPickOption(option)
+            }
+        )
+        .matchedGeometryEffect(id: option.optionId, in: namespace)
+    }
+    
     var headerView: some View {
         HStack {
             Text(header)
@@ -731,27 +764,6 @@ struct OptionsSection: View {
         return isGrid || !allowCompactView
     }
     
-    @ViewBuilder
-    var content: some View {
-        if shouldShowAsGrid {
-            grid
-        } else {
-            horizontalScrollView
-        }
-    }
-    
-    var grid: some View {
-        FlowLayout(
-            mode: .scrollable,
-            items: options,
-            itemSpacing: 4,
-            shouldAnimateHeight: .constant(true)
-        ) {
-            button(for: $0)
-        }
-        .padding(.horizontal, 17)
-    }
-    
     var horizontalScrollView: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack {
@@ -762,17 +774,4 @@ struct OptionsSection: View {
             .padding(.horizontal, 17)
         }
     }
-    
-    func button(for option: Option) -> some View {
-        PillButton(
-            primaryString: option.optionTitle,
-            secondaryString: option.optionDetail,
-            swapColors: swapColors,
-            didTap: {
-                didPickOption(option)
-            }
-        )
-            .matchedGeometryEffect(id: option.optionId, in: namespace)
-    }
-    
 }
