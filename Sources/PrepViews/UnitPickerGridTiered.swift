@@ -233,16 +233,35 @@ public struct UnitPickerGridTiered: View {
     
     var content: some View {
         FormStyledScrollView {
-            if pickedGroup == nil {
-                primaryUnitsSection
-                    .transition(.move(edge: .leading))
-            }
-            if let pickedGroup {
-                sections(for: pickedGroup)
+            if let filteredGroup {
+                sections(for: filteredGroup)
             } else {
-                groupButtons
+                if pickedGroup == nil {
+                    primaryUnitsSection
+                        .transition(.move(edge: .leading))
+                }
+                if let pickedGroup {
+                    sections(for: pickedGroup)
+                } else {
+                    groupButtons
+                }
             }
         }
+    }
+    
+    var filteredGroup: UnitGroup? {
+        guard standardSizes.count == 0,
+              volumePrefixedSizes.count == 0,
+              !includeServing else {
+            return nil
+        }
+        if includeWeights && !includeVolumes {
+            return .weights
+        }
+        if includeVolumes && !includeWeights {
+            return .volumes
+        }
+        return nil
     }
     
     //MARK: - Primary Units Section
