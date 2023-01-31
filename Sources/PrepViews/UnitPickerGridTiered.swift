@@ -251,7 +251,7 @@ public struct UnitPickerGridTiered: View {
     var primaryUnitsSection: some View {
 //        if !standardSizes.isEmpty {
             OptionsSection(
-                header: "Sizes",
+//                header: "Sizes",
                 options: primaryUnitOptions,
                 isGrid: $isGrid
             ) { option in

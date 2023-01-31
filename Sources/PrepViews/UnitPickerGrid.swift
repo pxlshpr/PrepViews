@@ -683,7 +683,7 @@ struct OptionsSection: View {
     @Namespace var namespace
     @State var isGrid: Bool = false
     
-    let header: String
+    let header: String?
     let allowCompactView: Bool
     let swapColors: Bool
     let options: [any Option]
@@ -691,7 +691,7 @@ struct OptionsSection: View {
     
     let didPickOption: ((Option) -> ())
     
-    init(header: String, options: [any Option], allowCompactView: Bool = false, isGrid: Binding<Bool>? = nil, swapColors: Bool = false, didPickOption: @escaping ((Option) -> ())) {
+    init(header: String? = nil, options: [any Option], allowCompactView: Bool = false, isGrid: Binding<Bool>? = nil, swapColors: Bool = false, didPickOption: @escaping ((Option) -> ())) {
         self.header = header
         self.allowCompactView = allowCompactView
         self.options = options
@@ -700,9 +700,16 @@ struct OptionsSection: View {
         self.didPickOption = didPickOption
     }
     
+    @ViewBuilder
     var body: some View {
-        FormStyledSection(header: headerView, horizontalPadding: 0) {
-            content
+        if let header {
+            FormStyledSection(header: headerView(header), horizontalPadding: 0) {
+                content
+            }
+        } else {
+            FormStyledSection(horizontalPadding: 0) {
+                content
+            }
         }
     }
     
@@ -739,7 +746,7 @@ struct OptionsSection: View {
         .matchedGeometryEffect(id: option.optionId, in: namespace)
     }
     
-    var headerView: some View {
+    func headerView(_ header: String) -> some View {
         HStack {
             Text(header)
             Spacer()
