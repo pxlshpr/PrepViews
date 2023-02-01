@@ -226,7 +226,8 @@ public struct UnitPickerGridTiered: View {
                 Haptics.feedback(style: .soft)
                 dismiss()
             } label: {
-                closeButtonLabel
+                CloseButtonLabel()
+//                closeButtonLabel
             }
         }
     }

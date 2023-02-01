@@ -308,8 +308,8 @@ public struct NutrientsPicker: View {
         dismiss()
     }
     
-    var navigationTrailingContent: some ToolbarContent {
-        ToolbarItemGroup(placement: .navigationBarTrailing) {
+    var navigationLeadingContent: some ToolbarContent {
+        ToolbarItemGroup(placement: .navigationBarLeading) {
             if pickedNutrientsCount > 0, supportsMultipleSelections {
                 Button("Add \(pickedNutrientsCount)") {
                     dismissWithSelections()
@@ -317,13 +317,14 @@ public struct NutrientsPicker: View {
             }
         }
     }
-    var navigationLeadingContent: some ToolbarContent {
-        ToolbarItemGroup(placement: .navigationBarLeading) {
+    var navigationTrailingContent: some ToolbarContent {
+        ToolbarItemGroup(placement: .navigationBarTrailing) {
             Button {
                 Haptics.feedback(style: .soft)
                 dismiss()
             } label: {
-                closeButtonLabel
+                CloseButtonLabel()
+//                closeButtonLabel
             }
         }
     }
