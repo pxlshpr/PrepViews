@@ -32,7 +32,7 @@ extension PortionAwareness {
         let bodyProfile: BodyProfile?
         let shouldCreateSubgoals: Bool
         
-        @Published var metersType: MetersType
+        @Published var currentType: MetersType
         @Published var pagerHeight: CGFloat
         
         @Published var page: Page
@@ -61,9 +61,19 @@ extension PortionAwareness {
             let metersTypes = MetersType.types(for: day, meal: meal)
             self.metersTypes = metersTypes
             
-            let initialMetersType = MetersType.initialType(for: day, meal: meal)
-            self.metersType = initialMetersType
-            switch initialMetersType {
+            
+            let type: MetersType
+            if let userDefaultsTypeRawValue = UserDefaults.standard.object(forKey: "portionAwarenessType") as? Int,
+               let userDefaultsType = MetersType(rawValue: userDefaultsTypeRawValue)
+            {
+                type = userDefaultsType
+            } else {
+                let initialMetersType = MetersType.initialType(for: day, meal: meal)
+                type = initialMetersType
+            }
+            self.currentType = type
+
+            switch type {
             case .meal:
                 self.page = Page.withIndex(0)
             case .diet:
@@ -74,7 +84,7 @@ extension PortionAwareness {
             
             self.pagerHeight = 0
             
-            let numberOfRows = self.numberOfRows(for: self.metersType)
+            let numberOfRows = self.numberOfRows(for: self.currentType)
             self.pagerHeight = calculateHeight(numberOfRows: numberOfRows)
             
             self.nutrientMeterViewModels = calculatedNutrientMeterViewModels
@@ -148,7 +158,7 @@ extension PortionAwareness.ViewModel {
     }
 
     func recalculateHeight() {
-        let numberOfRows = numberOfRows(for: metersType)
+        let numberOfRows = numberOfRows(for: currentType)
         pagerHeight = calculateHeight(numberOfRows: numberOfRows)
     }
     
@@ -163,7 +173,7 @@ extension PortionAwareness.ViewModel {
     func refresh() {
         foodItemChanged()
         metersTypes = MetersType.types(for: day, meal: meal)
-        page = .withIndex(pageIndex(for: self.metersType))
+        page = .withIndex(pageIndex(for: self.currentType))
     }
     
     func foodItemChanged() {
@@ -178,7 +188,7 @@ extension PortionAwareness.ViewModel {
         
         var hasNewCompletion = false
         var hasNewExcess = false
-        switch metersType {
+        switch currentType {
         case .diet:
             for viewModel in dietMeterViewModels {
                 if viewModel.percentageType == .complete {
@@ -260,10 +270,10 @@ extension PortionAwareness.ViewModel {
     
     var metersTypeBinding: Binding<MetersType> {
         Binding<MetersType>(
-            get: { self.metersType },
+            get: { self.currentType },
             set: { newType in
                 withAnimation {
-                    self.metersType = newType
+                    self.currentType = newType
                     
                     self.page.update(.new(index: self.pageIndex(for: newType)))
                     self.pagerHeight = self.calculateHeight(numberOfRows: self.numberOfRows(for: newType))
@@ -296,8 +306,8 @@ extension PortionAwareness.ViewModel {
         switch result {
         case .success(let transition):
             withAnimation {
-                self.metersType = MetersType(rawValue: transition.nextPage + 1) ?? .nutrients
-                self.pagerHeight = calculateHeight(numberOfRows: self.numberOfRows(for: self.metersType))
+                self.currentType = MetersType(rawValue: transition.nextPage + 1) ?? .nutrients
+                self.pagerHeight = calculateHeight(numberOfRows: self.numberOfRows(for: self.currentType))
             }
         case .failure:
             break
@@ -630,7 +640,7 @@ extension PortionAwareness.ViewModel {
     }
     
     var currentMeterViewModels: [NutrientMeter.ViewModel] {
-        meterViewModels(for: metersType)
+        meterViewModels(for: currentType)
     }
     
     func meterViewModels(for type: MetersType) -> [NutrientMeter.ViewModel] {

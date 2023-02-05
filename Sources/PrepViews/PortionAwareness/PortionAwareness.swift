@@ -3,10 +3,15 @@ import SwiftUISugar
 import PrepDataTypes
 import PrepMocks
 import SwiftUIPager
+import SwiftHaptics
 
 public struct PortionAwareness: View {
-    
+
+    @Environment(\.colorScheme) var colorScheme
     @StateObject var viewModel: ViewModel
+
+    @State var showingFoodLabel: Bool = false
+//    @State var foodLabelHeight: CGFloat = 0
     
     @Binding var foodItem: MealFoodItem
     @Binding var meal: DayMeal
@@ -93,6 +98,10 @@ public struct PortionAwareness: View {
                 viewModel.day = day
             }
         }
+        .onChange(of: viewModel.currentType) { newValue in
+            UserDefaults.standard.setValue(newValue.rawValue, forKey: "portionAwarenessType")
+        }
+        .sheet(isPresented: $showingFoodLabel) { foodLabelSheet }
     }
     
     //MARK: Pager
@@ -108,10 +117,14 @@ public struct PortionAwareness: View {
                     .frame(maxWidth: .infinity)
                     .padding(.leading, 17)
                     .padding(.vertical, 15)
-                    .background(
-                        RoundedRectangle(cornerRadius: 10)
-                            .foregroundColor(Color(.secondarySystemGroupedBackground))
-                    )
+                
+//                    .background(
+//                        RoundedRectangle(cornerRadius: 10)
+//                            .foregroundColor(Color(.secondarySystemGroupedBackground))
+//                    )
+                    .background(FormCellBackground())
+                    .cornerRadius(10)
+
                     .padding(.horizontal, 20)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -153,7 +166,7 @@ public struct PortionAwareness: View {
     
     var footer: some View {
         Group {
-            switch viewModel.metersType {
+            switch viewModel.currentType {
             case .nutrients:
                 legend
             case .diet:
@@ -182,7 +195,7 @@ public struct PortionAwareness: View {
     }
     
     var footer_legacy: some View {
-        Text(viewModel.metersType.footerString)
+        Text(viewModel.currentType.footerString)
             .fixedSize(horizontal: false, vertical: true)
             .foregroundColor(Color(.secondaryLabel))
             .font(.footnote)
@@ -210,9 +223,9 @@ public struct PortionAwareness: View {
     //MARK: - GoalSet Picker
     @ViewBuilder
     var goalSetPicker: some View {
-        switch viewModel.metersType {
+        switch viewModel.currentType {
         case .nutrients:
-            emptyPicker
+            nutrientsPicker
                 .transition(.move(edge: .leading)
                     .combined(with: .opacity)
                     .combined(with: .scale)
@@ -232,8 +245,35 @@ public struct PortionAwareness: View {
         }
     }
     
-    var emptyPicker: some View {
-        picker().opacity(0)
+    var nutrientsPicker: some View {
+        var label: some View {
+            HStack(spacing: 2) {
+                Image(systemName: "chart.bar.doc.horizontal")
+                Text("Food Label")
+            }
+            .font(.footnote)
+            .foregroundColor(.accentColor)
+            .bold()
+            .padding(.horizontal, 8)
+            .padding(.vertical, 8)
+            .background(
+                RoundedRectangle(cornerRadius: 7, style: .continuous)
+                    .fill(Color.accentColor.opacity(
+                        colorScheme == .dark ? 0.1 : 0.15
+                    ))
+            )
+        }
+        
+        var button: some View {
+            return Button {
+                Haptics.feedback(style: .soft)
+                showingFoodLabel = true
+            } label: {
+                label
+            }
+        }
+        
+        return button
     }
     
     var dietPicker: some View {
@@ -246,23 +286,38 @@ public struct PortionAwareness: View {
     
     /// We're allowing nil to be passed into this so it can be used as a transparent placeholder
     func picker(for goalSet: GoalSet? = nil, forMeal: Bool = false) -> some View {
-        Button {
-            didTapGoalSetButton(viewModel.metersType == .meal)
-        } label: {
+        
+        var label: some View {
             HStack(spacing: 2) {
-                Text(goalSet?.emoji ?? "🫃🏽")
-                    .opacity(goalSet == nil ? 0 : 1)
-                    .font(.footnote)
+                if let emoji = goalSet?.emoji {
+                    Text(emoji)
+                        .font(.footnote)
+                }
                 Text(goalSet?.name ?? "Select \(forMeal ? "Meal Type" : "Diet")")
                     .font(.footnote)
                     .foregroundColor(.accentColor)
                 Image(systemName: "chevron.up.chevron.down")
                     .foregroundColor(.accentColor)
-                    .foregroundColor(Color(.tertiaryLabel))
+//                    .foregroundColor(Color(.tertiaryLabel))
                     .font(.footnote)
                     .imageScale(.small)
             }
-            .padding(.trailing, 20)
+            .bold()
+            .padding(.horizontal, 8)
+            .padding(.vertical, 8)
+            .background(
+                RoundedRectangle(cornerRadius: 7, style: .continuous)
+                    .fill(Color.accentColor.opacity(
+                        colorScheme == .dark ? 0.1 : 0.15
+                    ))
+            )
+        }
+        
+        return Button {
+            didTapGoalSetButton(viewModel.currentType == .meal)
+        } label: {
+            label
+//                .padding(.trailing, 20)
         }
     }
     
@@ -292,14 +347,14 @@ public struct PortionAwareness: View {
 extension PortionAwareness.ViewModel {
     
     var showMealSubgoals: Bool {
-        guard metersType == .meal else { return false }
+        guard currentType == .meal else { return false }
         return currentMeterViewModels.contains {
             $0.isGenerated
         }
     }
     
     var showDietAutoGoals: Bool {
-        guard metersType == .diet else { return false }
+        guard currentType == .diet else { return false }
         return currentMeterViewModels.contains {
             $0.isGenerated
         }
@@ -427,404 +482,6 @@ extension Food {
         return components
     }
 }
-
-//MARK: - Legend
-
-extension PortionAwareness {
-    struct Legend: View {
-        
-        @Environment(\.colorScheme) var colorScheme
-        
-        let spacing: CGFloat = 2
-        let colorSize: CGFloat = 10
-        let cornerRadius: CGFloat = 2
-        
-        let barCornerRadius: CGFloat = 3.5
-        let barHeight: CGFloat = 14
-
-        /// Note: We're using an `@ObservedObject` here instead of `@EnvironmentObject` so that
-        /// we are able to set the internal `showingLegend` bool during initialization as opposed to in the
-        /// `onAppear` modifier—which causes it to be temporarily whatever value we set it with and
-        /// then animate to the actual value saved in the `UserDefaults`, causing a jump in the height
-        /// when transitioning between types.
-        @ObservedObject var viewModel: ViewModel
-//        @EnvironmentObject var viewModel: ViewModel
-        @State var showingLegend: Bool
-        
-        init(viewModel: ViewModel) {
-            self.viewModel = viewModel
-            _showingLegend = State(initialValue: viewModel.showingLegend)
-        }
-    }
-}
-
-extension PortionAwareness.Legend {
-    
-    var body: some View {
-        VStack(alignment: .leading) {
-            legendButton
-            if showingLegend {
-                grid
-            }
-        }
-    }
-    
-    var legendButton: some View {
-        HStack(spacing: 5) {
-            Text("\(showingLegend ? "Hide" : "Show") Legend")
-            Image(systemName: "chevron.right")
-                .rotationEffect(showingLegend ? .degrees(90) : .degrees(0))
-                .font(.caption2)
-                .imageScale(.small)
-        }
-        .foregroundColor(showingLegend ? .accentColor : .secondary)
-        .onTapGesture {
-            withAnimation {
-                showingLegend.toggle()
-                /// Set the binding too so it's saved to `UserDefaults`
-                viewModel.showingLegend = showingLegend
-            }
-        }
-    }
-    
-    var totalText: Text {
-        var suffix: String {
-            guard !viewModel.componentsFromFood.isEmpty else { return "" }
-            let relativeBrightness = colorScheme == .light ? "lighter" : "darker"
-            return " (\(relativeBrightness))"
-        }
-        switch viewModel.metersType {
-        case .nutrients, .diet:
-            return Text("**Today's** total\(suffix)")
-        case .meal:
-            return Text("This **meal's** total\(suffix)")
-        }
-    }
-    
-    var foodText: Text {
-        var suffix: String {
-            guard !viewModel.componentsWithTotals.isEmpty else { return "" }
-            let relativeBrightness = colorScheme == .light ? "darker" : "lighter"
-            return " (\(relativeBrightness))"
-        }
-        return Text("What this **food** adds\(suffix)")
-    }
-    
-    var unboundedRemainderText: some View {
-        VStack(alignment: .leading) {
-            Text("Remainder till your RDA* is reached:")
-            HStack(spacing: 2) {
-                Text("•")
-                    .foregroundColor(Color(.quaternaryLabel))
-                Text("If the bar is in green, this is your **upper limit**")
-            }
-            HStack(spacing: 2) {
-                Text("•")
-                    .foregroundColor(Color(.quaternaryLabel))
-                Text("Otherwise, it's your **minimum**")
-            }
-        }
-    }
-    
-    var boundedRemainderText: some View {
-        var goalDescription: String {
-            switch viewModel.metersType {
-            case .nutrients:
-                return "RDA*"
-            case .meal:
-                return "meal goals"
-            case .diet:
-                return "daily goals"
-            }
-        }
-
-        var showMinimumGoal: Bool {
-            viewModel.showFirstDashedLine || viewModel.showSolidLine
-        }
-        
-        return Group {
-            VStack(alignment: .leading, spacing: 3) {
-//                Text("Lines marking your \(goalDescription)")
-                if showMinimumGoal {
-                    HStack(alignment: .top, spacing: 2) {
-                        if viewModel.showSecondDashedLine {
-                            Text("•")
-                                .foregroundColor(Color(.tertiaryLabel))
-                        }
-                        if viewModel.showFirstDashedLine && viewModel.showSolidLine {
-                            if viewModel.showSecondDashedLine {
-                                Text("Solid or first dotted lines indicate **minimum** \(goalDescription)")
-                            } else {
-                                Text("Solid or dotted line indicates **minimum** \(goalDescription)")
-                            }
-                        } else if viewModel.showFirstDashedLine {
-                            if viewModel.showSecondDashedLine {
-                                Text("First dotted lines indicate **minimum** \(goalDescription)")
-                            } else {
-                                Text("Dotted lines indicate **minimum** \(goalDescription)")
-                            }
-                        } else if viewModel.showSolidLine {
-                            Text("Lines indicate **minimum** \(goalDescription)")
-                        }
-                    }
-                }
-                
-                if viewModel.showSecondDashedLine {
-                    HStack(spacing: 2) {
-                        if showMinimumGoal {
-                            Text("•")
-                                .foregroundColor(Color(.tertiaryLabel))
-                        }
-                        Text("Second dotted lines indicate **upper limits**")
-                    }
-                }
-            }
-        }
-    }
-    
-    var completeGoalsText: Text {
-        var suffix: String {
-//            "accomplished"
-            "met"
-        }
-        
-        switch viewModel.metersType {
-        case .nutrients:
-            return Text("RDA* \(suffix)")
-        case .meal:
-            return Text("Meal goal \(suffix)")
-        case .diet:
-            return Text("Daily goal \(suffix)")
-        }
-    }
-    
-    var excessGoalsText: Text {
-        Text("Upper limit exceeded")
-    }
-    
-    var grid: some View {
-        func goalCompletionBar(isExcess: Bool) -> some View {
-            var fillColor: Color {
-                isExcess
-                ? NutrientMeter.ViewModel.Colors.Excess.fill
-                : NutrientMeter.ViewModel.Colors.Complete.fill
-            }
-            
-            var placeholderColor: Color {
-                isExcess
-                ? NutrientMeter.ViewModel.Colors.Excess.placeholder
-                : NutrientMeter.ViewModel.Colors.Complete.placeholder
-            }
-            
-            var text: Text {
-                isExcess
-                ? excessGoalsText
-                : completeGoalsText
-            }
-            
-            return GridRow {
-                HStack(spacing: 0) {
-                    ZStack(alignment: .leading) {
-                        RoundedRectangle(cornerRadius: barCornerRadius)
-                            .fill(fillColor.gradient)
-                        if !viewModel.componentsWithTotals.isEmpty {
-                            RoundedRectangle(cornerRadius: barCornerRadius)
-                                .fill(placeholderColor.gradient)
-                                .frame(width: barWidth / 2.0)
-                        }
-                    }
-                }
-                .frame(width: barWidth, height: barHeight)
-                .cornerRadius(barCornerRadius)
-                text
-            }
-        }
-        
-        @ViewBuilder
-        var totalRow: some View {
-            if !viewModel.componentsWithTotals.isEmpty {
-                GridRow {
-                    totalColors
-                    totalText
-                }
-            }
-        }
-        
-        @ViewBuilder
-        var foodRow: some View {
-            if !viewModel.componentsFromFood.isEmpty && !viewModel.componentsWithTotals.isEmpty {
-                GridRow {
-                    foodColors
-                    foodText
-                }
-            }
-        }
-        
-        var showLinesRow: Bool {
-            viewModel.showSolidLine ||
-            viewModel.showFirstDashedLine ||
-            viewModel.showSecondDashedLine
-        }
-        
-        var showDashedLine: Bool {
-            viewModel.showFirstDashedLine ||
-            viewModel.showSecondDashedLine
-        }
-        
-        @ViewBuilder
-        var linesRow: some View {
-            if showLinesRow {
-                GridRow(alignment: .top) {
-//                GridRow {
-                    ZStack(alignment: .leading) {
-                        NutrientMeter.ViewModel.Colors.Empty.fill
-                            .frame(width: barWidth, height: barHeight)
-                            .cornerRadius(barCornerRadius)
-                        if viewModel.showSolidLine {
-                            DottedLine()
-                                .stroke(style: StrokeStyle(
-                                    lineWidth: 2,
-                                    dash: [100])
-                                )
-                                .frame(width: 1)
-                                .foregroundColor(Color(.systemGroupedBackground))
-                                .offset(x: (barWidth / (showDashedLine ? 3.0 : 2.0)) - 1.0)
-                        }
-                        if viewModel.showFirstDashedLine || viewModel.showSecondDashedLine {
-                            DottedLine()
-                                .stroke(style: StrokeStyle(
-                                    lineWidth: 2,
-                                    dash: [2])
-                                )
-                                .frame(width: 1)
-                                .foregroundColor(Color(.systemGroupedBackground))
-                                .offset(x: (barWidth / (viewModel.showSolidLine ? 1.5 : 2.0)) - 1.0)
-                        }
-                    }
-                    .fixedSize(horizontal: false, vertical: true)
-                    .offset(y: 1)
-                    boundedRemainderText
-                }
-            }
-        }
-        
-        @ViewBuilder
-        var completionRow: some View {
-            if viewModel.showCompletion {
-                goalCompletionBar(isExcess: false)
-            }
-        }
-        
-        @ViewBuilder
-        var excessRow: some View {
-            if viewModel.showExcess {
-                goalCompletionBar(isExcess: true)
-            }
-        }
-        
-        @ViewBuilder
-        var rdaExplanation: some View {
-            if viewModel.metersType == .nutrients && showLinesRow {
-                HStack(alignment: .firstTextBaseline, spacing: 5) {
-                    Text("*")
-                        .font(.callout)
-                        .offset(y: 3)
-                    Text("**Recommended Dietary Allowance (RDA)**: Average daily level of intake sufficient to meet your nutrient requirements. [You can customise this in settings.](http://something.com)")
-                }
-            }
-        }
-        
-        @ViewBuilder
-        var generatedGoals: some View {
-            if viewModel.showMealSubgoals || viewModel.showDietAutoGoals {
-                GridRow {
-                    Group {
-                        HStack {
-                            Spacer()
-                            VStack {
-                                Image(systemName: "sparkles")
-                                Spacer()
-                            }
-                        }
-                        .frame(width: barWidth)
-                        if viewModel.showMealSubgoals {
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text("**Meal Subgoals**")
-                                Text("Calculated by taking the remainder of your goals for the day and dividing them by how many more meals your have left to plan (including this one).")
-                            }
-                        } else {
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text("**Implied Goal**")
-                                Text("Calculated since you have 3 of the 4 components of the energy equation in this diet. Staying within this goal will help you avoid overshooting them.")
-                            }
-                        }
-                    }
-                    .padding(.top, 5)
-                }
-            }
-        }
-        
-        return VStack(alignment: .leading) {
-            Grid(alignment: .leading) {
-                totalRow
-                foodRow
-                completionRow
-                excessRow
-                linesRow
-                generatedGoals
-            }
-            rdaExplanation
-        }
-    }
-    
-    var maxColorCount: Int {
-        var count = max(viewModel.componentsWithTotals.count, viewModel.componentsFromFood.count)
-        if viewModel.showExcess { count += 1 }
-        if viewModel.showCompletion { count += 1 }
-        return count
-    }
-    var barWidth: CGFloat {
-        let MinimumBarWidth: CGFloat = colorSize * 2
-        let count = CGFloat(maxColorCount)
-        let calculated = (count * colorSize) + ((count - 1) * spacing)
-        return max(MinimumBarWidth, calculated)
-    }
-    
-    var totalColors: some View {
-        HStack(spacing: spacing) {
-            ForEach(viewModel.componentsWithTotals, id: \.self) {
-                colorBox($0.preppedColor)
-            }
-            if viewModel.showCompletion {
-                colorBox(NutrientMeter.ViewModel.Colors.Complete.placeholder)
-            }
-            if viewModel.showExcess {
-                colorBox(NutrientMeter.ViewModel.Colors.Excess.placeholder)
-            }
-        }
-    }
-    
-    var foodColors: some View {
-        HStack(spacing: spacing) {
-            ForEach(viewModel.componentsFromFood, id: \.self) {
-                colorBox($0.eatenColor)
-            }
-            if viewModel.showCompletion {
-                colorBox(NutrientMeter.ViewModel.Colors.Complete.fill)
-            }
-            if viewModel.showExcess {
-                colorBox(NutrientMeter.ViewModel.Colors.Excess.fill)
-            }
-        }
-    }
-    
-    func colorBox(_ color: Color) -> some View {
-        color
-            .frame(width: colorSize, height: colorSize)
-            .cornerRadius(cornerRadius)
-    }
-}
-
 
 //MARK: - 👁‍🗨 Previews
 import SwiftUISugar
@@ -984,8 +641,152 @@ public struct MealItemNutrientMetersPreview: View {
 
 }
 
-struct MealItemNutrientMeters_Previews: PreviewProvider {
-    static var previews: some View {
-        MealItemNutrientMetersPreview()
+import FoodLabel
+
+struct FoodLabelSheet: View {
+
+    let foodItem: MealFoodItem
+
+    @Environment(\.dismiss) var dismiss
+    @State var foodLabelHeight: CGFloat = 0
+    
+    var body: some View {
+        NavigationStack {
+            foodLabel
+                .padding(.horizontal, 15)
+                .padding(.bottom, 50)
+                .toolbar {
+                    ToolbarItemGroup(placement: .navigationBarTrailing) {
+                        Button {
+                            dismiss()
+                        } label: {
+                            CloseButtonLabel(forNavigationBar: true)
+                        }
+                    }
+                }
+                .readSize { size in
+                    let navigationBarHeight = 58.0
+                    foodLabelHeight = size.height + navigationBarHeight
+                }
+        }
+        .presentationDetents([.height(foodLabelHeight)])
+        .presentationDragIndicator(.hidden)
     }
+    
+    var foodLabel: FoodLabel {
+        let energyBinding = Binding<FoodLabelValue>(
+//            get: { fields.energy.value.value ?? .init(amount: 0, unit: .kcal)  },
+            get: {
+                .init(amount: foodItem.scaledValueForEnergyInKcal, unit: .kcal)
+            },
+            set: { _ in }
+        )
+
+        let carbBinding = Binding<Double>(
+            get: { foodItem.scaledValueForMacro(.carb) },
+            set: { _ in }
+        )
+
+        let fatBinding = Binding<Double>(
+            get: { foodItem.scaledValueForMacro(.fat) },
+            set: { _ in }
+        )
+
+        let proteinBinding = Binding<Double>(
+            get: { foodItem.scaledValueForMacro(.protein) },
+            set: { _ in }
+        )
+        
+        let microsBinding = Binding<[NutrientType : FoodLabelValue]>(
+            get: { foodItem.microsDict },
+            set: { _ in }
+        )
+        
+        let amountBinding = Binding<String>(
+            get: { foodItem.description },
+            set: { _ in }
+        )
+
+        return FoodLabel(
+            energyValue: energyBinding,
+            carb: carbBinding,
+            fat: fatBinding,
+            protein: proteinBinding,
+            nutrients: microsBinding,
+            amountPerString: amountBinding
+        )
+    }}
+
+extension PortionAwareness {
+    var foodLabelSheet: some View {
+        FoodLabelSheet(foodItem: foodItem)
+    }
+    
+//    var foodLabelSheet_legacy: some View {
+//        NavigationStack {
+//            foodLabel
+//                .padding(.horizontal, 15)
+//                .padding(.bottom, 50)
+//                .toolbar {
+//                    ToolbarItemGroup(placement: .navigationBarTrailing) {
+//                        Button {
+//                            showingFoodLabel = false
+//                        } label: {
+//                            CloseButtonLabel(forNavigationBar: true)
+//                        }
+//                    }
+//                }
+//                .readSize { size in
+//                    let navigationBarHeight = 58.0
+//                    foodLabelHeight = size.height + navigationBarHeight
+//                }
+//        }
+//        .presentationDetents([.height(foodLabelHeight)])
+//        .presentationDragIndicator(.hidden)
+//    }
+//
+//    var foodLabel: FoodLabel {
+//        let energyBinding = Binding<FoodLabelValue>(
+////            get: { fields.energy.value.value ?? .init(amount: 0, unit: .kcal)  },
+//            get: {
+//                .init(amount: foodItem.scaledValueForEnergyInKcal, unit: .kcal)
+//            },
+//            set: { _ in }
+//        )
+//
+//        let carbBinding = Binding<Double>(
+//            get: { foodItem.scaledValueForMacro(.carb) },
+//            set: { _ in }
+//        )
+//
+//        let fatBinding = Binding<Double>(
+//            get: { foodItem.scaledValueForMacro(.fat) },
+//            set: { _ in }
+//        )
+//
+//        let proteinBinding = Binding<Double>(
+//            get: { foodItem.scaledValueForMacro(.protein) },
+//            set: { _ in }
+//        )
+//
+//        let microsBinding = Binding<[NutrientType : FoodLabelValue]>(
+//            get: { foodItem.microsDict },
+//            set: { _ in }
+//        )
+//
+//        let amountBinding = Binding<String>(
+//            get: { foodItem.description },
+//            set: { _ in }
+//        )
+//
+//        return FoodLabel(
+//            energyValue: energyBinding,
+//            carb: carbBinding,
+//            fat: fatBinding,
+//            protein: proteinBinding,
+//            nutrients: microsBinding,
+//            amountPerString: amountBinding
+//        )
+//    }
+    
 }
