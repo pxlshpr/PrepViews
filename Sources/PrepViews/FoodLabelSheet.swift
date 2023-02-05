@@ -13,23 +13,25 @@ struct FoodLabelSheet: View {
     
     var body: some View {
         NavigationStack {
-            foodLabel
-                .padding(.horizontal, 15)
-                .padding(.bottom, 50)
-                .toolbar {
-                    ToolbarItemGroup(placement: .navigationBarTrailing) {
-                        Button {
-                            Haptics.feedback(style: .soft)
-                            dismiss()
-                        } label: {
-                            CloseButtonLabel(forNavigationBar: true)
-                        }
+            ScrollView(showsIndicators: false) {
+                foodLabel
+                    .readSize { size in
+                        let navigationBarHeight = 58.0
+                        foodLabelHeight = size.height + navigationBarHeight
+                    }
+            }
+            .padding(.horizontal, 15)
+//            .padding(.bottom, 50)
+            .toolbar {
+                ToolbarItemGroup(placement: .navigationBarTrailing) {
+                    Button {
+                        Haptics.feedback(style: .soft)
+                        dismiss()
+                    } label: {
+                        CloseButtonLabel(forNavigationBar: true)
                     }
                 }
-                .readSize { size in
-                    let navigationBarHeight = 58.0
-                    foodLabelHeight = size.height + navigationBarHeight
-                }
+            }
         }
         .presentationDetents([.height(foodLabelHeight)])
         .presentationDragIndicator(.hidden)
