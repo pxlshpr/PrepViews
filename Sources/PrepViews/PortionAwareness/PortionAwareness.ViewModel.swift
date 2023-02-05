@@ -6,7 +6,7 @@ import SwiftHaptics
 let MeterSpacing = 5.0
 let MeterHeight = 20.0
 
-extension MealItemMeters {
+extension PortionAwareness {
     
     class ViewModel: ObservableObject {
         
@@ -87,14 +87,15 @@ extension MealItemMeters {
 
 extension MetersType {
     static func initialType(for day: Day?, meal: DayMeal) -> MetersType {
-        /// If we have no `Day`, start with `.meal` if we have a meal type, otherwise fall back to `.nutrients`
+        /// If we have no `Day`, start with `.nutrients`
         guard let day else {
-            return meal.goalSet != nil ? .meal : .nutrients
+//            return meal.goalSet != nil ? .meal : .nutrients
+            return .nutrients
         }
         
-        /// If we have a `Day`, and have a `meal.goalSet`, start with `.meal`
+        /// If we have a `Day`, and have a `meal.goalSet`, start with `.day`
         guard meal.goalSet == nil else {
-            return .meal
+            return .diet
         }
         
         /// If we have no `day.goalSet`, return `.nutrients`
@@ -102,8 +103,10 @@ extension MetersType {
             return .nutrients
         }
         
-        /// If we have more than 1 meal (and will show subgoals), start with `.meal`, otherwise start with `.diet`
-        return day.meals.count > 1 ? .meal : .diet
+//        /// If we have more than 1 meal (and will show subgoals), start with `.meal`, otherwise start with `.diet`
+//        return day.meals.count > 1 ? .meal : .diet
+        
+        return .diet
     }
 
     static func types(for day: Day?, meal: DayMeal) -> [MetersType] {
@@ -130,7 +133,7 @@ extension MetersType {
     }
 }
 
-extension MealItemMeters.ViewModel {
+extension PortionAwareness.ViewModel {
     
     var shouldShowMealGoals: Bool {
         /// If we have a `MealType` associated
@@ -369,7 +372,7 @@ extension FoodNutrient {
         }
     }
 }
-extension MealItemMeters.ViewModel {
+extension PortionAwareness.ViewModel {
     
     var nutrients: FoodNutrients {
         foodItem.food.info.nutrients

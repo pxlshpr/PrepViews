@@ -4,7 +4,7 @@ import PrepDataTypes
 import PrepMocks
 import SwiftUIPager
 
-public struct MealItemMeters: View {
+public struct PortionAwareness: View {
     
     @StateObject var viewModel: ViewModel
     
@@ -71,8 +71,8 @@ public struct MealItemMeters: View {
         Group {
 //            arrow
             VStack(spacing: 7) {
-                typePickerRow
                 header
+                typePickerRow
                 pager
                 footer
             }
@@ -123,18 +123,23 @@ public struct MealItemMeters: View {
     }
     
     var header: some View {
-        HStack(alignment: .bottom) {
-            Text(viewModel.metersType.headerString)
-                .font(.footnote)
-                .textCase(.uppercase)
-                .padding(.leading, 20)
+        HStack {
+//            Text(viewModel.metersType.headerString)
+//                .font(.footnote)
+//                .textCase(.uppercase)
+//                .padding(.leading, 20)
+            Text("Portion Awareness")
+                .font(.title2)
+                .fontWeight(.bold)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .foregroundColor(.primary)
             Spacer()
             goalSetPicker
         }
         .foregroundColor(Color(.secondaryLabel))
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, 20)
-        .padding(.top, 10)
+        .padding(.bottom, 5)
     }
     
     @ViewBuilder
@@ -284,7 +289,7 @@ public struct MealItemMeters: View {
 
 //MARK: - MealItemMeters.ViewModel (Legend)
 
-extension MealItemMeters.ViewModel {
+extension PortionAwareness.ViewModel {
     
     var showMealSubgoals: Bool {
         guard metersType == .meal else { return false }
@@ -425,7 +430,7 @@ extension Food {
 
 //MARK: - Legend
 
-extension MealItemMeters {
+extension PortionAwareness {
     struct Legend: View {
         
         @Environment(\.colorScheme) var colorScheme
@@ -453,7 +458,7 @@ extension MealItemMeters {
     }
 }
 
-extension MealItemMeters.Legend {
+extension PortionAwareness.Legend {
     
     var body: some View {
         VStack(alignment: .leading) {
@@ -578,13 +583,18 @@ extension MealItemMeters.Legend {
     }
     
     var completeGoalsText: Text {
+        var suffix: String {
+//            "accomplished"
+            "met"
+        }
+        
         switch viewModel.metersType {
         case .nutrients:
-            return Text("RDA* accomplished")
+            return Text("RDA* \(suffix)")
         case .meal:
-            return Text("Meal goal accomplished")
+            return Text("Meal goal \(suffix)")
         case .diet:
-            return Text("Daily goal accomplished")
+            return Text("Daily goal \(suffix)")
         }
     }
     
@@ -829,7 +839,7 @@ public struct MealItemNutrientMetersPreview: View {
         NavigationView {
             FormStyledScrollView {
                 textFieldSection
-                metersSection
+                portionAwareness
             }
             .navigationTitle("Log Food")
         }
@@ -882,8 +892,8 @@ public struct MealItemNutrientMetersPreview: View {
         )
     }
     
-    var metersSection: some View {
-        MealItemMeters(
+    var portionAwareness: some View {
+        PortionAwareness(
             foodItem: foodItemBinding,
             meal: mealBinding,
             day: .constant(mockDay),

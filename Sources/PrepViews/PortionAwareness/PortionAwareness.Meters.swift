@@ -4,11 +4,11 @@ import PrepDataTypes
 let MeterLabelFontStyle: Font.TextStyle = .body
 let MeterLabelFont: Font = Font.system(MeterLabelFontStyle)
 
-extension MealItemMeters {
+extension PortionAwareness {
     
     struct Meters: View {
         
-        @EnvironmentObject var viewModel: MealItemMeters.ViewModel
+        @EnvironmentObject var viewModel: PortionAwareness.ViewModel
         
         let type: MetersType
         
@@ -18,7 +18,7 @@ extension MealItemMeters {
     }
 }
 
-extension MealItemMeters.Meters {
+extension PortionAwareness.Meters {
     var body: some View {
         VStack {
             Grid(alignment: .leading, verticalSpacing: MeterSpacing) {
@@ -169,7 +169,7 @@ struct MeterRow: View {
     }
 }
 
-extension Double {
+public extension Double {
     var formattedNutrient: String {
         let rounded: Double
         if self < 50 {
@@ -179,9 +179,20 @@ extension Double {
         }
         return rounded.formattedWithCommas
     }
+    
+    var formattedMealItemAmount: String {
+        let rounded: Double
+//        if self < 50 {
+//            rounded = self.rounded(toPlaces: 1)
+//        } else {
+            rounded = self.rounded()
+//        }
+        return rounded.formattedWithCommas
+    }
+
 }
 
-extension Font.Weight {
+public extension Font.Weight {
     var uiFontWeight: UIFont.Weight {
         switch self {
         case .medium:
@@ -264,7 +275,7 @@ struct AnimatableNutrientModifier: AnimatableModifier {
     }
 }
 
-extension View {
+public extension View {
     func animatedNutrient(value: Double, unit: NutrientUnit, color: Color) -> some View {
         modifier(AnimatableNutrientModifier(value: value, unit: unit, color: color))
     }
@@ -311,7 +322,7 @@ extension NutrientType {
     }
 }
 
-extension NutrientUnit {
+public extension NutrientUnit {
     
     /// Converts things like 1000 mg → 1g, 1000 ug → 1mg
     func convertingLargeValue(_ value: Double) -> (Double, NutrientUnit) {
