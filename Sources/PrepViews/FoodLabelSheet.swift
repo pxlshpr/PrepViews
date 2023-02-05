@@ -13,15 +13,8 @@ struct FoodLabelSheet: View {
     
     var body: some View {
         NavigationStack {
-            ScrollView(showsIndicators: false) {
-                foodLabel
-                    .readSize { size in
-                        let navigationBarHeight = 58.0
-                        foodLabelHeight = size.height + navigationBarHeight
-                    }
-            }
+            content
             .padding(.horizontal, 15)
-//            .padding(.bottom, 50)
             .toolbar {
                 ToolbarItemGroup(placement: .navigationBarTrailing) {
                     Button {
@@ -37,6 +30,31 @@ struct FoodLabelSheet: View {
         .presentationDragIndicator(.hidden)
     }
     
+    @ViewBuilder
+    var content: some View {
+        if totalHeight > UIScreen.main.bounds.height {
+            ScrollView(showsIndicators: false) {
+                foodLabelAfterReadingSize
+            }
+        } else {
+            foodLabelAfterReadingSize
+        }
+    }
+    
+    var foodLabelAfterReadingSize: some View {
+        foodLabel
+            .readSize { size in
+                let navigationBarHeight = 58.0
+                foodLabelHeight = size.height + navigationBarHeight
+            }
+    }
+
+    var totalHeight: CGFloat {
+        let bottomSafeAreaHeight = 34.0
+        let topSafeAreaHeight = 69.0
+        return foodLabelHeight + bottomSafeAreaHeight + topSafeAreaHeight
+    }
+
     var foodLabel: FoodLabel {
         let energyBinding = Binding<FoodLabelValue>(
 //            get: { fields.energy.value.value ?? .init(amount: 0, unit: .kcal)  },
@@ -80,5 +98,4 @@ struct FoodLabelSheet: View {
             amountPerString: amountBinding
         )
     }
-    
 }
