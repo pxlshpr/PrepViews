@@ -30,7 +30,7 @@ public extension NutrientMeter {
     }
 
     var shape: some Shape {
-        RoundedRectangle(cornerRadius: 5)
+        RoundedRectangle(cornerRadius: 5, style: .continuous)
 //            Capsule()
     }
     
