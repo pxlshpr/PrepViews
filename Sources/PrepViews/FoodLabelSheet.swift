@@ -4,12 +4,21 @@ import SwiftHaptics
 import PrepDataTypes
 import SwiftUISugar
 
+extension FoodLabelSheet {
+    class ViewModel: ObservableObject {
+        @Published var height: CGFloat = 0
+    }
+}
+
 struct FoodLabelSheet: View {
 
     let foodItem: MealFoodItem
 
     @Environment(\.dismiss) var dismiss
-    @State var foodLabelHeight: CGFloat = 0
+//    @State var foodLabelHeight: CGFloat = 0
+    @StateObject var viewModel = ViewModel()
+    
+    @Environment(\.scenePhase) var scenePhase
     
     var body: some View {
         NavigationStack {
@@ -25,9 +34,21 @@ struct FoodLabelSheet: View {
                     }
                 }
             }
+            .onChange(of: scenePhase, perform: scenePhaseChanged)
         }
-        .presentationDetents([.height(foodLabelHeight)])
+        .presentationDetents([.height(viewModel.height)])
         .presentationDragIndicator(.hidden)
+    }
+    
+    func scenePhaseChanged(to newPhase: ScenePhase) {
+        switch newPhase {
+        case .background:
+            break
+        case .active:
+            break
+        default:
+            break
+        }
     }
     
     @ViewBuilder
@@ -45,14 +66,14 @@ struct FoodLabelSheet: View {
         foodLabel
             .readSize { size in
                 let navigationBarHeight = 58.0
-                foodLabelHeight = size.height + navigationBarHeight
+                viewModel.height = size.height + navigationBarHeight
             }
     }
 
     var totalHeight: CGFloat {
         let bottomSafeAreaHeight = 34.0
         let topSafeAreaHeight = 69.0
-        return foodLabelHeight + bottomSafeAreaHeight + topSafeAreaHeight
+        return viewModel.height + bottomSafeAreaHeight + topSafeAreaHeight
     }
 
     var foodLabel: FoodLabel {
