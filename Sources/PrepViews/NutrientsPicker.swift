@@ -323,7 +323,7 @@ public struct NutrientsPicker: View {
                 Haptics.feedback(style: .soft)
                 dismiss()
             } label: {
-                CloseButtonLabel()
+                CloseButtonLabel(forNavigationBar: true)
 //                closeButtonLabel
             }
         }
