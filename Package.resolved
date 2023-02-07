@@ -10,12 +10,30 @@
       }
     },
     {
+      "identity" : "foodlabel",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/pxlshpr/FoodLabel",
+      "state" : {
+        "revision" : "a28efc8afb7582cdc6d101c429856ae59343f6d5",
+        "version" : "0.0.30"
+      }
+    },
+    {
+      "identity" : "foodlabelscanner",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/pxlshpr/FoodLabelScanner",
+      "state" : {
+        "revision" : "1db9a95a6ac1915b2ac6ded0962da49fbe5cbe0b",
+        "version" : "0.0.148"
+      }
+    },
+    {
       "identity" : "prepdatatypes",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/pxlshpr/PrepDataTypes",
       "state" : {
-        "revision" : "f1e73b73b8535874ac97667085aff92f092742dd",
-        "version" : "0.0.244"
+        "revision" : "7b690a09057b9d4c594c339792e0d88c172668b4",
+        "version" : "0.0.250"
       }
     },
     {
@@ -25,6 +43,15 @@
       "state" : {
         "revision" : "ecf161115522677d7b28a47f7bf2b4ac50831251",
         "version" : "0.0.3"
+      }
+    },
+    {
+      "identity" : "swift-collections",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-collections",
+      "state" : {
+        "revision" : "937e904258d22af6e447a0b72c0bc67583ef64a2",
+        "version" : "1.0.4"
       }
     },
     {
@@ -68,8 +95,17 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/pxlshpr/SwiftUISugar",
       "state" : {
-        "revision" : "374fa0b506e1a8180bc18122cfcc1a9505ddf4bc",
-        "version" : "0.0.327"
+        "revision" : "84ba3241562fb86e4ec1bd06d13858577be622a3",
+        "version" : "0.0.361"
+      }
+    },
+    {
+      "identity" : "visionsugar",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/pxlshpr/VisionSugar",
+      "state" : {
+        "revision" : "58fafbf2054881b26400c80110ff470ab731cd4e",
+        "version" : "0.0.77"
       }
     }
   ],
