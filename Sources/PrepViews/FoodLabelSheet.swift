@@ -4,22 +4,13 @@ import SwiftHaptics
 import PrepDataTypes
 import SwiftUISugar
 
-extension FoodLabelSheet {
-    class ViewModel: ObservableObject {
-        @Published var height: CGFloat = 0
-    }
-}
-
 struct FoodLabelSheet: View {
 
     let foodItem: MealFoodItem
 
     @Environment(\.dismiss) var dismiss
-//    @State var foodLabelHeight: CGFloat = 0
-    @StateObject var viewModel = ViewModel()
-    
-    @Environment(\.scenePhase) var scenePhase
-    
+    @State var foodLabelHeight: CGFloat = 0
+
     var body: some View {
         NavigationStack {
             content
@@ -34,46 +25,34 @@ struct FoodLabelSheet: View {
                     }
                 }
             }
-            .onChange(of: scenePhase, perform: scenePhaseChanged)
         }
-        .presentationDetents([.height(viewModel.height)])
-        .presentationDragIndicator(.hidden)
+//        .presentationDetents([.height(foodLabelHeight)])
+//        .presentationDragIndicator(.hidden)
     }
-    
-    func scenePhaseChanged(to newPhase: ScenePhase) {
-        switch newPhase {
-        case .background:
-            break
-        case .active:
-            break
-        default:
-            break
-        }
-    }
-    
+
     @ViewBuilder
     var content: some View {
-        if totalHeight > UIScreen.main.bounds.height {
+//        if totalHeight > UIScreen.main.bounds.height {
             ScrollView(showsIndicators: false) {
                 foodLabelAfterReadingSize
             }
-        } else {
-            foodLabelAfterReadingSize
-        }
+//        } else {
+//            foodLabelAfterReadingSize
+//        }
     }
-    
+
     var foodLabelAfterReadingSize: some View {
         foodLabel
             .readSize { size in
                 let navigationBarHeight = 58.0
-                viewModel.height = size.height + navigationBarHeight
+                foodLabelHeight = size.height + navigationBarHeight
             }
     }
 
     var totalHeight: CGFloat {
         let bottomSafeAreaHeight = 34.0
         let topSafeAreaHeight = 69.0
-        return viewModel.height + bottomSafeAreaHeight + topSafeAreaHeight
+        return foodLabelHeight + bottomSafeAreaHeight + topSafeAreaHeight
     }
 
     var foodLabel: FoodLabel {
@@ -99,12 +78,12 @@ struct FoodLabelSheet: View {
             get: { foodItem.scaledValueForMacro(.protein) },
             set: { _ in }
         )
-        
+
         let microsBinding = Binding<[NutrientType : FoodLabelValue]>(
             get: { foodItem.microsDict },
             set: { _ in }
         )
-        
+
         let amountBinding = Binding<String>(
             get: { foodItem.description },
             set: { _ in }

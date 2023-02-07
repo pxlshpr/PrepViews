@@ -45,7 +45,6 @@ public struct PortionAwareness: View {
         
         self.didTapGoalSetButton = didTapGoalSetButton
         
-        
 //        var types: [MetersType] = []
 //        if meal.wrappedValue.goalSet != nil {
 //            types.append(.meal)
@@ -74,14 +73,12 @@ public struct PortionAwareness: View {
 //
     public var body: some View {
         Group {
-//            arrow
             VStack(spacing: 7) {
                 header
                 typePickerRow
                 pager
                 footer
             }
-//            .padding(.top, 10)
         }
         .onChange(of: foodItem) { newFoodItem in
             withAnimation {
