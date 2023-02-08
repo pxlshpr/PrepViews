@@ -35,6 +35,9 @@ extension PortionAwareness {
         @Published var currentType: MetersType
         @Published var pagerHeight: CGFloat
         
+        @Published var currentPagerHeight: CGFloat = 0
+        @Published var pagerHeights: [MetersType : CGFloat] = [:]
+        
         @Published var page: Page
 
         @Published var nutrientMeterViewModels: [NutrientMeter.ViewModel] = []
@@ -61,7 +64,6 @@ extension PortionAwareness {
             let metersTypes = MetersType.types(for: day, meal: meal)
             self.metersTypes = metersTypes
             
-            
             let type: MetersType
             if let userDefaultsTypeRawValue = UserDefaults.standard.object(forKey: "portionAwarenessType") as? Int,
                let userDefaultsType = MetersType(rawValue: userDefaultsTypeRawValue)
@@ -73,14 +75,15 @@ extension PortionAwareness {
             }
             self.currentType = type
 
-            switch type {
-            case .meal:
-                self.page = Page.withIndex(0)
-            case .diet:
-                self.page = Page.withIndex(1)
-            case .nutrients:
-                self.page = Page.withIndex(2)
-            }
+            self.page = Page.withIndex(type.rawValue-1)
+//            switch type {
+//            case .meal:
+//                self.page = Page.withIndex(0)
+//            case .diet:
+//                self.page = Page.withIndex(1)
+//            case .nutrients:
+//                self.page = Page.withIndex(2)
+//            }
             
             self.pagerHeight = 0
             
@@ -120,26 +123,26 @@ extension MetersType {
     }
 
     static func types(for day: Day?, meal: DayMeal) -> [MetersType] {
-        
-        var shouldShowMealGoals: Bool {
-            if meal.goalSet != nil {
-                return true
-            }
-            
-            /// Or have more than 1 meal (and a diet, since there's no meal type)
-            guard let day, day.goalSet != nil else { return false }
-            return day.meals.count > 1
-        }
-        
-        var types: [MetersType] = []
-//        if shouldShowMealGoals {
-            types.append(.meal)
+        return [.nutrients, .diet, .meal]
+//        var shouldShowMealGoals: Bool {
+//            if meal.goalSet != nil {
+//                return true
+//            }
+//
+//            /// Or have more than 1 meal (and a diet, since there's no meal type)
+//            guard let day, day.goalSet != nil else { return false }
+//            return day.meals.count > 1
 //        }
-//        if day != nil {
-            types.append(.diet)
-//        }
-        types.append(.nutrients)
-        return types
+//
+//        var types: [MetersType] = []
+////        if shouldShowMealGoals {
+//            types.append(.meal)
+////        }
+////        if day != nil {
+//            types.append(.diet)
+////        }
+//        types.append(.nutrients)
+//        return types
     }
 }
 

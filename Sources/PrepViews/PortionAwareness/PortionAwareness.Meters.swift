@@ -19,14 +19,17 @@ extension PortionAwareness {
 }
 
 extension PortionAwareness.Meters {
+    
     var body: some View {
-        VStack {
-            Grid(alignment: .leading, verticalSpacing: MeterSpacing) {
-                if shouldShowEmptyRows {
-                    emptyRows
-                } else {
-                    rows
-                }
+        metersGrid
+    }
+    
+    var metersGrid: some View {
+        Grid(alignment: .leading, verticalSpacing: MeterSpacing) {
+            if shouldShowEmptyRows {
+                emptyRows
+            } else {
+                rows
             }
         }
     }

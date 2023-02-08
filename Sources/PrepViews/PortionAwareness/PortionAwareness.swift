@@ -4,6 +4,7 @@ import PrepDataTypes
 import PrepMocks
 import SwiftUIPager
 import SwiftHaptics
+import FoodLabel
 
 public struct PortionAwareness: View {
 
@@ -109,27 +110,80 @@ public struct PortionAwareness: View {
             data: viewModel.metersTypes,
             id: \.self,
             content: { metersType in
-                Meters(metersType)
-                    .environmentObject(viewModel)
-                    .frame(maxWidth: .infinity)
-                    .padding(.leading, 17)
-                    .padding(.vertical, 15)
-                
-//                    .background(
-//                        RoundedRectangle(cornerRadius: 10)
-//                            .foregroundColor(Color(.secondarySystemGroupedBackground))
-//                    )
-                    .background(FormCellBackground())
-                    .cornerRadius(10)
-
-                    .padding(.horizontal, 20)
-                    .fixedSize(horizontal: false, vertical: true)
+                content(for: metersType)
+                    .readSize { size in
+                        viewModel.pagerHeights[metersType] = size.height
+                    }
             }
         )
         .pagingPriority(.simultaneous)
         .onPageWillTransition(viewModel.pageWillTransition)
 //        .frame(height: 200)
-        .frame(height: viewModel.pagerHeight)
+//        .frame(height: viewModel.pagerHeight)
+        .frame(height: viewModel.pagerHeights[viewModel.currentType])
+    }
+    
+    @ViewBuilder
+    func content(for metersType: MetersType) -> some View {
+        if metersType == .nutrients {
+            FormStyledSection {
+                foodLabel
+            }
+        } else {
+            Meters(metersType)
+                .environmentObject(viewModel)
+                .frame(maxWidth: .infinity)
+                .padding(.leading, 17)
+                .padding(.vertical, 15)
+                .background(FormCellBackground())
+                .cornerRadius(10)
+                .padding(.horizontal, 20)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+    
+    var foodLabel: FoodLabel {
+        let energyBinding = Binding<FoodLabelValue>(
+//            get: { fields.energy.value.value ?? .init(amount: 0, unit: .kcal)  },
+            get: {
+                .init(amount: foodItem.scaledValueForEnergyInKcal, unit: .kcal)
+            },
+            set: { _ in }
+        )
+
+        let carbBinding = Binding<Double>(
+            get: { foodItem.scaledValueForMacro(.carb) },
+            set: { _ in }
+        )
+
+        let fatBinding = Binding<Double>(
+            get: { foodItem.scaledValueForMacro(.fat) },
+            set: { _ in }
+        )
+
+        let proteinBinding = Binding<Double>(
+            get: { foodItem.scaledValueForMacro(.protein) },
+            set: { _ in }
+        )
+
+        let microsBinding = Binding<[NutrientType : FoodLabelValue]>(
+            get: { foodItem.microsDict },
+            set: { _ in }
+        )
+
+        let amountBinding = Binding<String>(
+            get: { foodItem.description },
+            set: { _ in }
+        )
+
+        return FoodLabel(
+            energyValue: energyBinding,
+            carb: carbBinding,
+            fat: fatBinding,
+            protein: proteinBinding,
+            nutrients: microsBinding,
+            amountPerString: amountBinding
+        )
     }
     
     var header: some View {
@@ -165,7 +219,8 @@ public struct PortionAwareness: View {
         Group {
             switch viewModel.currentType {
             case .nutrients:
-                legend
+                EmptyView()
+//                legend
             case .diet:
                 if viewModel.hasDiet {
                     legend
