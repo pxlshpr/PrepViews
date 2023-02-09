@@ -1,5 +1,7 @@
 import SwiftUI
 import SwiftHaptics
+import PrepDataTypes
+import SwiftUISugar
 
 public struct FoodCell: View {
 
@@ -199,97 +201,5 @@ struct FoodCellPreview: View {
             .navigationTitle("Foods")
             .navigationBarTitleDisplayMode(.large)
         }
-    }
-}
-
-import SwiftUISugar
-import PrepMocks
-import PrepDataTypes
-
-struct FoodCellAlignmentPreview: View {
-    
-    @StateObject var viewModel = ViewModel()
-    
-    var food: Food {
-        var food = FoodMock.carrots
-        food.detail = "Juicy, thick, meaty all those nice things"
-        food.brand = "Some brand"
-        return food
-    }
-    
-    var body: some View {
-        FormStyledScrollView {
-            FormStyledSection(horizontalPadding: 0) {
-                VStack {
-                    foodLink
-                        .padding(.horizontal, 20)
-                }
-            }
-        }
-    }
-    
-    var foodLink: some View {
-        Button {
-        } label: {
-            HStack {
-                FoodCell(
-                    food: food,
-                    showMacrosIndicator: false
-                )
-                .fixedSize(horizontal: false, vertical: true)
-                Spacer()
-                NutritionSummary(
-                    dataProvider: viewModel,
-                    showMacrosIndicator: true
-                )
-                .fixedSize(horizontal: true, vertical: false)
-                Image(systemName: "chevron.right")
-                    .imageScale(.small)
-                    .fontWeight(.medium)
-                    .foregroundColor(Color(.tertiaryLabel))
-            }
-            .multilineTextAlignment(.leading)
-        }
-    }
-    
-    class ViewModel: ObservableObject { }
-}
-
-extension FoodCellAlignmentPreview.ViewModel: NutritionSummaryProvider {
-    var forMeal: Bool {
-        true
-    }
-    
-    var isMarkedAsCompleted: Bool {
-        true
-    }
-    
-    var showQuantityAsSummaryDetail: Bool {
-        true
-    }
-    
-    var energyAmount: Double {
-        120
-    }
-    
-    var carbAmount: Double {
-        69
-    }
-    
-    var fatAmount: Double {
-        7
-    }
-    
-    var proteinAmount: Double {
-        42
-    }
-    
-    
-}
-
-struct FoodCell_Previews: PreviewProvider {
-    static var previews: some View {
-//        FoodCellPreview()
-        FoodCellAlignmentPreview()
     }
 }

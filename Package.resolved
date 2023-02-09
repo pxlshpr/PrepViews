@@ -14,8 +14,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/pxlshpr/FoodLabel",
       "state" : {
-        "revision" : "c3a62b29391c6bafbab52ec9e97688174e4641a0",
-        "version" : "0.0.48"
+        "revision" : "33fac0a87becc3d490f94fa76f23597c2a7539fc",
+        "version" : "0.0.49"
       }
     },
     {
