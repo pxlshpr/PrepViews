@@ -19,12 +19,7 @@ public struct PortionAwareness: View {
     @Binding var day: Day?
     //    var day: Binding<Day?>
     
-    //TODO: Put this all into one data structure for FoodLabel
-    @State var energyInKcal: Double
-    @State var carb: Double
-    @State var fat: Double
-    @State var protein: Double
-    @State var micros: [NutrientType : FoodLabelValue]
+    @State var foodLabelData: FoodLabelData
     
     let didTapGoalSetButton: (Bool) -> ()
     
@@ -41,11 +36,7 @@ public struct PortionAwareness: View {
         _meal = meal
         _day = day
         
-        _energyInKcal = State(initialValue: foodItem.wrappedValue.scaledValueForEnergyInKcal)
-        _carb = State(initialValue: foodItem.wrappedValue.scaledValueForMacro(.carb))
-        _fat = State(initialValue: foodItem.wrappedValue.scaledValueForMacro(.fat))
-        _protein = State(initialValue: foodItem.wrappedValue.scaledValueForMacro(.protein))
-        _micros = State(initialValue: foodItem.wrappedValue.microsDict)
+        _foodLabelData = State(initialValue: foodItem.wrappedValue.foodLabelData)
 
         let viewModel = ViewModel(
             foodItem: foodItem.wrappedValue,
@@ -159,61 +150,16 @@ public struct PortionAwareness: View {
     
     func foodItemChanged(_ newValue: MealFoodItem) {
         withAnimation {
-            energyInKcal = foodItem.scaledValueForEnergyInKcal
-            carb = foodItem.scaledValueForMacro(.carb)
-            fat = foodItem.scaledValueForMacro(.fat)
-            protein = foodItem.scaledValue(for: .protein)
-            micros = foodItem.microsDict
+            foodLabelData = foodItem.foodLabelData
         }
     }
     
     var foodLabel: FoodLabel {
-        let energyBinding = Binding<FoodLabelValue>(
-            get: { .init(amount: energyInKcal, unit: .kcal) },
-            set: { _ in }
-        )
-
-        let carbBinding = Binding<Double>(
-            get: { carb },
-            set: { _ in }
-        )
-
-        let fatBinding = Binding<Double>(
-            get: { fat },
-            set: { _ in }
-        )
-
-        let proteinBinding = Binding<Double>(
-            get: { protein },
-            set: { _ in }
-        )
-
-        let microsBinding = Binding<[NutrientType : FoodLabelValue]>(
-            get: { micros },
-            set: { _ in }
-        )
-
-        let amountBinding = Binding<String>(
-            get: { foodItem.description },
-            set: { _ in }
-        )
-
-        return FoodLabel(
-            energyValue: energyBinding,
-            carb: carbBinding,
-            fat: fatBinding,
-            protein: proteinBinding,
-            nutrients: microsBinding,
-            amountPerString: amountBinding
-        )
+        FoodLabel(data: $foodLabelData)
     }
     
     var header: some View {
         HStack {
-//            Text(viewModel.metersType.headerString)
-//                .font(.footnote)
-//                .textCase(.uppercase)
-//                .padding(.leading, 20)
             Text("Portion Awareness")
                 .font(.title2)
                 .fontWeight(.bold)
@@ -715,5 +661,19 @@ public struct MealItemNutrientMetersPreview: View {
                 unitPicker
             }
         }
+    }
+}
+
+extension MealFoodItem {
+    var foodLabelData: FoodLabelData {
+        FoodLabelData(
+            energyValue: FoodLabelValue(amount: scaledValueForEnergyInKcal, unit: .kcal),
+            carb: scaledValueForMacro(.carb),
+            fat: scaledValueForMacro(.fat),
+            protein: scaledValueForMacro(.protein),
+            nutrients: microsDict,
+            quantityValue: amount.value,
+            quantityUnit: amount.unitDescription(sizes: food.info.sizes)
+        )
     }
 }
