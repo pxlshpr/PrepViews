@@ -16,7 +16,6 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/pxlshpr/PrepDataTypes", from: "0.0.250"),
-        .package(url: "https://github.com/pxlshpr/PrepMocks", from: "0.0.3"),
         .package(url: "https://github.com/pxlshpr/FoodLabel", from: "0.0.48"),
         .package(url: "https://github.com/pxlshpr/SwiftUISugar", from: "0.0.361"),
         
@@ -29,7 +28,6 @@ let package = Package(
             name: "PrepViews",
             dependencies: [
                 .product(name: "PrepDataTypes", package: "prepdatatypes"),
-                .product(name: "PrepMocks", package: "prepmocks"),
                 .product(name: "FoodLabel", package: "foodlabel"),
                 .product(name: "SwiftUISugar", package: "swiftuisugar"),
                 

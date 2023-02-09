@@ -14,8 +14,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/pxlshpr/FoodLabel",
       "state" : {
-        "revision" : "a28efc8afb7582cdc6d101c429856ae59343f6d5",
-        "version" : "0.0.30"
+        "revision" : "c3a62b29391c6bafbab52ec9e97688174e4641a0",
+        "version" : "0.0.48"
       }
     },
     {
@@ -32,17 +32,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/pxlshpr/PrepDataTypes",
       "state" : {
-        "revision" : "7b690a09057b9d4c594c339792e0d88c172668b4",
-        "version" : "0.0.250"
-      }
-    },
-    {
-      "identity" : "prepmocks",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/pxlshpr/PrepMocks",
-      "state" : {
-        "revision" : "ecf161115522677d7b28a47f7bf2b4ac50831251",
-        "version" : "0.0.3"
+        "revision" : "c91659d46b8284fecd9094a206c61108324e146e",
+        "version" : "0.0.255"
       }
     },
     {
