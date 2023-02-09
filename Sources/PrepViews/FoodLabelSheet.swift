@@ -56,46 +56,62 @@ struct FoodLabelSheet: View {
     }
 
     var foodLabel: FoodLabel {
-        let energyBinding = Binding<FoodLabelValue>(
-//            get: { fields.energy.value.value ?? .init(amount: 0, unit: .kcal)  },
-            get: {
-                .init(amount: foodItem.scaledValueForEnergyInKcal, unit: .kcal)
-            },
-            set: { _ in }
-        )
-
-        let carbBinding = Binding<Double>(
-            get: { foodItem.scaledValueForMacro(.carb) },
-            set: { _ in }
-        )
-
-        let fatBinding = Binding<Double>(
-            get: { foodItem.scaledValueForMacro(.fat) },
-            set: { _ in }
-        )
-
-        let proteinBinding = Binding<Double>(
-            get: { foodItem.scaledValueForMacro(.protein) },
-            set: { _ in }
-        )
-
-        let microsBinding = Binding<[NutrientType : FoodLabelValue]>(
-            get: { foodItem.microsDict },
-            set: { _ in }
-        )
+//        let energyBinding = Binding<FoodLabelValue>(
+////            get: { fields.energy.value.value ?? .init(amount: 0, unit: .kcal)  },
+//            get: {
+//                .init(amount: foodItem.scaledValueForEnergyInKcal, unit: .kcal)
+//            },
+//            set: { _ in }
+//        )
+//
+//        let carbBinding = Binding<Double>(
+//            get: { foodItem.scaledValueForMacro(.carb) },
+//            set: { _ in }
+//        )
+//
+//        let fatBinding = Binding<Double>(
+//            get: { foodItem.scaledValueForMacro(.fat) },
+//            set: { _ in }
+//        )
+//
+//        let proteinBinding = Binding<Double>(
+//            get: { foodItem.scaledValueForMacro(.protein) },
+//            set: { _ in }
+//        )
+//
+//        let microsBinding = Binding<[NutrientType : FoodLabelValue]>(
+//            get: { foodItem.microsDict },
+//            set: { _ in }
+//        )
 
         let amountBinding = Binding<String>(
             get: { foodItem.description },
             set: { _ in }
         )
+        
+        let dataBinding = Binding<FoodLabelData>(
+            get: {
+                .init(
+                    energyValue: .init(amount: foodItem.scaledValueForEnergyInKcal, unit: .kcal),
+                    carb: foodItem.scaledValueForMacro(.carb),
+                    fat: foodItem.scaledValueForMacro(.fat),
+                    protein: foodItem.scaledValueForMacro(.protein),
+                    nutrients: foodItem.microsDict,
+                    quantityValue: foodItem.amount.value,
+                    quantityUnit: foodItem.amount.unitDescription(sizes: foodItem.food.info.sizes)
+                )
+            },
+            set: { _ in }
+        )
 
         return FoodLabel(
-            energyValue: energyBinding,
-            carb: carbBinding,
-            fat: fatBinding,
-            protein: proteinBinding,
-            nutrients: microsBinding,
-            amountPerString: amountBinding
+            data: dataBinding
+//            energyValue: energyBinding,
+//            carb: carbBinding,
+//            fat: fatBinding,
+//            protein: proteinBinding,
+//            nutrients: microsBinding,
+//            amountPerString: amountBinding
         )
     }
 }
