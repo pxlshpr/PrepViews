@@ -11,14 +11,15 @@ public struct PortionAwareness: View {
     @Environment(\.colorScheme) var colorScheme
     @StateObject var viewModel: ViewModel
 
-    @State var showingFoodLabel: Bool = false
-//    @State var foodLabelHeight: CGFloat = 0
+    @State var showingRDASettings: Bool = false
     
     @Binding var foodItem: MealFoodItem
     @Binding var meal: DayMeal
     @Binding var day: Day?
     //    var day: Binding<Day?>
-    
+
+    @AppStorage(UserDefaultsKeys.showingRDA) private var showingRDA = true
+
     @State var foodLabelData: FoodLabelData
     
     let didTapGoalSetButton: (Bool) -> ()
@@ -36,7 +37,8 @@ public struct PortionAwareness: View {
         _meal = meal
         _day = day
         
-        _foodLabelData = State(initialValue: foodItem.wrappedValue.foodLabelData)
+        let showingRDA = UserDefaults.standard.bool(forKey: UserDefaultsKeys.showingRDA)
+        _foodLabelData = State(initialValue: foodItem.wrappedValue.foodLabelData(showRDA: showingRDA))
 
         let viewModel = ViewModel(
             foodItem: foodItem.wrappedValue,
@@ -104,7 +106,11 @@ public struct PortionAwareness: View {
         .onChange(of: viewModel.currentType) { newValue in
             UserDefaults.standard.setValue(newValue.rawValue, forKey: "portionAwarenessType")
         }
-        .sheet(isPresented: $showingFoodLabel) { foodLabelSheet }
+        .sheet(isPresented: $showingRDASettings) { rdaSettings }
+    }
+    
+    var rdaSettings: some View {
+        Text("RDA Settings go here")
     }
     
     //MARK: Pager
@@ -134,6 +140,7 @@ public struct PortionAwareness: View {
             FormStyledSection {
                 foodLabel
                     .onChange(of: foodItem, perform: foodItemChanged)
+                    .onChange(of: showingRDA, perform: showingRDAChanged)
             }
         } else {
             Meters(metersType)
@@ -147,15 +154,29 @@ public struct PortionAwareness: View {
                 .fixedSize(horizontal: false, vertical: true)
         }
     }
-    
+
+    func showingRDAChanged(_ newValue: Bool) {
+        withAnimation {
+            foodLabelData = foodItem.foodLabelData(showRDA: newValue)
+        }
+    }
+
     func foodItemChanged(_ newValue: MealFoodItem) {
         withAnimation {
-            foodLabelData = foodItem.foodLabelData
+            foodLabelData = foodItem.foodLabelData(showRDA: showingRDA)
         }
     }
     
     var foodLabel: FoodLabel {
-        FoodLabel(data: $foodLabelData)
+        FoodLabel(
+            data: $foodLabelData,
+            didTapFooter: didTapFoodLabelFooter
+        )
+    }
+    
+    func didTapFoodLabelFooter() {
+        Haptics.feedback(style: .soft)
+        showingRDASettings = true
     }
     
     var header: some View {
@@ -273,7 +294,7 @@ public struct PortionAwareness: View {
         var label: some View {
             HStack(spacing: 2) {
                 Image(systemName: "chart.bar.doc.horizontal")
-                Text("Food Label")
+                Text("% Daily Value")
             }
             .font(.footnote)
             .foregroundColor(.accentColor)
@@ -285,13 +306,15 @@ public struct PortionAwareness: View {
                     .fill(Color.accentColor.opacity(
                         colorScheme == .dark ? 0.1 : 0.15
                     ))
+                    .opacity(showingRDA ? 1 : 0)
             )
         }
         
         var button: some View {
             return Button {
                 Haptics.feedback(style: .soft)
-                showingFoodLabel = true
+                showingRDA.toggle()
+                
             } label: {
                 label
             }
@@ -665,7 +688,7 @@ public struct MealItemNutrientMetersPreview: View {
 }
 
 extension MealFoodItem {
-    var foodLabelData: FoodLabelData {
+    func foodLabelData(showRDA: Bool) -> FoodLabelData {
         FoodLabelData(
             energyValue: FoodLabelValue(amount: scaledValueForEnergyInKcal, unit: .kcal),
             carb: scaledValueForMacro(.carb),
@@ -673,7 +696,8 @@ extension MealFoodItem {
             protein: scaledValueForMacro(.protein),
             nutrients: microsDict,
             quantityValue: amount.value,
-            quantityUnit: amount.unitDescription(sizes: food.info.sizes)
+            quantityUnit: amount.unitDescription(sizes: food.info.sizes),
+            showRDA: showRDA
         )
     }
 }
