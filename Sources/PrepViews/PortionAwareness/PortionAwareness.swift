@@ -50,8 +50,23 @@ public struct PortionAwareness: View {
         )
         _viewModel = StateObject(wrappedValue: viewModel)
 
-        let showingRDA = UserDefaults.standard.bool(forKey: UserDefaultsKeys.showingRDA)
-        let usingDietGoalsInsteadOfRDA = UserDefaults.standard.bool(forKey: UserDefaultsKeys.usingDietGoalsInsteadOfRDA)
+        let showingRDA: Bool
+        if let showingRDAValue = UserDefaults.standard.value(forKey: UserDefaultsKeys.showingRDA) {
+            showingRDA = showingRDAValue as? Bool ?? true
+        } else {
+            /// Make sure the initial value (if not set) is always `true`
+            showingRDA = true
+        }
+
+        /// Make sure the initial value (if not set) is always `true`
+        let usingDietGoalsInsteadOfRDA: Bool
+        if let usingDietGoalsInsteadOfRDAValue = UserDefaults.standard.value(forKey: UserDefaultsKeys.usingDietGoalsInsteadOfRDA) {
+            usingDietGoalsInsteadOfRDA = usingDietGoalsInsteadOfRDAValue as? Bool ?? true
+        } else {
+            /// Make sure the initial value (if not set) is always `true`
+            usingDietGoalsInsteadOfRDA = true
+        }
+
         let diet = day.wrappedValue?.goalSet ?? DataManager.shared.lastUsedGoalSet
         if usingDietGoalsInsteadOfRDA, let diet {
             _foodLabelData = State(initialValue: foodItem.wrappedValue.foodLabelData(
