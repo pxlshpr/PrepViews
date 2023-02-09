@@ -2,6 +2,7 @@ import SwiftUI
 import PrepDataTypes
 import SwiftUIPager
 import SwiftHaptics
+import PrepCoreDataStack
 
 let MeterSpacing = 5.0
 let MeterHeight = 20.0
@@ -247,8 +248,17 @@ extension PortionAwareness.ViewModel {
         self.mealMeterViewModels = mealMeterViewModels
     }
     
+    var dietNameWithEmoji: String? {
+        guard let diet else { return nil }
+        return "\(diet.emoji) \(diet.name)"
+    }
+    
     var diet: GoalSet? {
-        day?.goalSet
+        if let day {
+            return day.goalSet
+        } else {
+            return DataManager.shared.lastUsedGoalSet
+        }
     }
     
     var hasDiet: Bool {
@@ -289,7 +299,8 @@ extension PortionAwareness.ViewModel {
         GoalCalcParams(
             userUnits: userUnits,
             bodyProfile: bodyProfile,
-            energyGoal: day?.goalSet?.energyGoal)
+            energyGoal: diet?.energyGoal)
+//            energyGoal: day?.goalSet?.energyGoal)
     }
     
     func numberOfRows(for metersType: MetersType) -> Int {
@@ -528,7 +539,8 @@ extension PortionAwareness.ViewModel {
     
     //MARK: Diet MeterViewModels
     var calculatedDietMeterViewModels: [NutrientMeter.ViewModel] {
-        guard let diet = day?.goalSet else { return [] }
+//        guard let diet = day?.goalSet else { return [] }
+        guard let diet else { return [] }
         
         var viewModels = diet.goals.map {
             nutrientMeterViewModel(for: $0, metersType: .diet)

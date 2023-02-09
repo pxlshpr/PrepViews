@@ -6,6 +6,8 @@ import SwiftUIPager
 import SwiftHaptics
 import FoodLabel
 
+import PrepCoreDataStack
+
 public struct PortionAwareness: View {
 
     @Environment(\.colorScheme) var colorScheme
@@ -19,6 +21,7 @@ public struct PortionAwareness: View {
     //    var day: Binding<Day?>
 
     @AppStorage(UserDefaultsKeys.showingRDA) private var showingRDA = true
+    @AppStorage(UserDefaultsKeys.usingDietGoalsInsteadOfRDA) private var usingDietGoalsInsteadOfRDA = true
 
     @State var foodLabelData: FoodLabelData
     
@@ -37,9 +40,6 @@ public struct PortionAwareness: View {
         _meal = meal
         _day = day
         
-        let showingRDA = UserDefaults.standard.bool(forKey: UserDefaultsKeys.showingRDA)
-        _foodLabelData = State(initialValue: foodItem.wrappedValue.foodLabelData(showRDA: showingRDA))
-
         let viewModel = ViewModel(
             foodItem: foodItem.wrappedValue,
             meal: meal.wrappedValue,
@@ -49,7 +49,19 @@ public struct PortionAwareness: View {
             shouldCreateSubgoals: shouldCreateSubgoals
         )
         _viewModel = StateObject(wrappedValue: viewModel)
-        
+
+        let showingRDA = UserDefaults.standard.bool(forKey: UserDefaultsKeys.showingRDA)
+        let usingDietGoalsInsteadOfRDA = UserDefaults.standard.bool(forKey: UserDefaultsKeys.usingDietGoalsInsteadOfRDA)
+        let diet = day.wrappedValue?.goalSet ?? DataManager.shared.lastUsedGoalSet
+        if usingDietGoalsInsteadOfRDA, let diet {
+            _foodLabelData = State(initialValue: foodItem.wrappedValue.foodLabelData(
+                showRDA: showingRDA,
+                customRDAValues: diet.customRDAValues(with: viewModel.goalCalcParams),
+                dietName: viewModel.dietNameWithEmoji
+            ))
+        } else {
+            _foodLabelData = State(initialValue: foodItem.wrappedValue.foodLabelData(showRDA: showingRDA))
+        }
         
         self.didTapGoalSetButton = didTapGoalSetButton
         
@@ -137,11 +149,7 @@ public struct PortionAwareness: View {
     @ViewBuilder
     func content(for metersType: MetersType) -> some View {
         if metersType == .nutrients {
-            FormStyledSection {
-                foodLabel
-                    .onChange(of: foodItem, perform: foodItemChanged)
-                    .onChange(of: showingRDA, perform: showingRDAChanged)
-            }
+            foodLabelSection
         } else {
             Meters(metersType)
                 .environmentObject(viewModel)
@@ -154,17 +162,46 @@ public struct PortionAwareness: View {
                 .fixedSize(horizontal: false, vertical: true)
         }
     }
-
-    func showingRDAChanged(_ newValue: Bool) {
+    
+    var foodLabelSection: some View {
+        FormStyledSection {
+            VStack {
+                foodLabel
+                Toggle("Use daily goals", isOn: $usingDietGoalsInsteadOfRDA)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .onChange(of: foodItem, perform: foodItemChanged)
+            .onChange(of: showingRDA, perform: showingRDAChanged)
+            .onChange(of: usingDietGoalsInsteadOfRDA, perform: usingDietGoalsInsteadOfRDAChanged)
+        }
+    }
+    
+    func usingDietGoalsInsteadOfRDAChanged(_ newValue: Bool) {
+        updateFoodLabelData()
+    }
+    
+    func updateFoodLabelData() {
+        var customRDAValues: [AnyNutrient : (Double, NutrientUnit)] {
+            guard usingDietGoalsInsteadOfRDA,
+                  let diet = viewModel.diet
+            else { return [:] }
+            return diet.customRDAValues(with: viewModel.goalCalcParams)
+        }
         withAnimation {
-            foodLabelData = foodItem.foodLabelData(showRDA: newValue)
+            foodLabelData = foodItem.foodLabelData(
+                showRDA: showingRDA,
+                customRDAValues: customRDAValues,
+                dietName: viewModel.dietNameWithEmoji
+            )
         }
     }
 
+    func showingRDAChanged(_ newValue: Bool) {
+        updateFoodLabelData()
+    }
+
     func foodItemChanged(_ newValue: MealFoodItem) {
-        withAnimation {
-            foodLabelData = foodItem.foodLabelData(showRDA: showingRDA)
-        }
+        updateFoodLabelData()
     }
     
     var foodLabel: FoodLabel {
@@ -231,9 +268,9 @@ public struct PortionAwareness: View {
         .padding(.horizontal, 30)
     }
     
-    var foodLabelSheet: some View {
-        FoodLabelSheet(foodItem: foodItem)
-    }
+//    var foodLabelSheet: some View {
+//        FoodLabelSheet(foodItem: foodItem)
+//    }
 
     var legend: some View {
         Legend(viewModel: viewModel)
@@ -688,7 +725,11 @@ public struct MealItemNutrientMetersPreview: View {
 }
 
 extension MealFoodItem {
-    func foodLabelData(showRDA: Bool) -> FoodLabelData {
+    func foodLabelData(
+        showRDA: Bool,
+        customRDAValues: [AnyNutrient : (Double, NutrientUnit)] = [:],
+        dietName: String? = nil
+    ) -> FoodLabelData {
         FoodLabelData(
             energyValue: FoodLabelValue(amount: scaledValueForEnergyInKcal, unit: .kcal),
             carb: scaledValueForMacro(.carb),
@@ -697,7 +738,71 @@ extension MealFoodItem {
             nutrients: microsDict,
             quantityValue: amount.value,
             quantityUnit: amount.unitDescription(sizes: food.info.sizes),
-            showRDA: showRDA
+            showRDA: showRDA,
+            customRDAValues: customRDAValues,
+            dietName: dietName
         )
+    }
+}
+
+extension GoalSet {
+    func customRDAValues(with goalCalcParams: GoalCalcParams) -> [AnyNutrient : (Double, NutrientUnit)] {
+        var values: [AnyNutrient : (Double, NutrientUnit)] = [:]
+        for goal in goals {
+            guard let value = goal.calculateLowerBound(with: goalCalcParams) else { continue }
+            values[goal.anyNutrient] = (
+                value,
+                goal.nutrientUnit(userUnits: goalCalcParams.userUnits)
+            )
+        }
+        return values
+    }
+}
+
+extension Goal {
+    var anyNutrient: AnyNutrient {
+        switch type {
+        case .energy:
+            return .energy
+        case .macro(_, let macro):
+            return .macro(macro)
+        case .micro(_, let nutrientType, _):
+            return .micro(nutrientType)
+        }
+    }
+    
+    func nutrientUnit(userUnits: UserUnits) -> NutrientUnit {
+        switch type {
+        case .energy(let energyGoalType):
+            return energyGoalType.nutrientUnit(userUnits: userUnits)
+        case .macro:
+            return .g
+        case .micro(_, _, let nutrientUnit):
+            return nutrientUnit
+        }
+    }
+}
+
+extension EnergyGoalType {
+    func nutrientUnit(userUnits: UserUnits) -> NutrientUnit {
+        switch self {
+        case .fixed(let energyUnit):
+            return energyUnit.nutrientUnit
+        case .fromMaintenance(let energyUnit, _):
+            return energyUnit.nutrientUnit
+        case .percentFromMaintenance(_):
+            return userUnits.energy.nutrientUnit
+        }
+    }
+}
+
+extension EnergyUnit {
+    var nutrientUnit: NutrientUnit {
+        switch self {
+        case .kcal:
+            return .kcal
+        case .kJ:
+            return .kJ
+        }
     }
 }
