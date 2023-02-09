@@ -6,7 +6,7 @@ import SwiftUIPager
 import SwiftHaptics
 import FoodLabel
 
-import PrepCoreDataStack
+//import PrepCoreDataStack
 
 public struct PortionAwareness: View {
 
@@ -18,6 +18,7 @@ public struct PortionAwareness: View {
     @Binding var foodItem: MealFoodItem
     @Binding var meal: DayMeal
     @Binding var day: Day?
+    @Binding var lastUsedGoalSet: GoalSet?
     //    var day: Binding<Day?>
 
     @AppStorage(UserDefaultsKeys.showingRDA) private var showingRDA = true
@@ -31,6 +32,7 @@ public struct PortionAwareness: View {
         foodItem: Binding<MealFoodItem>,
         meal: Binding<DayMeal>,
         day: Binding<Day?>,
+        lastUsedGoalSet: Binding<GoalSet?>,
         userUnits: UserUnits,
         bodyProfile: BodyProfile?,
         shouldCreateSubgoals: Bool = true,
@@ -39,11 +41,13 @@ public struct PortionAwareness: View {
         _foodItem = foodItem
         _meal = meal
         _day = day
+        _lastUsedGoalSet = lastUsedGoalSet
         
         let viewModel = ViewModel(
             foodItem: foodItem.wrappedValue,
             meal: meal.wrappedValue,
             day: day.wrappedValue,
+            lastUsedGoalSet: lastUsedGoalSet.wrappedValue,
             userUnits: userUnits,
             bodyProfile: bodyProfile,
             shouldCreateSubgoals: shouldCreateSubgoals
@@ -67,7 +71,14 @@ public struct PortionAwareness: View {
             usingDietGoalsInsteadOfRDA = true
         }
 
-        let diet = day.wrappedValue?.goalSet ?? DataManager.shared.lastUsedGoalSet
+        let diet: GoalSet?
+        if let unwrappedDay = day.wrappedValue {
+            diet = unwrappedDay.goalSet
+        } else {
+            diet = lastUsedGoalSet.wrappedValue
+        }
+
+//        let diet = day.wrappedValue?.goalSet ?? lastUsedGoalSet.wrappedValue
         if usingDietGoalsInsteadOfRDA, let diet {
             _foodLabelData = State(initialValue: foodItem.wrappedValue.foodLabelData(
                 showRDA: showingRDA,
@@ -653,6 +664,7 @@ public struct MealItemNutrientMetersPreview: View {
             foodItem: foodItemBinding,
             meal: mealBinding,
             day: .constant(mockDay),
+            lastUsedGoalSet: .constant(mockDay.goalSet),
             userUnits: .standard,
             bodyProfile: BodyProfileMock.calculated,
             didTapGoalSetButton: { forMeal in

@@ -2,7 +2,6 @@ import SwiftUI
 import PrepDataTypes
 import SwiftUIPager
 import SwiftHaptics
-import PrepCoreDataStack
 
 let MeterSpacing = 5.0
 let MeterHeight = 20.0
@@ -32,6 +31,7 @@ extension PortionAwareness {
         let userUnits: UserUnits
         let bodyProfile: BodyProfile?
         let shouldCreateSubgoals: Bool
+        let lastUsedGoalSet: GoalSet?
         
         @Published var currentType: MetersType
         @Published var pagerHeight: CGFloat
@@ -51,10 +51,12 @@ extension PortionAwareness {
             foodItem: MealFoodItem,
             meal: DayMeal,
             day: Day?,
+            lastUsedGoalSet: GoalSet?,
             userUnits: UserUnits,
             bodyProfile: BodyProfile?,
             shouldCreateSubgoals: Bool
         ) {
+            self.lastUsedGoalSet = lastUsedGoalSet
             self.foodItem = foodItem
             self.day = day
             self.meal = meal
@@ -257,7 +259,7 @@ extension PortionAwareness.ViewModel {
         if let day {
             return day.goalSet
         } else {
-            return DataManager.shared.lastUsedGoalSet
+            return lastUsedGoalSet
         }
     }
     
