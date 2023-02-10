@@ -34,7 +34,7 @@ public struct FoodCell: View {
     let showMacrosIndicator: Bool
     let didTapMacrosIndicator: (() -> ())?
     let didToggleSelection: ((Bool) -> ())?
-
+    
     public init(
         emoji: String,
         name: String,

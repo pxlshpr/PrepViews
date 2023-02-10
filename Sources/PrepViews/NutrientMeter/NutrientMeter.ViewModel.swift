@@ -256,9 +256,9 @@ public extension NutrientMeter.ViewModel {
         }
         
         switch eatenPercentageType {
-        case .empty:
-            return Color("StatsEmptyFill", bundle: .module)
-        case .regular:
+//        case .empty:
+//            return Color("StatsEmptyFill", bundle: .module)
+        case .regular, .empty:
             return component.eatenColor
         case .complete:
             return haveGoal ? Colors.Complete.fill : component.eatenColor

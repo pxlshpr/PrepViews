@@ -44,7 +44,8 @@ public extension NutrientMeter {
         
         var preppedCapsule: some View {
             shape
-                .fill(viewModel.preppedColor.gradient)
+//                .fill(viewModel.preppedColor.gradient)
+                .fill(viewModel.eatenColor.gradient)
                 .frame(width: preppedWidth(for: proxy))
                 .if(hasAppeared, transform: { view in
                     /// Use this to make sure the animation only gets applied after the view has appeared, so that it doesn't animate it during it being transitioned into view
@@ -57,6 +58,7 @@ public extension NutrientMeter {
         var eatenCapsule: some View {
             shape
                 .fill(viewModel.eatenColor.gradient)
+//                .frame(width: preppedWidth(for: proxy))
                 .frame(width: eatenWidth(proxy: proxy))
                 .if(hasAppeared, transform: { view in
                     /// Use this to make sure the animation only gets applied after the view has appeared, so that it doesn't animate it during it being transitioned into view
@@ -112,7 +114,7 @@ public extension NutrientMeter {
             placeholderCapsule
             incrementCapsule
             preppedCapsule
-            eatenCapsule
+//            eatenCapsule
             lowerGoalMark
             upperGoalMark
         }
