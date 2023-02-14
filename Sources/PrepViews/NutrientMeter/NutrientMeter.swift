@@ -12,11 +12,14 @@ public struct NutrientMeter: View {
     }
 }
 
+let Bounce: Animation = .interactiveSpring(response: 0.35, dampingFraction: 0.66, blendDuration: 0.35)
+
 public extension NutrientMeter {
     var body: some View {
         GeometryReader { proxy -> AnyView in
             return AnyView(
                 capsulesPrototype(proxy)
+                    .animation(Bounce, value: viewModel.planned)
             )
         }
         .clipShape(
