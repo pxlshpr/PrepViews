@@ -278,7 +278,7 @@ extension PortionAwareness.ViewModel {
             /// Shift the back 1 more to account for missing `meal` type
             return type.rawValue - 2
         } else {
-            print("Not supported")
+            cprint("Not supported")
             return 1
         }
     }
@@ -624,10 +624,10 @@ extension PortionAwareness.ViewModel {
             let increment = foodItem.scaledValue(for: component)
 
             if component == .energy {
-//                print("planned is \(planned)")
-//                print("increment is \(increment)")
-//                print("subgoalUpper is \(subgoalUpper!)")
-//                print(" ")
+//                cprint("planned is \(planned)")
+//                cprint("increment is \(increment)")
+//                cprint("subgoalUpper is \(subgoalUpper!)")
+//                cprint(" ")
             }
 
 

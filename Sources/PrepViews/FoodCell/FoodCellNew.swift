@@ -57,7 +57,7 @@
 //                self.proteinWidth = proteinWidth
 //                self.fatWidth = fatWidth
 //                self.isZeroCalories = totalEnergy == 0
-//                print("Calculated widths for: \(emoji) \(name)")
+//                cprint("Calculated widths for: \(emoji) \(name)")
 //            }
 //        }
 //    }
