@@ -105,6 +105,10 @@ public extension DayMeal {
                 return partialResult
             }
             
+            guard !mealFoodItem.isSoftDeleted else {
+                return partialResult
+            }
+            
 //            if let idOfFoodItemToIgnore, mealFoodItem.id == idOfFoodItemToIgnore {
 //                return partialResult
 //            } else {
