@@ -5,6 +5,8 @@ import SwiftUISugar
 
 public struct FoodCell: View {
 
+    @Environment(\.colorScheme) var colorScheme
+    
     //TODO: Refactor this and move to PrepViews
     /// [ ] Rename it to `isSelectable`
     /// [ ] Make it optional so that we can disregard it if needed
@@ -75,8 +77,10 @@ public struct FoodCell: View {
                 macrosIndicator
             }
         }
-//        .listRowBackground(Color(.secondarySystemGroupedBackground))
-        .listRowBackground(FormCellBackground())
+//        .listRowBackground(
+//            colorScheme == .light ? Color(.systemGroupedBackground) : Color(hex: "191919")
+////            FormCellBackground()
+//        )
     }
     
     @ViewBuilder
