@@ -243,12 +243,6 @@ public extension NutrientMeterComponent {
 }
 
 public extension MealFoodItem {
-    
-//    var nutrientScaleFactor: Double {
-//        guard let foodQuantity = food.quantity(for: amount) else { return 0 }
-//        return food.nutrientScaleFactor(for: foodQuantity) ?? 0
-//    }
-    
     func scaledValue(for component: NutrientMeterComponent) -> Double {
         guard let value = food.info.nutrients.value(for: component) else { return 0 }
         return value * nutrientScaleFactor
