@@ -7,7 +7,7 @@ import FoodLabel
 
 //import PrepCoreDataStack
 
-public struct PortionAwareness: View {
+public struct ItemPortion: View {
 
     @Environment(\.colorScheme) var colorScheme
     @StateObject var viewModel: ViewModel
@@ -453,7 +453,7 @@ public struct PortionAwareness: View {
 
 //MARK: - MealItemMeters.ViewModel (Legend)
 
-extension PortionAwareness.ViewModel {
+extension ItemPortion.ViewModel {
     
     var showMealSubgoals: Bool {
         guard currentType == .meal else { return false }

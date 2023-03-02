@@ -6,7 +6,7 @@ import SwiftHaptics
 let MeterSpacing = 5.0
 let MeterHeight = 20.0
 
-extension PortionAwareness {
+extension ItemPortion {
     
     class ViewModel: ObservableObject {
         
@@ -149,7 +149,7 @@ extension MetersType {
     }
 }
 
-extension PortionAwareness.ViewModel {
+extension ItemPortion.ViewModel {
     
     var shouldShowMealGoals: Bool {
         /// If we have a `MealType` associated
@@ -398,7 +398,7 @@ extension FoodNutrient {
         }
     }
 }
-extension PortionAwareness.ViewModel {
+extension ItemPortion.ViewModel {
     
     var nutrients: FoodNutrients {
         foodItem.food.info.nutrients

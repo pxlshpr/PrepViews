@@ -4,11 +4,11 @@ import PrepDataTypes
 let MeterLabelFontStyle: Font.TextStyle = .body
 let MeterLabelFont: Font = Font.system(MeterLabelFontStyle)
 
-extension PortionAwareness {
+extension ItemPortion {
     
     struct Meters: View {
         
-        @EnvironmentObject var viewModel: PortionAwareness.ViewModel
+        @EnvironmentObject var viewModel: ItemPortion.ViewModel
         
         let type: MetersType
         
@@ -18,7 +18,7 @@ extension PortionAwareness {
     }
 }
 
-extension PortionAwareness.Meters {
+extension ItemPortion.Meters {
     
     var body: some View {
         metersGrid

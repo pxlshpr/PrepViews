@@ -3,7 +3,7 @@ import SwiftHaptics
 
 //MARK: - Legend
 
-extension PortionAwareness {
+extension ItemPortion {
     struct Legend: View {
         
         @Environment(\.colorScheme) var colorScheme
@@ -31,7 +31,7 @@ extension PortionAwareness {
     }
 }
 
-extension PortionAwareness.Legend {
+extension ItemPortion.Legend {
     
     var body: some View {
         VStack(alignment: .leading) {
