@@ -14,7 +14,7 @@ public struct PortionAwareness: View {
 
     @State var showingRDASettings: Bool = false
     
-    @Binding var foodItem: MealFoodItem
+    @Binding var foodItem: MealItem
     @Binding var meal: DayMeal
     @Binding var day: Day?
     @Binding var lastUsedGoalSet: GoalSet?
@@ -28,7 +28,7 @@ public struct PortionAwareness: View {
     let didTapGoalSetButton: (Bool) -> ()
     
     public init(
-        foodItem: Binding<MealFoodItem>,
+        foodItem: Binding<MealItem>,
         meal: Binding<DayMeal>,
         day: Binding<Day?>,
         lastUsedGoalSet: Binding<GoalSet?>,
@@ -225,7 +225,7 @@ public struct PortionAwareness: View {
         updateFoodLabelData()
     }
 
-    func foodItemChanged(_ newValue: MealFoodItem) {
+    func foodItemChanged(_ newValue: MealItem) {
         updateFoodLabelData()
     }
     
@@ -592,7 +592,7 @@ extension Food {
     }
 }
 
-extension MealFoodItem {
+extension MealItem {
     func foodLabelData(
         showRDA: Bool,
         customRDAValues: [AnyNutrient : (Double, NutrientUnit)] = [:],

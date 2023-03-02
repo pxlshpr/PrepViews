@@ -80,7 +80,7 @@ public extension Day {
     }
 }
 
-extension MealFoodItem {
+extension MealItem {
     var isEaten: Bool {
         markedAsEatenAt != nil && markedAsEatenAt! > 0
     }
@@ -88,31 +88,31 @@ extension MealFoodItem {
 
 public extension DayMeal {
     func eatenValue(for component: NutrientMeterComponent) -> Double {
-        foodItems.reduce(0) { partialResult, mealFoodItem in
-            guard !mealFoodItem.isSoftDeleted && mealFoodItem.isEaten else {
+        foodItems.reduce(0) { partialResult, mealItem in
+            guard !mealItem.isSoftDeleted && mealItem.isEaten else {
                 return partialResult
             }
-            return partialResult + mealFoodItem.scaledValue(for: component)
+            return partialResult + mealItem.scaledValue(for: component)
         }
     }
     
     func plannedValue(for component: NutrientMeterComponent, ignoring idOfFoodItemToIgnore: UUID? = nil) -> Double {
         
-        foodItems.reduce(0) { partialResult, mealFoodItem in
+        foodItems.reduce(0) { partialResult, mealItem in
             
-            guard !(mealFoodItem.id == idOfFoodItemToIgnore
-                    || mealFoodItem.isSoftDeleted) else {
+            guard !(mealItem.id == idOfFoodItemToIgnore
+                    || mealItem.isSoftDeleted) else {
                 return partialResult
             }
             
-            guard !mealFoodItem.isSoftDeleted else {
+            guard !mealItem.isSoftDeleted else {
                 return partialResult
             }
             
-//            if let idOfFoodItemToIgnore, mealFoodItem.id == idOfFoodItemToIgnore {
+//            if let idOfFoodItemToIgnore, mealItem.id == idOfFoodItemToIgnore {
 //                return partialResult
 //            } else {
-                return partialResult + mealFoodItem.scaledValue(for: component)
+                return partialResult + mealItem.scaledValue(for: component)
 //            }
         }
     }
@@ -242,7 +242,7 @@ public extension NutrientMeterComponent {
     }
 }
 
-public extension MealFoodItem {
+public extension MealItem {
     func scaledValue(for component: NutrientMeterComponent) -> Double {
         guard let value = food.info.nutrients.value(for: component) else { return 0 }
         return value * nutrientScaleFactor

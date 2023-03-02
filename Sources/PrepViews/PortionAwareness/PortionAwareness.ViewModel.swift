@@ -10,7 +10,7 @@ extension PortionAwareness {
     
     class ViewModel: ObservableObject {
         
-        @Published var foodItem: MealFoodItem {
+        @Published var foodItem: MealItem {
             didSet {
                 foodItemChanged()
             }
@@ -48,7 +48,7 @@ extension PortionAwareness {
         @Published var metersTypes: [MetersType] = []
         
         init(
-            foodItem: MealFoodItem,
+            foodItem: MealItem,
             meal: DayMeal,
             day: Day?,
             lastUsedGoalSet: GoalSet?,

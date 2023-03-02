@@ -6,7 +6,7 @@
 //
 //struct FoodLabelSheet: View {
 //
-//    let foodItem: MealFoodItem
+//    let foodItem: MealItem
 //
 //    @Environment(\.dismiss) var dismiss
 //    @State var foodLabelHeight: CGFloat = 0
