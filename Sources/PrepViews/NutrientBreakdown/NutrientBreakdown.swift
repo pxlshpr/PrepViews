@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftUISugar
+import PrepDataTypes
 
 let FontSizeRegular: CGFloat = 20
 let FontSizeSmall: CGFloat = 13

@@ -1,4 +1,5 @@
 import SwiftUI
+import PrepDataTypes
 
 public extension NutrientMeter {
     struct ViewModel {

@@ -1,4 +1,5 @@
 import SwiftUI
+import PrepDataTypes
 
 extension NutrientBreakdown {
     struct Row: View {
