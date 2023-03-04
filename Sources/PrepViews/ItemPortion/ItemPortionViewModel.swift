@@ -28,7 +28,7 @@ extension ItemPortion {
             }
         }
         
-        let userOptions: UserOptions
+        let userUnits: UserOptions.Units
         let bodyProfile: BodyProfile?
         let shouldCreateSubgoals: Bool
         let lastUsedGoalSet: GoalSet?
@@ -52,7 +52,7 @@ extension ItemPortion {
             meal: DayMeal,
             day: Day?,
             lastUsedGoalSet: GoalSet?,
-            userOptions: UserOptions,
+            userUnits: UserOptions.Units,
             bodyProfile: BodyProfile?,
             shouldCreateSubgoals: Bool
         ) {
@@ -60,7 +60,7 @@ extension ItemPortion {
             self.foodItem = foodItem
             self.day = day
             self.meal = meal
-            self.userOptions = userOptions
+            self.userUnits = userUnits
             self.bodyProfile = bodyProfile
             self.shouldCreateSubgoals = shouldCreateSubgoals
             
@@ -299,7 +299,7 @@ extension ItemPortion.ViewModel {
     
     var goalCalcParams: GoalCalcParams {
         GoalCalcParams(
-            userOptions: userOptions,
+            userUnits: userUnits,
             bodyProfile: bodyProfile,
             energyGoal: diet?.energyGoal)
 //            energyGoal: day?.goalSet?.energyGoal)

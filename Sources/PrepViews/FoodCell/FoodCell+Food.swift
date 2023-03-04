@@ -4,6 +4,7 @@ import PrepDataTypes
 public extension FoodCell {
     init(
         food: Food,
+        showEmoji: Binding<Bool>,
         isSelectable: Binding<Bool> = .constant(false),
         showMacrosIndicator: Bool = true,
         didTapMacrosIndicator: (() -> ())? = nil,
@@ -18,6 +19,7 @@ public extension FoodCell {
             fat: food.info.nutrients.fat,
             protein: food.info.nutrients.protein,
             showMacrosIndicator: showMacrosIndicator,
+            showEmoji: showEmoji,
             isSelectable: isSelectable,
             didTapMacrosIndicator: didTapMacrosIndicator,
             didToggleSelection: didToggleSelection

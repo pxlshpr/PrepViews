@@ -32,7 +32,7 @@ public struct ItemPortion: View {
         meal: Binding<DayMeal>,
         day: Binding<Day?>,
         lastUsedGoalSet: Binding<GoalSet?>,
-        userOptions: UserOptions,
+        userUnits: UserOptions.Units,
         bodyProfile: BodyProfile?,
         shouldCreateSubgoals: Bool = true,
         didTapGoalSetButton: @escaping (Bool) -> ()
@@ -47,7 +47,7 @@ public struct ItemPortion: View {
             meal: meal.wrappedValue,
             day: day.wrappedValue,
             lastUsedGoalSet: lastUsedGoalSet.wrappedValue,
-            userOptions: userOptions,
+            userUnits: userUnits,
             bodyProfile: bodyProfile,
             shouldCreateSubgoals: shouldCreateSubgoals
         )
@@ -620,7 +620,7 @@ extension GoalSet {
             guard let value = goal.calculateLowerBound(with: goalCalcParams) else { continue }
             values[goal.anyNutrient] = (
                 value,
-                goal.nutrientUnit(userOptions: goalCalcParams.userOptions)
+                goal.nutrientUnit(userUnits: goalCalcParams.userUnits)
             )
         }
         return values
@@ -639,10 +639,10 @@ extension Goal {
         }
     }
     
-    func nutrientUnit(userOptions: UserOptions) -> NutrientUnit {
+    func nutrientUnit(userUnits: UserOptions.Units) -> NutrientUnit {
         switch type {
         case .energy(let energyGoalType):
-            return energyGoalType.nutrientUnit(userOptions: userOptions)
+            return energyGoalType.nutrientUnit(userUnits: userUnits)
         case .macro:
             return .g
         case .micro(_, _, let nutrientUnit):
@@ -652,14 +652,14 @@ extension Goal {
 }
 
 extension EnergyGoalType {
-    func nutrientUnit(userOptions: UserOptions) -> NutrientUnit {
+    func nutrientUnit(userUnits: UserOptions.Units) -> NutrientUnit {
         switch self {
         case .fixed(let energyUnit):
             return energyUnit.nutrientUnit
         case .fromMaintenance(let energyUnit, _):
             return energyUnit.nutrientUnit
         case .percentFromMaintenance(_):
-            return userOptions.energy.nutrientUnit
+            return userUnits.energy.nutrientUnit
         }
     }
 }

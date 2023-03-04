@@ -12,8 +12,9 @@ public struct FoodCell: View {
     /// [ ] Make it optional so that we can disregard it if needed
     /// [ ] Conslidate it by moving it back to `PrepViews`
 
-    @AppStorage(UserDefaultsKeys.showingFoodEmojis) var showingFoodEmojis = true
+//    @AppStorage(UserDefaultsKeys.showingFoodEmojis) var showingFoodEmojis = true
 
+    @Binding var showEmoji: Bool
     @Binding var isSelectable: Bool
     @State var isSelected: Bool = false
 
@@ -47,6 +48,7 @@ public struct FoodCell: View {
         protein: Double,
         nameFontWeight: Font.Weight = .medium,
         showMacrosIndicator: Bool = true,
+        showEmoji: Binding<Bool>,
         isSelectable: Binding<Bool> = .constant(false),
         didTapMacrosIndicator: (() -> ())? = nil,
         didToggleSelection: ((Bool) -> ())? = nil
@@ -65,6 +67,7 @@ public struct FoodCell: View {
         self.didToggleSelection = didToggleSelection
 
         _isSelectable = isSelectable
+        _showEmoji = showEmoji
     }
     
     public var body: some View {
@@ -101,7 +104,7 @@ public struct FoodCell: View {
     
     @ViewBuilder
     var emojiText: some View {
-        if showingFoodEmojis {
+        if showEmoji {
             Text(emoji)
         }
     }
@@ -195,6 +198,7 @@ struct FoodCellPreview: View {
                         carb: food.c,
                         fat: food.f,
                         protein: food.p,
+                        showEmoji: .constant(true),
                         isSelectable: .constant(false),
                         didToggleSelection: { isSelected in
                             cprint("\(food) selection changed to: \(isSelected)")
