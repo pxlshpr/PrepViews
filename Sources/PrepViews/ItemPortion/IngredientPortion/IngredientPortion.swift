@@ -24,7 +24,7 @@ public struct IngredientPortion: View {
     public init(
         ingredientItem: Binding<IngredientItem>,
         lastUsedGoalSet: Binding<GoalSet?>,
-        userUnits: UserUnits,
+        userOptions: UserOptions,
         bodyProfile: BodyProfile?,
         didTapGoalSetButton: @escaping (Bool) -> ()
     ) {
@@ -34,7 +34,7 @@ public struct IngredientPortion: View {
         let viewModel = ViewModel(
             ingredientItem: ingredientItem.wrappedValue,
             lastUsedGoalSet: lastUsedGoalSet.wrappedValue,
-            userUnits: userUnits,
+            userOptions: userOptions,
             bodyProfile: bodyProfile
         )
         _viewModel = StateObject(wrappedValue: viewModel)

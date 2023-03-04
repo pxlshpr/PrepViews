@@ -32,7 +32,7 @@ public struct ItemPortion: View {
         meal: Binding<DayMeal>,
         day: Binding<Day?>,
         lastUsedGoalSet: Binding<GoalSet?>,
-        userUnits: UserUnits,
+        userOptions: UserOptions,
         bodyProfile: BodyProfile?,
         shouldCreateSubgoals: Bool = true,
         didTapGoalSetButton: @escaping (Bool) -> ()
@@ -47,7 +47,7 @@ public struct ItemPortion: View {
             meal: meal.wrappedValue,
             day: day.wrappedValue,
             lastUsedGoalSet: lastUsedGoalSet.wrappedValue,
-            userUnits: userUnits,
+            userOptions: userOptions,
             bodyProfile: bodyProfile,
             shouldCreateSubgoals: shouldCreateSubgoals
         )
@@ -620,7 +620,7 @@ extension GoalSet {
             guard let value = goal.calculateLowerBound(with: goalCalcParams) else { continue }
             values[goal.anyNutrient] = (
                 value,
-                goal.nutrientUnit(userUnits: goalCalcParams.userUnits)
+                goal.nutrientUnit(userOptions: goalCalcParams.userOptions)
             )
         }
         return values
@@ -639,10 +639,10 @@ extension Goal {
         }
     }
     
-    func nutrientUnit(userUnits: UserUnits) -> NutrientUnit {
+    func nutrientUnit(userOptions: UserOptions) -> NutrientUnit {
         switch type {
         case .energy(let energyGoalType):
-            return energyGoalType.nutrientUnit(userUnits: userUnits)
+            return energyGoalType.nutrientUnit(userOptions: userOptions)
         case .macro:
             return .g
         case .micro(_, _, let nutrientUnit):
@@ -652,14 +652,14 @@ extension Goal {
 }
 
 extension EnergyGoalType {
-    func nutrientUnit(userUnits: UserUnits) -> NutrientUnit {
+    func nutrientUnit(userOptions: UserOptions) -> NutrientUnit {
         switch self {
         case .fixed(let energyUnit):
             return energyUnit.nutrientUnit
         case .fromMaintenance(let energyUnit, _):
             return energyUnit.nutrientUnit
         case .percentFromMaintenance(_):
-            return userUnits.energy.nutrientUnit
+            return userOptions.energy.nutrientUnit
         }
     }
 }

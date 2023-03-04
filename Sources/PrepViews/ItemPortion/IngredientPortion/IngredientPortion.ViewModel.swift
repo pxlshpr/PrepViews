@@ -9,19 +9,19 @@ extension IngredientPortion {
         
         @Published var ingredientItem: IngredientItem
         
-        let userUnits: UserUnits
+        let userOptions: UserOptions
         let bodyProfile: BodyProfile?
         let lastUsedGoalSet: GoalSet?
         
         init(
             ingredientItem: IngredientItem,
             lastUsedGoalSet: GoalSet?,
-            userUnits: UserUnits,
+            userOptions: UserOptions,
             bodyProfile: BodyProfile?
         ) {
             self.lastUsedGoalSet = lastUsedGoalSet
             self.ingredientItem = ingredientItem
-            self.userUnits = userUnits
+            self.userOptions = userOptions
             self.bodyProfile = bodyProfile
         }
     }
@@ -45,7 +45,7 @@ extension IngredientPortion.ViewModel {
     
     var goalCalcParams: GoalCalcParams {
         GoalCalcParams(
-            userUnits: userUnits,
+            userOptions: userOptions,
             bodyProfile: bodyProfile,
             energyGoal: diet?.energyGoal)
 //            energyGoal: day?.goalSet?.energyGoal)

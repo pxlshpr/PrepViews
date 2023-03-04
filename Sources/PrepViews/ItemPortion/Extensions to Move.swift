@@ -270,9 +270,89 @@ public extension FoodNutrients {
             return fat
         case .protein:
             return protein
-        case .micro(let nutrientType, _):
+        case .micro(let nutrientType, let nutrientUnit):
             //TODO: Consider nutrientUnit mistmatches here as we may have a different unit in the goal than was the food is described in. Do this for energy kcal/kj too.
-            return micros.first(where: { $0.nutrientType == nutrientType })?.value
+            guard let foodNutrient = micros.first(where: { $0.nutrientType == nutrientType }) else {
+                return nil
+            }
+            
+            var value = foodNutrient.value
+            if foodNutrient.nutrientUnit != nutrientUnit {
+                value = convert(value, from: foodNutrient.nutrientUnit, to: nutrientUnit)
+            }
+            
+            return foodNutrient.value
         }
     }
+}
+
+func convert(
+    _ amount: Double,
+    from source: NutrientUnit,
+    to target: NutrientUnit
+) -> Double {
+    
+    var scale: Double {
+        switch source {
+        case .g:
+            switch target {
+            case .mcg, .mcgDFE, .mcgRAE:
+                return 1000000
+            case .mg, .mgAT, .mgNE, .mgGAE:
+                return 1000
+            default:
+                return 1
+            }
+            
+        case .mg, .mgAT, .mgNE, .mgGAE:
+            switch target {
+            case .g:
+                return 0.001
+            case .mcg, .mcgDFE, .mcgRAE:
+                return 1000
+            default:
+                return 1
+            }
+            
+        case .mcg, .mcgDFE, .mcgRAE:
+            switch target {
+            case .g:
+                return 0.000001
+            case .mg, .mgAT, .mgNE, .mgGAE:
+                return 0.001
+            default:
+                return 1
+            }
+
+        case .kcal:
+            switch target {
+            case .kJ:
+                return KjPerKcal
+            default:
+                return 0
+            }
+            
+        case .kJ:
+            switch target {
+            case .kcal:
+                return 1.0/KjPerKcal
+            default:
+                return 0
+            }
+            
+        case .p:
+            //TODO: Handle this
+            return 1
+        
+        case .IU:
+            //TODO: Handle this
+            return 1
+            
+        case .pH, .SG, .mcmolTE:
+            return 1
+
+        }
+    }
+    
+    return amount * scale
 }
