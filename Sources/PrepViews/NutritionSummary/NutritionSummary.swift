@@ -293,13 +293,13 @@ public struct NutritionSummary<Provider: NutritionSummaryProvider>: View {
 import SwiftUISugar
 
 struct NutritionSummaryPreview: View {
-    @StateObject var viewModel = ViewModel()
+    @StateObject var model = Model()
     var body: some View {
         ZStack {
             FormStyledScrollView {
                 FormStyledSection {
                     NutritionSummary(
-                        dataProvider: viewModel,
+                        dataProvider: model,
                         showMacrosIndicator: true
                     )
                 }
@@ -314,7 +314,7 @@ struct NutritionSummaryPreview: View {
     var bottomButtons: some View {
         HStack {
             Button {
-                viewModel.decrement()
+                model.decrement()
             } label: {
                 Text("- 50")
                     .foregroundColor(.white)
@@ -325,7 +325,7 @@ struct NutritionSummaryPreview: View {
                     )
             }
             Button {
-                viewModel.increment()
+                model.increment()
             } label: {
                 Text("+ 50")
                     .foregroundColor(.white)
@@ -340,7 +340,7 @@ struct NutritionSummaryPreview: View {
     }
     
     
-    class ViewModel: ObservableObject {
+    class Model: ObservableObject {
         @Published var energy: Double = 40
         @Published var carb: Double = 69
         @Published var fat: Double = 30
@@ -366,7 +366,7 @@ struct NutritionSummaryPreview: View {
     }
 }
 
-extension NutritionSummaryPreview.ViewModel: NutritionSummaryProvider {
+extension NutritionSummaryPreview.Model: NutritionSummaryProvider {
     var energyAmount: Double { energy }
     var carbAmount: Double { carb }
     var fatAmount: Double { fat }

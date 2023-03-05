@@ -4,12 +4,12 @@ import PrepDataTypes
 public struct NutrientMeter: View {
     
     @Environment(\.colorScheme) var colorScheme
-    @Binding var viewModel: NutrientMeter.ViewModel
+    @Binding var model: NutrientMeter.Model
     
     @State private var hasAppeared = false
     
-    public init(viewModel: Binding<NutrientMeter.ViewModel>) {
-        _viewModel = viewModel
+    public init(model: Binding<NutrientMeter.Model>) {
+        _model = model
     }
 }
 
@@ -20,7 +20,7 @@ public extension NutrientMeter {
         GeometryReader { proxy -> AnyView in
             return AnyView(
                 capsulesPrototype(proxy)
-                    .animation(Bounce, value: viewModel.planned)
+                    .animation(Bounce, value: model.planned)
             )
         }
         .clipShape(
@@ -44,80 +44,80 @@ public extension NutrientMeter {
         var placeholderCapsule: some View {
             shape
                 .fill(placeholderColor)
-                .animation(.none, value: viewModel.planned)
+                .animation(.none, value: model.planned)
         }
         
         var preppedCapsule: some View {
             
             var fill: some ShapeStyle {
-                viewModel.increment == nil
-                ? viewModel.eatenColor.gradient
-                : viewModel.preppedColor.gradient
+                model.increment == nil
+                ? model.eatenColor.gradient
+                : model.preppedColor.gradient
             }
             
             return shape
-//                .fill(viewModel.preppedColor.gradient)
+//                .fill(model.preppedColor.gradient)
                 .fill(fill)
                 .frame(width: preppedWidth(for: proxy))
                 .if(hasAppeared, transform: { view in
                     /// Use this to make sure the animation only gets applied after the view has appeared, so that it doesn't animate it during it being transitioned into view
                     view
-                        .animation(animation, value: viewModel.eaten)
-                        .animation(animation, value: viewModel.increment)
+                        .animation(animation, value: model.eaten)
+                        .animation(animation, value: model.increment)
                 })
         }
         
         var eatenCapsule: some View {
             shape
-                .fill(viewModel.eatenColor.gradient)
+                .fill(model.eatenColor.gradient)
 //                .frame(width: preppedWidth(for: proxy))
                 .frame(width: eatenWidth(proxy: proxy))
                 .if(hasAppeared, transform: { view in
                     /// Use this to make sure the animation only gets applied after the view has appeared, so that it doesn't animate it during it being transitioned into view
                     view
-                        .animation(animation, value: viewModel.eaten)
-                        .animation(animation, value: viewModel.increment)
+                        .animation(animation, value: model.eaten)
+                        .animation(animation, value: model.increment)
                 })
         }
 
         var incrementCapsule: some View {
             shape
-                .fill(viewModel.incrementColor.gradient)
+                .fill(model.incrementColor.gradient)
                 .frame(width: incrementWidth(proxy: proxy))
                 .if(hasAppeared, transform: { view in
                     /// Use this to make sure the animation only gets applied after the view has appeared, so that it doesn't animate it during it being transitioned into view
                     view
-                        .animation(animation, value: viewModel.eaten)
-                        .animation(animation, value: viewModel.increment)
+                        .animation(animation, value: model.eaten)
+                        .animation(animation, value: model.increment)
                 })
         }
         
         @ViewBuilder
         var lowerGoalMark: some View {
-            if viewModel.shouldShowLowerGoalMark {
+            if model.shouldShowLowerGoalMark {
                 DottedLine()
                     .stroke(style: StrokeStyle(
-                        lineWidth: viewModel.lowerGoalMarkLineWidth,
-                        dash: [viewModel.lowerGoalMarkDash])
+                        lineWidth: model.lowerGoalMarkLineWidth,
+                        dash: [model.lowerGoalMarkDash])
                     )
                     .frame(width: 1)
-                    .foregroundColor(viewModel.lowerGoalMarkColor)
-                    .opacity(viewModel.lowerGoalMarkOpacity)
+                    .foregroundColor(model.lowerGoalMarkColor)
+                    .opacity(model.lowerGoalMarkOpacity)
                     .offset(x: lowerGoalMarkOffset(for: proxy))
             }
         }
 
         @ViewBuilder
         var upperGoalMark: some View {
-            if viewModel.shouldShowUpperGoalMark {
+            if model.shouldShowUpperGoalMark {
                 DottedLine()
                     .stroke(style: StrokeStyle(
-                        lineWidth: viewModel.upperGoalMarkLineWidth,
-                        dash: [viewModel.upperGoalMarkDash])
+                        lineWidth: model.upperGoalMarkLineWidth,
+                        dash: [model.upperGoalMarkDash])
                     )
                     .frame(width: 1)
-                    .foregroundColor(viewModel.upperGoalMarkColor)
-                    .opacity(viewModel.upperGoalMarkOpacity)
+                    .foregroundColor(model.upperGoalMarkColor)
+                    .opacity(model.upperGoalMarkOpacity)
                     .offset(x: upperGoalMarkOffset(for: proxy))
             }
         }
@@ -134,7 +134,7 @@ public extension NutrientMeter {
     
     //MARK: - Accessors
     var food: Double {
-        viewModel.planned
+        model.planned
     }
     
     //MARK: - 📐 Widths
@@ -144,23 +144,23 @@ public extension NutrientMeter {
         return max(width, 5)
     }
     func preppedWidth(for proxy: GeometryProxy) -> Double {
-        correctedWidth(proxy.size.width * viewModel.preppedPercentageForMeter)
+        correctedWidth(proxy.size.width * model.preppedPercentageForMeter)
     }
     
     func eatenWidth(proxy: GeometryProxy) -> Double {
-        correctedWidth(proxy.size.width * viewModel.eatenPercentage)
+        correctedWidth(proxy.size.width * model.eatenPercentage)
     }
     
     func incrementWidth(proxy: GeometryProxy) -> Double {
-        correctedWidth(proxy.size.width * viewModel.incrementPercentageForMeter)
+        correctedWidth(proxy.size.width * model.incrementPercentageForMeter)
     }
     
     func lowerGoalMarkOffset(for proxy: GeometryProxy) -> Double {
-        (proxy.size.width * viewModel.lowerGoalPercentage) - 1.0
+        (proxy.size.width * model.lowerGoalPercentage) - 1.0
     }
 
     func upperGoalMarkOffset(for proxy: GeometryProxy) -> Double {
-        (proxy.size.width * viewModel.upperGoalPercentage) - 1.0
+        (proxy.size.width * model.upperGoalPercentage) - 1.0
     }
 
     //MARK: - 🎨 Colors
@@ -174,7 +174,7 @@ public extension NutrientMeter {
         .interactiveSpring()
 //        .default
         
-//        let shouldBounce = !viewModel.isCloseToEdges || !viewModel.haveGoal
+//        let shouldBounce = !model.isCloseToEdges || !model.haveGoal
 //        if shouldBounce {
 //            return .interactiveSpring(response: 0.35, dampingFraction: 0.66, blendDuration: 0.35)
 //        } else {
@@ -189,7 +189,7 @@ public extension NutrientMeter {
     }
 }
 
-extension NutrientMeter.ViewModel {
+extension NutrientMeter.Model {
     
     var isCloseToEdges: Bool {
         if showingIncrement {
@@ -550,10 +550,10 @@ public struct FoodMeterPreviewView: View {
         }
     }
     
-    func viewModel(gridIndex: Int, rowIndex i: Int, previewType: PreviewType) -> NutrientMeter.ViewModel {
+    func model(gridIndex: Int, rowIndex i: Int, previewType: PreviewType) -> NutrientMeter.Model {
         let dataSet = gridData(for: previewType)
         if previewType == .increment {
-            return NutrientMeter.ViewModel(
+            return NutrientMeter.Model(
                 component: dataSet[gridIndex][i].type,
                 goalLower: dataSet[gridIndex][i].goal,
                 goalUpper: dataSet[gridIndex][i].goal + 200,
@@ -562,7 +562,7 @@ public struct FoodMeterPreviewView: View {
                 increment: dataSet[gridIndex][i].increment
             )
         } else {
-            return NutrientMeter.ViewModel(
+            return NutrientMeter.Model(
                 component: dataSet[gridIndex][i].type,
                 goalLower: dataSet[gridIndex][i].goal,
                 goalUpper: dataSet[gridIndex][i].goal + 100,
@@ -574,11 +574,11 @@ public struct FoodMeterPreviewView: View {
     }
     
     func foodMeter(gridIndex: Int, rowIndex i: Int, type: PreviewType) -> some View {
-        var viewModel = viewModel(gridIndex: gridIndex, rowIndex: i, previewType: type)
+        var model = model(gridIndex: gridIndex, rowIndex: i, previewType: type)
         if !includeGoal {
-            viewModel.goalLower = nil
+            model.goalLower = nil
         }
-        return NutrientMeter(viewModel: .constant(viewModel))
+        return NutrientMeter(model: .constant(model))
         .frame(height: 26)
     }
 }

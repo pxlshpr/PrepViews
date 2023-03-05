@@ -9,7 +9,7 @@ import PrepCoreDataStack
 public struct IngredientPortion: View {
 
     @Environment(\.colorScheme) var colorScheme
-    @StateObject var viewModel: ViewModel
+    @StateObject var model: Model
    
     @Binding var ingredientItem: IngredientItem
     @Binding var lastUsedGoalSet: GoalSet?
@@ -38,21 +38,21 @@ public struct IngredientPortion: View {
         _showingRDA = State(initialValue: UserManager.showingRDAForPortion)
         _usingDietGoalsInsteadOfRDA = State(initialValue: usingDietGoalsInsteadOfRDA)
 
-        let viewModel = ViewModel(
+        let model = Model(
             ingredientItem: ingredientItem.wrappedValue,
             lastUsedGoalSet: lastUsedGoalSet.wrappedValue,
             userUnits: userUnits,
             bodyProfile: bodyProfile
         )
-        _viewModel = StateObject(wrappedValue: viewModel)
+        _model = StateObject(wrappedValue: model)
 
         let diet = lastUsedGoalSet.wrappedValue
         
         if usingDietGoalsInsteadOfRDA, let diet {
             _foodLabelData = State(initialValue: ingredientItem.wrappedValue.foodLabelData(
                 showRDA: showingRDA,
-                customRDAValues: diet.customRDAValues(with: viewModel.goalCalcParams),
-                dietName: viewModel.dietNameWithEmoji
+                customRDAValues: diet.customRDAValues(with: model.goalCalcParams),
+                dietName: model.dietNameWithEmoji
             ))
         } else {
             _foodLabelData = State(initialValue: ingredientItem.wrappedValue.foodLabelData(showRDA: showingRDA))
@@ -77,7 +77,7 @@ public struct IngredientPortion: View {
         }
         .onChange(of: ingredientItem) { newItem in
             withAnimation {
-                viewModel.ingredientItem = newItem
+                model.ingredientItem = newItem
             }
         }
         .onReceive(didUpdateUser, perform: didUpdateUser)
@@ -111,15 +111,15 @@ public struct IngredientPortion: View {
     func updateFoodLabelData() {
         var customRDAValues: [AnyNutrient : (Double, NutrientUnit)] {
             guard usingDietGoalsInsteadOfRDA,
-                  let diet = viewModel.diet
+                  let diet = model.diet
             else { return [:] }
-            return diet.customRDAValues(with: viewModel.goalCalcParams)
+            return diet.customRDAValues(with: model.goalCalcParams)
         }
         withAnimation {
             foodLabelData = ingredientItem.foodLabelData(
                 showRDA: showingRDA,
                 customRDAValues: customRDAValues,
-                dietName: viewModel.dietNameWithEmoji
+                dietName: model.dietNameWithEmoji
             )
         }
     }

@@ -5,7 +5,7 @@ import SwiftHaptics
 
 extension IngredientPortion {
     
-    class ViewModel: ObservableObject {
+    class Model: ObservableObject {
         
         @Published var ingredientItem: IngredientItem
         
@@ -27,7 +27,7 @@ extension IngredientPortion {
     }
 }
 
-extension IngredientPortion.ViewModel {
+extension IngredientPortion.Model {
     
 
     var dietNameWithEmoji: String? {
@@ -53,7 +53,7 @@ extension IngredientPortion.ViewModel {
 }
 
 
-extension IngredientPortion.ViewModel {
+extension IngredientPortion.Model {
     var nutrients: FoodNutrients {
         ingredientItem.food.info.nutrients
     }

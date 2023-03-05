@@ -12,10 +12,10 @@ let FontEnergyUnit: Font = .system(size: FontSizeSmall, weight: .medium)
 //MARK: - 🔵 NutrientBreakdown
 public struct NutrientBreakdown: View {
     
-    @ObservedObject var viewModel: ViewModel
+    @ObservedObject var model: Model
 
-    public init(viewModel: ViewModel) {
-        self.viewModel = viewModel
+    public init(model: Model) {
+        self.model = model
     }
     
     public var body: some View {
@@ -23,34 +23,34 @@ public struct NutrientBreakdown: View {
     }
     
     var gaugesGrid: some View {
-        Grid(horizontalSpacing: viewModel.showingDetails ? 0 : nil) {
-            if viewModel.includeHeaderRow {
+        Grid(horizontalSpacing: model.showingDetails ? 0 : nil) {
+            if model.includeHeaderRow {
                 headerRow
                 Divider()
             }
-            row(foodMeterViewModel: $viewModel.energyViewModel)
-            row(foodMeterViewModel: $viewModel.carbViewModel)
-            row(foodMeterViewModel: $viewModel.fatViewModel)
-            row(foodMeterViewModel: $viewModel.proteinViewModel)
-//            ForEach(viewModel.foodMeterViewModels, id: \.self) { foodMeterViewModel in
+            row(foodMeterViewModel: $model.energyViewModel)
+            row(foodMeterViewModel: $model.carbViewModel)
+            row(foodMeterViewModel: $model.fatViewModel)
+            row(foodMeterViewModel: $model.proteinViewModel)
+//            ForEach(model.foodMeterViewModels, id: \.self) { foodMeterViewModel in
 //                row(foodMeterViewModel: foodMeterViewModel)
 //            }
         }
     }
     
     @ViewBuilder
-    func row(foodMeterViewModel: Binding<NutrientMeter.ViewModel>) -> some View {
+    func row(foodMeterViewModel: Binding<NutrientMeter.Model>) -> some View {
         Row(foodMeterViewModel: foodMeterViewModel)
-            .environmentObject(viewModel)
-            .if(!viewModel.haveGoal) { view in
+            .environmentObject(model)
+            .if(!model.haveGoal) { view in
                 view.redacted(reason: .placeholder)
             }
-//        if viewModel.haveGoal {
-//            Row(viewModel: rowViewModel)
-//                .environmentObject(viewModel)
+//        if model.haveGoal {
+//            Row(model: rowViewModel)
+//                .environmentObject(model)
 //        } else {
-//            Row(viewModel: rowViewModel)
-//                .environmentObject(viewModel)
+//            Row(model: rowViewModel)
+//                .environmentObject(model)
 //                .redacted(reason: .placeholder)
 //        }
     }
@@ -66,7 +66,7 @@ public struct NutrientBreakdown: View {
         
         var leftHeader: some View {
             headerTitle("Remaining")
-                .gridCellColumns(viewModel.showingDetails ? 1 : 3)
+                .gridCellColumns(model.showingDetails ? 1 : 3)
         }
 
         var emptyGridCell: some View {
@@ -86,10 +86,10 @@ public struct NutrientBreakdown: View {
         }
 
         return GridRow {
-            if viewModel.showingDetails {
+            if model.showingDetails {
                 emptyGridCell
                 totalGoalHeader
-                if viewModel.includeBurnedCalories {
+                if model.includeBurnedCalories {
                     plus
                     burnedHeader
                 }
@@ -121,45 +121,45 @@ func artithmeticIcon(name: String, labelColor: Color? = nil) -> some View {
         .foregroundColor(labelColor ?? Color(.quaternaryLabel))
 }
 
-//MARK: - 🔵 NutrientBreakdown.ViewModel
+//MARK: - 🔵 NutrientBreakdown.Model
 
 public extension NutrientBreakdown {
-    class ViewModel: ObservableObject {
+    class Model: ObservableObject {
         @Published public var haveGoal: Bool = true
         @Published public var showingDetails: Bool = false
         @Published public var includeBurnedCalories: Bool = true
         @Published public var includeHeaderRow: Bool = true
         
-//        @Published var foodMeterViewModels: [FoodMeter.ViewModel]
-//        init(foodMeterViewModels: [FoodMeter.ViewModel]) {
+//        @Published var foodMeterViewModels: [FoodMeter.Model]
+//        init(foodMeterViewModels: [FoodMeter.Model]) {
 //            self.foodMeterViewModels = foodMeterViewModels
 //        }
         
-        @Published public var energyViewModel: NutrientMeter.ViewModel
-        @Published public var carbViewModel: NutrientMeter.ViewModel
-        @Published public var fatViewModel: NutrientMeter.ViewModel
-        @Published public var proteinViewModel: NutrientMeter.ViewModel
+        @Published public var energyViewModel: NutrientMeter.Model
+        @Published public var carbViewModel: NutrientMeter.Model
+        @Published public var fatViewModel: NutrientMeter.Model
+        @Published public var proteinViewModel: NutrientMeter.Model
         
-        public required init(energyViewModel: NutrientMeter.ViewModel, carbViewModel: NutrientMeter.ViewModel, fatViewModel: NutrientMeter.ViewModel, proteinViewModel: NutrientMeter.ViewModel) {
+        public required init(energyViewModel: NutrientMeter.Model, carbViewModel: NutrientMeter.Model, fatViewModel: NutrientMeter.Model, proteinViewModel: NutrientMeter.Model) {
             self.energyViewModel = energyViewModel
             self.carbViewModel = carbViewModel
             self.fatViewModel = fatViewModel
             self.proteinViewModel = proteinViewModel
         }
         
-        public static var empty: ViewModel {
+        public static var empty: Model {
             Self.init(
-                energyViewModel: NutrientMeter.ViewModel.empty(for: .energy),
-                carbViewModel: NutrientMeter.ViewModel.empty(for: .carb),
-                fatViewModel: NutrientMeter.ViewModel.empty(for: .fat),
-                proteinViewModel: NutrientMeter.ViewModel.empty(for: .protein)
+                energyViewModel: NutrientMeter.Model.empty(for: .energy),
+                carbViewModel: NutrientMeter.Model.empty(for: .carb),
+                fatViewModel: NutrientMeter.Model.empty(for: .fat),
+                proteinViewModel: NutrientMeter.Model.empty(for: .protein)
             )
         }
     }
 }
 
-public extension NutrientMeter.ViewModel {
-    static func empty(for component: NutrientMeterComponent) -> NutrientMeter.ViewModel {
-        NutrientMeter.ViewModel(component: component, goalLower: 0, burned: 0, planned: 0, eaten: 0)
+public extension NutrientMeter.Model {
+    static func empty(for component: NutrientMeterComponent) -> NutrientMeter.Model {
+        NutrientMeter.Model(component: component, goalLower: 0, burned: 0, planned: 0, eaten: 0)
     }
 }

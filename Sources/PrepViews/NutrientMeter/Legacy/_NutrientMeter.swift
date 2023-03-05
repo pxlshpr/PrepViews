@@ -3,12 +3,12 @@
 //public struct NutrientMeter: View {
 //    
 //    @Environment(\.colorScheme) var colorScheme
-//    @ObservedObject var viewModel: NutrientMeter.ViewModel
+//    @ObservedObject var model: NutrientMeter.Model
 //    
 //    @State private var hasAppeared = false
 //    
-//    public init(viewModel: NutrientMeter.ViewModel) {
-//        self.viewModel = viewModel
+//    public init(model: NutrientMeter.Model) {
+//        self.model = model
 //    }
 //}
 //
@@ -50,48 +50,48 @@
 //        
 //        var preppedCapsule: some View {
 //            shape
-//                .fill(viewModel.preppedColor.gradient)
+//                .fill(model.preppedColor.gradient)
 //                .frame(width: preppedWidth(for: proxy))
 //        }
 //        
 //        var eatenCapsule: some View {
 //            shape
-//                .fill(viewModel.eatenColor.gradient)
+//                .fill(model.eatenColor.gradient)
 //                .frame(width: eatenWidth(proxy: proxy))
 //        }
 //
 //        var incrementCapsule: some View {
 //            shape
-//                .fill(viewModel.incrementColor.gradient)
+//                .fill(model.incrementColor.gradient)
 //                .frame(width: incrementWidth(proxy: proxy))
 //        }
 //        
 //        @ViewBuilder
 //        var lowerGoalMark: some View {
-//            if viewModel.shouldShowLowerGoalMark {
+//            if model.shouldShowLowerGoalMark {
 //                DottedLine()
 //                    .stroke(style: StrokeStyle(
-//                        lineWidth: viewModel.lowerGoalMarkLineWidth,
-//                        dash: [viewModel.lowerGoalMarkDash])
+//                        lineWidth: model.lowerGoalMarkLineWidth,
+//                        dash: [model.lowerGoalMarkDash])
 //                    )
 //                    .frame(width: 1)
-//                    .foregroundColor(viewModel.lowerGoalMarkColor)
-//                    .opacity(viewModel.lowerGoalMarkOpacity)
+//                    .foregroundColor(model.lowerGoalMarkColor)
+//                    .opacity(model.lowerGoalMarkOpacity)
 //                    .offset(x: lowerGoalMarkOffset(for: proxy))
 //            }
 //        }
 //
 //        @ViewBuilder
 //        var upperGoalMark: some View {
-//            if viewModel.shouldShowUpperGoalMark {
+//            if model.shouldShowUpperGoalMark {
 //                DottedLine()
 //                    .stroke(style: StrokeStyle(
-//                        lineWidth: viewModel.upperGoalMarkLineWidth,
-//                        dash: [viewModel.upperGoalMarkDash])
+//                        lineWidth: model.upperGoalMarkLineWidth,
+//                        dash: [model.upperGoalMarkDash])
 //                    )
 //                    .frame(width: 1)
-//                    .foregroundColor(viewModel.upperGoalMarkColor)
-//                    .opacity(viewModel.upperGoalMarkOpacity)
+//                    .foregroundColor(model.upperGoalMarkColor)
+//                    .opacity(model.upperGoalMarkOpacity)
 //                    .offset(x: upperGoalMarkOffset(for: proxy))
 //            }
 //        }
@@ -108,28 +108,28 @@
 //    
 //    //MARK: - Accessors
 //    var food: Double {
-//        viewModel.planned
+//        model.planned
 //    }
 //    
 //    //MARK: - 📐 Widths
 //    func preppedWidth(for proxy: GeometryProxy) -> Double {
-//        proxy.size.width * viewModel.preppedPercentageForMeter
+//        proxy.size.width * model.preppedPercentageForMeter
 //    }
 //    
 //    func eatenWidth(proxy: GeometryProxy) -> Double {
-//        proxy.size.width * viewModel.eatenPercentage
+//        proxy.size.width * model.eatenPercentage
 //    }
 //    
 //    func incrementWidth(proxy: GeometryProxy) -> Double {
-//        proxy.size.width * viewModel.incrementPercentageForMeter
+//        proxy.size.width * model.incrementPercentageForMeter
 //    }
 //    
 //    func lowerGoalMarkOffset(for proxy: GeometryProxy) -> Double {
-//        (proxy.size.width * viewModel.lowerGoalPercentage) - 1.0
+//        (proxy.size.width * model.lowerGoalPercentage) - 1.0
 //    }
 //
 //    func upperGoalMarkOffset(for proxy: GeometryProxy) -> Double {
-//        (proxy.size.width * viewModel.upperGoalPercentage) - 1.0
+//        (proxy.size.width * model.upperGoalPercentage) - 1.0
 //    }
 //
 //    //MARK: - 🎨 Colors
@@ -155,7 +155,7 @@
 //    }
 //}
 //
-//extension NutrientMeter.ViewModel {
+//extension NutrientMeter.Model {
 //    
 //    var shouldShowLowerGoalMark: Bool {
 //        switch goalBoundsType {

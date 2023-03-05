@@ -1,7 +1,7 @@
 //import SwiftUI
 //
 //public extension NutrientMeter {
-//    class ViewModel: ObservableObject {
+//    class Model: ObservableObject {
 //        
 //        @Published public var component: NutrientMeterComponent
 //
@@ -59,7 +59,7 @@
 //    }
 //}
 //
-//public extension NutrientMeter.ViewModel {
+//public extension NutrientMeter.Model {
 //    var remainingString: String {
 //        return "TODO"
 ////        guard let goal else { return "" }
@@ -85,7 +85,7 @@
 ////    }
 //}
 //
-//extension NutrientMeter.ViewModel: Hashable {
+//extension NutrientMeter.Model: Hashable {
 //    public func hash(into hasher: inout Hasher) {
 //        hasher.combine(component)
 //        hasher.combine(goalLower)
@@ -97,13 +97,13 @@
 //    }
 //}
 //
-//extension NutrientMeter.ViewModel: Equatable {
-//    public static func ==(lhs: NutrientMeter.ViewModel, rhs: NutrientMeter.ViewModel) -> Bool {
+//extension NutrientMeter.Model: Equatable {
+//    public static func ==(lhs: NutrientMeter.Model, rhs: NutrientMeter.Model) -> Bool {
 //        lhs.hashValue == rhs.hashValue
 //    }
 //}
 //
-//public extension NutrientMeter.ViewModel {
+//public extension NutrientMeter.Model {
 //    var haveGoal: Bool {
 //        goalLower != nil || goalUpper != nil
 //    }
@@ -208,7 +208,7 @@
 //
 ////MARK: Colors
 //
-//public extension NutrientMeter.ViewModel {
+//public extension NutrientMeter.Model {
 //    
 //    var preppedColor: Color {
 //        switch percentageType {
@@ -256,7 +256,7 @@
 //
 ////MARK: - Color Constants
 //
-//public extension NutrientMeter.ViewModel {
+//public extension NutrientMeter.Model {
 //    struct Colors {
 //        public struct Complete {
 //            public static let placeholder = Color("StatsCompleteFillExtraNew", bundle: .module)
@@ -280,7 +280,7 @@
 //    }
 //}
 //
-//extension NutrientMeter.ViewModel {
+//extension NutrientMeter.Model {
 //    
 //    var labelTextColor: Color {
 //        guard haveGoal else { return component.textColor }

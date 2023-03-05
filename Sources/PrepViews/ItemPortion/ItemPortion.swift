@@ -9,7 +9,7 @@ import PrepCoreDataStack
 public struct ItemPortion: View {
 
     @Environment(\.colorScheme) var colorScheme
-    @StateObject var viewModel: ViewModel
+    @StateObject var model: Model
 
     @State var showingRDASettings: Bool = false
     
@@ -47,7 +47,7 @@ public struct ItemPortion: View {
         _showingRDA = State(initialValue: UserManager.showingRDAForPortion)
         _usingDietGoalsInsteadOfRDA = State(initialValue: usingDietGoalsInsteadOfRDA)
 
-        let viewModel = ViewModel(
+        let model = Model(
             foodItem: foodItem.wrappedValue,
             meal: meal.wrappedValue,
             day: day.wrappedValue,
@@ -56,7 +56,7 @@ public struct ItemPortion: View {
             bodyProfile: bodyProfile,
             shouldCreateSubgoals: shouldCreateSubgoals
         )
-        _viewModel = StateObject(wrappedValue: viewModel)
+        _model = StateObject(wrappedValue: model)
 
         let diet: GoalSet?
         if let unwrappedDay = day.wrappedValue {
@@ -69,8 +69,8 @@ public struct ItemPortion: View {
         if usingDietGoalsInsteadOfRDA, let diet {
             _foodLabelData = State(initialValue: foodItem.wrappedValue.foodLabelData(
                 showRDA: showingRDA,
-                customRDAValues: diet.customRDAValues(with: viewModel.goalCalcParams),
-                dietName: viewModel.dietNameWithEmoji
+                customRDAValues: diet.customRDAValues(with: model.goalCalcParams),
+                dietName: model.dietNameWithEmoji
             ))
         } else {
             _foodLabelData = State(initialValue: foodItem.wrappedValue.foodLabelData(showRDA: showingRDA))
@@ -94,10 +94,10 @@ public struct ItemPortion: View {
 //
 //    var determineMetersTypes: [MetersType] {
 //        var types: [MetersType] = []
-//        if viewModel.shouldShowMealGoals {
+//        if model.shouldShowMealGoals {
 //            types.append(.meal)
 //        }
-//        if viewModel.day != nil {
+//        if model.day != nil {
 //            types.append(.diet)
 //        }
 //        types.append(.nutrients)
@@ -115,17 +115,17 @@ public struct ItemPortion: View {
         }
         .onChange(of: foodItem) { newFoodItem in
             withAnimation {
-                viewModel.foodItem = newFoodItem
+                model.foodItem = newFoodItem
             }
         }
         .onChange(of: meal) { newValue in
             withAnimation {
-                viewModel.meal = meal
+                model.meal = meal
             }
         }
         .onChange(of: day) { newValue in
             withAnimation {
-                viewModel.day = day
+                model.day = day
             }
         }
         .onReceive(didUpdateUser, perform: didUpdateUser)
@@ -147,21 +147,21 @@ public struct ItemPortion: View {
     
     var pager: some View {
         Pager(
-            page: viewModel.page,
+            page: model.page,
             data: PortionPage.allCases,
             id: \.self,
             content: { portionPage in
                 content(for: portionPage)
                     .readSize { size in
-                        viewModel.pagerHeights[portionPage] = size.height
+                        model.pagerHeights[portionPage] = size.height
                     }
             }
         )
         .pagingPriority(.simultaneous)
-        .onPageWillTransition(viewModel.pageWillTransition)
+        .onPageWillTransition(model.pageWillTransition)
 //        .frame(height: 200)
-//        .frame(height: viewModel.pagerHeight)
-        .frame(height: viewModel.pagerHeights[viewModel.portionPage])
+//        .frame(height: model.pagerHeight)
+        .frame(height: model.pagerHeights[model.portionPage])
     }
     
     @ViewBuilder
@@ -170,7 +170,7 @@ public struct ItemPortion: View {
             foodLabelSection
         } else {
             ItemPortionMetrics(portionPage)
-                .environmentObject(viewModel)
+                .environmentObject(model)
                 .frame(maxWidth: .infinity)
                 .padding(.leading, 17)
                 .padding(.vertical, 15)
@@ -204,15 +204,15 @@ public struct ItemPortion: View {
     func updateFoodLabelData() {
         var customRDAValues: [AnyNutrient : (Double, NutrientUnit)] {
             guard usingDietGoalsInsteadOfRDA,
-                  let diet = viewModel.diet
+                  let diet = model.diet
             else { return [:] }
-            return diet.customRDAValues(with: viewModel.goalCalcParams)
+            return diet.customRDAValues(with: model.goalCalcParams)
         }
         withAnimation {
             foodLabelData = foodItem.foodLabelData(
                 showRDA: showingRDA,
                 customRDAValues: customRDAValues,
-                dietName: viewModel.dietNameWithEmoji
+                dietName: model.dietNameWithEmoji
             )
         }
     }
@@ -263,21 +263,21 @@ public struct ItemPortion: View {
     
     var footer: some View {
         Group {
-            switch viewModel.portionPage {
+            switch model.portionPage {
             case .nutrients:
                 EmptyView()
 //                legend
             case .diet:
-                if viewModel.hasDiet {
+                if model.hasDiet {
                     legend
                 } else {
                     Text("Your daily goals will appear once you select a diet for the day.")
                 }
             case .meal:
-                if viewModel.shouldShowMealContent {
+                if model.shouldShowMealContent {
                     legend
                 } else {
-                    Text(viewModel.emptyMealFooterString)
+                    Text(model.emptyMealFooterString)
                 }
             }
         }
@@ -293,11 +293,11 @@ public struct ItemPortion: View {
 //    }
 
     var legend: some View {
-        Legend(viewModel: viewModel)
+        Legend(model: model)
     }
     
     var footer_legacy: some View {
-        Text(viewModel.portionPage.footerString)
+        Text(model.portionPage.footerString)
             .fixedSize(horizontal: false, vertical: true)
             .foregroundColor(Color(.secondaryLabel))
             .font(.footnote)
@@ -308,7 +308,7 @@ public struct ItemPortion: View {
     }
 
     var typePicker: some View {
-        Picker("", selection: viewModel.metersTypeBinding) {
+        Picker("", selection: model.metersTypeBinding) {
             ForEach(PortionPage.allCases, id: \.self) {
                 Text($0.description).tag($0)
             }
@@ -325,7 +325,7 @@ public struct ItemPortion: View {
     //MARK: - GoalSet Picker
     @ViewBuilder
     var goalSetPicker: some View {
-        switch viewModel.portionPage {
+        switch model.portionPage {
         case .nutrients:
             nutrientsPicker
                 .transition(.move(edge: .leading)
@@ -381,11 +381,11 @@ public struct ItemPortion: View {
     }
     
     var dietPicker: some View {
-        picker(for: viewModel.day?.goalSet)
+        picker(for: model.day?.goalSet)
     }
     
     var mealTypePicker: some View {
-        picker(for: viewModel.meal.goalSet, forMeal: true)
+        picker(for: model.meal.goalSet, forMeal: true)
     }
     
     /// We're allowing nil to be passed into this so it can be used as a transparent placeholder
@@ -418,7 +418,7 @@ public struct ItemPortion: View {
         }
         
         return Button {
-            didTapGoalSetButton(viewModel.portionPage == .meal)
+            didTapGoalSetButton(model.portionPage == .meal)
         } label: {
             label
 //                .padding(.trailing, 20)
@@ -446,9 +446,9 @@ public struct ItemPortion: View {
     }
 }
 
-//MARK: - MealItemMeters.ViewModel (Legend)
+//MARK: - MealItemMeters.Model (Legend)
 
-extension ItemPortion.ViewModel {
+extension ItemPortion.Model {
     
     var showMealSubgoals: Bool {
         guard portionPage == .meal else { return false }
@@ -537,7 +537,7 @@ extension PercentageType {
     }
 }
 
-extension NutrientMeter.ViewModel {
+extension NutrientMeter.Model {
     var showsRemainderWithoutLowerBound: Bool {
         guard !percentageType.isPastCompletion else { return false }
         guard goalBoundsType != .lowerAndUpper else {

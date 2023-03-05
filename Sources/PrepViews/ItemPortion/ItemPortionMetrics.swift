@@ -6,7 +6,7 @@ let MeterLabelFont: Font = Font.system(MeterLabelFontStyle)
 
 struct ItemPortionMetrics: View {
     
-    @EnvironmentObject var viewModel: ItemPortion.ViewModel
+    @EnvironmentObject var model: ItemPortion.Model
     
     let type: PortionPage
     
@@ -31,9 +31,9 @@ struct ItemPortionMetrics: View {
     var shouldShowEmptyRows: Bool {
         switch type {
         case .diet:
-            return !viewModel.hasDiet
+            return !model.hasDiet
         case .meal:
-            return !(viewModel.shouldShowMealContent)
+            return !(model.shouldShowMealContent)
         case .nutrients:
             return false
         }
@@ -50,22 +50,22 @@ struct ItemPortionMetrics: View {
     var rows: some View {
         switch type {
         case .nutrients:
-            ForEach(viewModel.nutrientMeterViewModels.indices, id: \.self) { index in
-                MeterRow(meterViewModel: $viewModel.nutrientMeterViewModels[index])
+            ForEach(model.nutrientMeterViewModels.indices, id: \.self) { index in
+                MeterRow(meterViewModel: $model.nutrientMeterViewModels[index])
             }
         case .diet:
-            ForEach(viewModel.dietMeterViewModels.indices, id: \.self) { index in
-                MeterRow(meterViewModel: $viewModel.dietMeterViewModels[index])
+            ForEach(model.dietMeterViewModels.indices, id: \.self) { index in
+                MeterRow(meterViewModel: $model.dietMeterViewModels[index])
             }
         case .meal:
-            ForEach(viewModel.mealMeterViewModels.indices, id: \.self) { index in
-                MeterRow(meterViewModel: $viewModel.mealMeterViewModels[index])
+            ForEach(model.mealMeterViewModels.indices, id: \.self) { index in
+                MeterRow(meterViewModel: $model.mealMeterViewModels[index])
             }
         }
     }
 }
 
-extension NutrientMeter.ViewModel {
+extension NutrientMeter.Model {
     var convertedQuantity: (value: Double, unit: NutrientUnit) {
         guard let value = increment else { return (0, .g) }
         let unit = component.unit
@@ -75,7 +75,7 @@ extension NutrientMeter.ViewModel {
 
 struct MeterRow: View {
     
-    @Binding var meterViewModel: NutrientMeter.ViewModel
+    @Binding var meterViewModel: NutrientMeter.Model
     @State var value: Double
     @State var unit: NutrientUnit
     
@@ -88,7 +88,7 @@ struct MeterRow: View {
         styleAsPlaceholder = true
     }
     
-    init(meterViewModel: Binding<NutrientMeter.ViewModel>) {
+    init(meterViewModel: Binding<NutrientMeter.Model>) {
         _meterViewModel = meterViewModel
         _value = State(initialValue: meterViewModel.wrappedValue.convertedQuantity.value)
         _unit = State(initialValue: meterViewModel.wrappedValue.convertedQuantity.unit)
@@ -129,7 +129,7 @@ struct MeterRow: View {
     }
     
     var meter: some View {
-        NutrientMeter(viewModel: .constant(meterViewModel))
+        NutrientMeter(model: .constant(meterViewModel))
             .frame(height: MeterHeight)
     }
     

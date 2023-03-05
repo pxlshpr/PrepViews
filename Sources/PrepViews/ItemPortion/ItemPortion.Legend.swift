@@ -21,14 +21,14 @@ extension ItemPortion {
         /// `onAppear` modifier—which causes it to be temporarily whatever value we set it with and
         /// then animate to the actual value saved in `UserOptions`, causing a jump in the height
         /// when transitioning between types.
-        @ObservedObject var viewModel: ViewModel
-//        @EnvironmentObject var viewModel: ViewModel
+        @ObservedObject var model: Model
+//        @EnvironmentObject var model: Model
         @State var showingLegend: Bool
         
         let didUpdateUser = NotificationCenter.default.publisher(for: .didUpdateUser)
         
-        init(viewModel: ViewModel) {
-            self.viewModel = viewModel
+        init(model: Model) {
+            self.model = model
             _showingLegend = State(initialValue: UserManager.showingLegendForPortion)
         }
     }
@@ -101,14 +101,14 @@ extension ItemPortion.Legend {
     
     var totalText: Text {
         var suffix: String {
-            guard !viewModel.componentsFromFood.isEmpty else { return "" }
+            guard !model.componentsFromFood.isEmpty else { return "" }
             let relativeBrightness = colorScheme == .light ? "lighter" : "darker"
             return " (\(relativeBrightness))"
         }
-        switch viewModel.portionPage {
+        switch model.portionPage {
         case .nutrients, .diet:
             let prefix: String
-            if viewModel.day?.date.startOfDay == Date().startOfDay {
+            if model.day?.date.startOfDay == Date().startOfDay {
                 prefix = "Today"
             } else {
                 prefix = "This day"
@@ -121,7 +121,7 @@ extension ItemPortion.Legend {
     
     var foodText: Text {
         var suffix: String {
-            guard !viewModel.componentsWithTotals.isEmpty else { return "" }
+            guard !model.componentsWithTotals.isEmpty else { return "" }
             let relativeBrightness = colorScheme == .light ? "darker" : "lighter"
             return " (\(relativeBrightness))"
         }
@@ -146,7 +146,7 @@ extension ItemPortion.Legend {
     
     var boundedRemainderText: some View {
         var goalDescription: String {
-            switch viewModel.portionPage {
+            switch model.portionPage {
             case .nutrients:
                 return "RDA*"
 //            case .meal:
@@ -159,7 +159,7 @@ extension ItemPortion.Legend {
         }
 
         var showMinimumGoal: Bool {
-            viewModel.showFirstDashedLine || viewModel.showSolidLine
+            model.showFirstDashedLine || model.showSolidLine
         }
         
         return Group {
@@ -167,29 +167,29 @@ extension ItemPortion.Legend {
 //                Text("Lines marking your \(goalDescription)")
                 if showMinimumGoal {
                     HStack(alignment: .top, spacing: 2) {
-                        if viewModel.showSecondDashedLine {
+                        if model.showSecondDashedLine {
                             Text("•")
                                 .foregroundColor(Color(.tertiaryLabel))
                         }
-                        if viewModel.showFirstDashedLine && viewModel.showSolidLine {
-                            if viewModel.showSecondDashedLine {
+                        if model.showFirstDashedLine && model.showSolidLine {
+                            if model.showSecondDashedLine {
                                 Text("Solid or first dotted line: **Minimum** \(goalDescription)")
                             } else {
                                 Text("Solid or dotted line: **Minimum** \(goalDescription)")
                             }
-                        } else if viewModel.showFirstDashedLine {
-                            if viewModel.showSecondDashedLine {
+                        } else if model.showFirstDashedLine {
+                            if model.showSecondDashedLine {
                                 Text("First dotted line: **Minimum** \(goalDescription)")
                             } else {
                                 Text("Dotted line: **Minimum** \(goalDescription)")
                             }
-                        } else if viewModel.showSolidLine {
+                        } else if model.showSolidLine {
                             Text("Line: **Minimum** \(goalDescription)")
                         }
                     }
                 }
                 
-                if viewModel.showSecondDashedLine {
+                if model.showSecondDashedLine {
                     HStack(spacing: 2) {
                         if showMinimumGoal {
                             Text("•")
@@ -208,7 +208,7 @@ extension ItemPortion.Legend {
             "met"
         }
         
-        switch viewModel.portionPage {
+        switch model.portionPage {
         case .nutrients:
             return Text("RDA* \(suffix)")
         case .meal:
@@ -226,14 +226,14 @@ extension ItemPortion.Legend {
         func goalCompletionBar(isExcess: Bool) -> some View {
             var fillColor: Color {
                 isExcess
-                ? NutrientMeter.ViewModel.Colors.Excess.fill
-                : NutrientMeter.ViewModel.Colors.Complete.fill
+                ? NutrientMeter.Model.Colors.Excess.fill
+                : NutrientMeter.Model.Colors.Complete.fill
             }
             
             var placeholderColor: Color {
                 isExcess
-                ? NutrientMeter.ViewModel.Colors.Excess.placeholder
-                : NutrientMeter.ViewModel.Colors.Complete.placeholder
+                ? NutrientMeter.Model.Colors.Excess.placeholder
+                : NutrientMeter.Model.Colors.Complete.placeholder
             }
             
             var text: Text {
@@ -247,7 +247,7 @@ extension ItemPortion.Legend {
                     ZStack(alignment: .leading) {
                         RoundedRectangle(cornerRadius: barCornerRadius)
                             .fill(fillColor.gradient)
-                        if !viewModel.componentsWithTotals.isEmpty {
+                        if !model.componentsWithTotals.isEmpty {
                             RoundedRectangle(cornerRadius: barCornerRadius)
                                 .fill(placeholderColor.gradient)
                                 .frame(width: barWidth / 2.0)
@@ -262,7 +262,7 @@ extension ItemPortion.Legend {
         
         @ViewBuilder
         var totalRow: some View {
-            if !viewModel.componentsWithTotals.isEmpty {
+            if !model.componentsWithTotals.isEmpty {
                 GridRow {
                     totalColors
                     totalText
@@ -272,7 +272,7 @@ extension ItemPortion.Legend {
         
         @ViewBuilder
         var foodRow: some View {
-            if !viewModel.componentsFromFood.isEmpty && !viewModel.componentsWithTotals.isEmpty {
+            if !model.componentsFromFood.isEmpty && !model.componentsWithTotals.isEmpty {
                 GridRow {
                     foodColors
                     foodText
@@ -281,14 +281,14 @@ extension ItemPortion.Legend {
         }
         
         var showLinesRow: Bool {
-            viewModel.showSolidLine ||
-            viewModel.showFirstDashedLine ||
-            viewModel.showSecondDashedLine
+            model.showSolidLine ||
+            model.showFirstDashedLine ||
+            model.showSecondDashedLine
         }
         
         var showDashedLine: Bool {
-            viewModel.showFirstDashedLine ||
-            viewModel.showSecondDashedLine
+            model.showFirstDashedLine ||
+            model.showSecondDashedLine
         }
         
         @ViewBuilder
@@ -297,10 +297,10 @@ extension ItemPortion.Legend {
                 GridRow(alignment: .top) {
 //                GridRow {
                     ZStack(alignment: .leading) {
-                        NutrientMeter.ViewModel.Colors.Empty.fill
+                        NutrientMeter.Model.Colors.Empty.fill
                             .frame(width: barWidth, height: barHeight)
                             .cornerRadius(barCornerRadius)
-                        if viewModel.showSolidLine {
+                        if model.showSolidLine {
                             DottedLine()
                                 .stroke(style: StrokeStyle(
                                     lineWidth: 2,
@@ -310,7 +310,7 @@ extension ItemPortion.Legend {
                                 .foregroundColor(Color(.systemGroupedBackground))
                                 .offset(x: (barWidth / (showDashedLine ? 3.0 : 2.0)) - 1.0)
                         }
-                        if viewModel.showFirstDashedLine || viewModel.showSecondDashedLine {
+                        if model.showFirstDashedLine || model.showSecondDashedLine {
                             DottedLine()
                                 .stroke(style: StrokeStyle(
                                     lineWidth: 2,
@@ -318,7 +318,7 @@ extension ItemPortion.Legend {
                                 )
                                 .frame(width: 1)
                                 .foregroundColor(Color(.systemGroupedBackground))
-                                .offset(x: (barWidth / (viewModel.showSolidLine ? 1.5 : 2.0)) - 1.0)
+                                .offset(x: (barWidth / (model.showSolidLine ? 1.5 : 2.0)) - 1.0)
                         }
                     }
                     .fixedSize(horizontal: false, vertical: true)
@@ -330,21 +330,21 @@ extension ItemPortion.Legend {
         
         @ViewBuilder
         var completionRow: some View {
-            if viewModel.showCompletion {
+            if model.showCompletion {
                 goalCompletionBar(isExcess: false)
             }
         }
         
         @ViewBuilder
         var excessRow: some View {
-            if viewModel.showExcess {
+            if model.showExcess {
                 goalCompletionBar(isExcess: true)
             }
         }
         
         @ViewBuilder
         var rdaExplanation: some View {
-            if viewModel.portionPage == .nutrients && showLinesRow {
+            if model.portionPage == .nutrients && showLinesRow {
                 HStack(alignment: .firstTextBaseline, spacing: 5) {
                     Text("*")
                         .font(.callout)
@@ -356,7 +356,7 @@ extension ItemPortion.Legend {
         
         @ViewBuilder
         var generatedGoals: some View {
-            if viewModel.showMealSubgoals || viewModel.showDietAutoGoals {
+            if model.showMealSubgoals || model.showDietAutoGoals {
                 GridRow {
                     Group {
                         HStack {
@@ -367,7 +367,7 @@ extension ItemPortion.Legend {
                             }
                         }
                         .frame(width: barWidth)
-                        if viewModel.showMealSubgoals {
+                        if model.showMealSubgoals {
                             VStack(alignment: .leading, spacing: 2) {
 //                                Text("**Meal Subgoals**")
 //                                Text("Calculated by taking the remainder of your goals for the day and dividing them by how many more meals your have left to plan (including this one).")
@@ -401,9 +401,9 @@ extension ItemPortion.Legend {
     }
     
     var maxColorCount: Int {
-        var count = max(viewModel.componentsWithTotals.count, viewModel.componentsFromFood.count)
-        if viewModel.showExcess { count += 1 }
-        if viewModel.showCompletion { count += 1 }
+        var count = max(model.componentsWithTotals.count, model.componentsFromFood.count)
+        if model.showExcess { count += 1 }
+        if model.showCompletion { count += 1 }
         return count
     }
     var barWidth: CGFloat {
@@ -415,28 +415,28 @@ extension ItemPortion.Legend {
     
     var totalColors: some View {
         HStack(spacing: spacing) {
-            ForEach(viewModel.componentsWithTotals, id: \.self) {
+            ForEach(model.componentsWithTotals, id: \.self) {
                 colorBox($0.preppedColor)
             }
-            if viewModel.showCompletion {
-                colorBox(NutrientMeter.ViewModel.Colors.Complete.placeholder)
+            if model.showCompletion {
+                colorBox(NutrientMeter.Model.Colors.Complete.placeholder)
             }
-            if viewModel.showExcess {
-                colorBox(NutrientMeter.ViewModel.Colors.Excess.placeholder)
+            if model.showExcess {
+                colorBox(NutrientMeter.Model.Colors.Excess.placeholder)
             }
         }
     }
     
     var foodColors: some View {
         HStack(spacing: spacing) {
-            ForEach(viewModel.componentsFromFood, id: \.self) {
+            ForEach(model.componentsFromFood, id: \.self) {
                 colorBox($0.eatenColor)
             }
-            if viewModel.showCompletion {
-                colorBox(NutrientMeter.ViewModel.Colors.Complete.fill)
+            if model.showCompletion {
+                colorBox(NutrientMeter.Model.Colors.Complete.fill)
             }
-            if viewModel.showExcess {
-                colorBox(NutrientMeter.ViewModel.Colors.Excess.fill)
+            if model.showExcess {
+                colorBox(NutrientMeter.Model.Colors.Excess.fill)
             }
         }
     }

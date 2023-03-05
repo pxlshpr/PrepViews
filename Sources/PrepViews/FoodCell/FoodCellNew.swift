@@ -88,20 +88,20 @@
 //    @Binding var isSelectable: Bool
 //    @State var isSelected: Bool = false
 //
-//    @ObservedObject var viewModel: FoodCellViewModel
+//    @ObservedObject var model: FoodCellViewModel
 //    
 //    let showMacrosIndicator: Bool
 //    let didTapMacrosIndicator: (() -> ())?
 //    let didToggleSelection: ((Bool) -> ())?
 //
 //    public init(
-//        viewModel: FoodCellViewModel,
+//        model: FoodCellViewModel,
 //        showMacrosIndicator: Bool = true,
 //        isSelectable: Binding<Bool> = .constant(false),
 //        didTapMacrosIndicator: (() -> ())? = nil,
 //        didToggleSelection: ((Bool) -> ())? = nil
 //    ) {
-//        self.viewModel = viewModel
+//        self.model = model
 //        
 //        self.showMacrosIndicator = showMacrosIndicator
 //        self.didTapMacrosIndicator = didTapMacrosIndicator
@@ -142,16 +142,16 @@
 //    @ViewBuilder
 //    var emojiText: some View {
 //        if showingFoodEmojis {
-//            Text(viewModel.emoji)
+//            Text(model.emoji)
 //        }
 //    }
 //    
 //    var nameTexts: some View {
-//        var view = Text(viewModel.name)
+//        var view = Text(model.name)
 //            .font(.body)
 //            .fontWeight(.medium)
 //            .foregroundColor(Color(.label))
-//        if let detail = viewModel.detail, !detail.isEmpty {
+//        if let detail = model.detail, !detail.isEmpty {
 //            view = view
 //            + Text(", ")
 //            
@@ -163,7 +163,7 @@
 //                .fontWeight(.regular)
 //                .foregroundColor(Color(.secondaryLabel))
 //        }
-//        if let brand = viewModel.brand, !brand.isEmpty {
+//        if let brand = model.brand, !brand.isEmpty {
 //            view = view
 ////            + Text(detail?.isEmpty == true ? "" : ", ")
 //            + Text(", ")
@@ -203,19 +203,19 @@
 //    
 //    var macrosIndicatorLabel: some View {
 //        let carbWidth = Binding<CGFloat>(
-//            get: { viewModel.carbWidth ?? 0 },
+//            get: { model.carbWidth ?? 0 },
 //            set: { _ in }
 //        )
 //        let fatWidth = Binding<CGFloat>(
-//            get: { viewModel.fatWidth ?? 0 },
+//            get: { model.fatWidth ?? 0 },
 //            set: { _ in }
 //        )
 //        let proteinWidth = Binding<CGFloat>(
-//            get: { viewModel.proteinWidth ?? 0 },
+//            get: { model.proteinWidth ?? 0 },
 //            set: { _ in }
 //        )
 //        let isZeroCalories = Binding<Bool>(
-//            get: { viewModel.isZeroCalories },
+//            get: { model.isZeroCalories },
 //            set: { _ in }
 //        )
 //        return FoodBadgeNew(

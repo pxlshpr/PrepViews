@@ -9,7 +9,7 @@ let MeterHeight = 20.0
 
 extension ItemPortion {
     
-    class ViewModel: ObservableObject {
+    class Model: ObservableObject {
         
         @Published var foodItem: MealItem {
             didSet {
@@ -42,9 +42,9 @@ extension ItemPortion {
         
         @Published var page: Page
 
-        @Published var nutrientMeterViewModels: [NutrientMeter.ViewModel] = []
-        @Published var dietMeterViewModels: [NutrientMeter.ViewModel] = []
-        @Published var mealMeterViewModels: [NutrientMeter.ViewModel] = []
+        @Published var nutrientMeterViewModels: [NutrientMeter.Model] = []
+        @Published var dietMeterViewModels: [NutrientMeter.Model] = []
+        @Published var mealMeterViewModels: [NutrientMeter.Model] = []
 
         init(
             foodItem: MealItem,
@@ -128,7 +128,7 @@ extension PortionPage {
     }
 }
 
-extension ItemPortion.ViewModel {
+extension ItemPortion.Model {
     
     var shouldShowMealGoals: Bool {
         /// If we have a `MealType` associated
@@ -183,18 +183,18 @@ extension ItemPortion.ViewModel {
         var hasNewExcess = false
         switch portionPage {
         case .diet:
-            for viewModel in dietMeterViewModels {
-                if viewModel.percentageType == .complete {
+            for model in dietMeterViewModels {
+                if model.percentageType == .complete {
                     /// Check if it was complete before
-                    if let previous = self.dietMeterViewModels.first(where: { $0.component == viewModel.component }),
+                    if let previous = self.dietMeterViewModels.first(where: { $0.component == model.component }),
                        previous.percentageType != .complete
                     {
                         hasNewCompletion = true
                     }
                 }
-                if viewModel.percentageType == .excess {
+                if model.percentageType == .excess {
                     /// Check if it was excess before
-                    if let previous = self.dietMeterViewModels.first(where: { $0.component == viewModel.component }),
+                    if let previous = self.dietMeterViewModels.first(where: { $0.component == model.component }),
                        previous.percentageType != .excess
                     {
                         hasNewExcess = true
@@ -202,18 +202,18 @@ extension ItemPortion.ViewModel {
                 }
             }
         case .meal:
-            for viewModel in mealMeterViewModels {
-                if viewModel.percentageType == .complete {
+            for model in mealMeterViewModels {
+                if model.percentageType == .complete {
                     /// Check if it was complete before
-                    if let previous = self.mealMeterViewModels.first(where: { $0.component == viewModel.component }),
+                    if let previous = self.mealMeterViewModels.first(where: { $0.component == model.component }),
                        previous.percentageType != .complete
                     {
                         hasNewCompletion = true
                     }
                 }
-                if viewModel.percentageType == .excess {
+                if model.percentageType == .excess {
                     /// Check if it was excess before
-                    if let previous = self.mealMeterViewModels.first(where: { $0.component == viewModel.component }),
+                    if let previous = self.mealMeterViewModels.first(where: { $0.component == model.component }),
                        previous.percentageType != .excess
                     {
                         hasNewExcess = true
@@ -381,7 +381,7 @@ extension FoodNutrient {
         }
     }
 }
-extension ItemPortion.ViewModel {
+extension ItemPortion.Model {
     
     var nutrients: FoodNutrients {
         foodItem.food.info.nutrients
@@ -412,7 +412,7 @@ extension ItemPortion.ViewModel {
     }
     
     //MARK: Nutrient MeterViewModels
-    var calculatedNutrientMeterViewModels: [NutrientMeter.ViewModel] {
+    var calculatedNutrientMeterViewModels: [NutrientMeter.Model] {
 //        if let meals = day?.meals, !meals.isEmpty {
 //            return calculatedNutrientViewModelsRelativeToDay
 //        } else {
@@ -420,7 +420,7 @@ extension ItemPortion.ViewModel {
 //        }
     }
     
-    var calculatedNutrientViewModelsRelativeToRDA: [NutrientMeter.ViewModel] {
+    var calculatedNutrientViewModelsRelativeToRDA: [NutrientMeter.Model] {
         func s(_ component: NutrientMeterComponent) -> Double {
             foodItem.scaledValue(for: component)
         }
@@ -447,8 +447,8 @@ extension ItemPortion.ViewModel {
             plannedValue(for: component, type: .nutrients)
         }
 
-        func vm(_ component: NutrientMeterComponent) -> NutrientMeter.ViewModel {
-            NutrientMeter.ViewModel(
+        func vm(_ component: NutrientMeterComponent) -> NutrientMeter.Model {
+            NutrientMeter.Model(
                 component: component,
                 goalLower: component.defaultLowerGoal,
                 goalUpper: component.defaultUpperGoal,
@@ -458,7 +458,7 @@ extension ItemPortion.ViewModel {
             )
         }
 
-        var viewModels: [NutrientMeter.ViewModel] = []
+        var viewModels: [NutrientMeter.Model] = []
         viewModels.append(vm(.energy))
 
         viewModels.append(vm(.carb))
@@ -478,7 +478,7 @@ extension ItemPortion.ViewModel {
         return viewModels
     }
     
-    var calculatedNutrientViewModelsRelativeToDay: [NutrientMeter.ViewModel] {
+    var calculatedNutrientViewModelsRelativeToDay: [NutrientMeter.Model] {
         func p(_ component: NutrientMeterComponent) -> Double {
             plannedValue(for: component, type: .nutrients)
         }
@@ -487,12 +487,12 @@ extension ItemPortion.ViewModel {
             foodItem.scaledValue(for: component)
         }
         
-        var viewModels: [NutrientMeter.ViewModel] = []
-        viewModels.append(NutrientMeter.ViewModel(component: .energy, planned: p(.energy), increment: i(.energy)))
+        var viewModels: [NutrientMeter.Model] = []
+        viewModels.append(NutrientMeter.Model(component: .energy, planned: p(.energy), increment: i(.energy)))
 
-        viewModels.append(NutrientMeter.ViewModel(component: .carb, planned: p(.carb), increment: i(.carb)))
-        viewModels.append(NutrientMeter.ViewModel(component: .fat, planned: p(.fat), increment: i(.fat)))
-        viewModels.append(NutrientMeter.ViewModel(component: .protein, planned: p(.protein), increment: i(.protein)))
+        viewModels.append(NutrientMeter.Model(component: .carb, planned: p(.carb), increment: i(.carb)))
+        viewModels.append(NutrientMeter.Model(component: .fat, planned: p(.fat), increment: i(.fat)))
+        viewModels.append(NutrientMeter.Model(component: .protein, planned: p(.protein), increment: i(.protein)))
 
         for micro in nutrients.micros {
             guard let nutrientType = micro.nutrientType, micro.value > 0 else { continue }
@@ -501,7 +501,7 @@ extension ItemPortion.ViewModel {
                 nutrientType: nutrientType,
                 nutrientUnit: micro.nutrientUnit
             )
-            viewModels.append(NutrientMeter.ViewModel(
+            viewModels.append(NutrientMeter.Model(
                 component: component,
                 planned: p(component),
                 increment: i(component)
@@ -510,9 +510,9 @@ extension ItemPortion.ViewModel {
         return viewModels
     }
     
-    func nutrientMeterViewModel(for goal: Goal, portionPage: PortionPage) -> NutrientMeter.ViewModel {
+    func nutrientMeterViewModel(for goal: Goal, portionPage: PortionPage) -> NutrientMeter.Model {
         let component = goal.nutrientMeterComponent
-        return NutrientMeter.ViewModel(
+        return NutrientMeter.Model(
             component: component,
             goalLower: goal.calculateLowerBound(with: goalCalcParams),
             goalUpper: goal.calculateUpperBound(with: goalCalcParams),
@@ -523,7 +523,7 @@ extension ItemPortion.ViewModel {
     }
     
     //MARK: Diet MeterViewModels
-    var calculatedDietMeterViewModels: [NutrientMeter.ViewModel] {
+    var calculatedDietMeterViewModels: [NutrientMeter.Model] {
 //        guard let diet = day?.goalSet else { return [] }
         guard let diet else { return [] }
         
@@ -531,9 +531,9 @@ extension ItemPortion.ViewModel {
             nutrientMeterViewModel(for: $0, portionPage: .diet)
         }
         if let implicitGoal = diet.implicitGoal(with: goalCalcParams) {
-            var viewModel = nutrientMeterViewModel(for: implicitGoal, portionPage: .diet)
-            viewModel.isGenerated = true
-            viewModels.append(viewModel)
+            var model = nutrientMeterViewModel(for: implicitGoal, portionPage: .diet)
+            model.isGenerated = true
+            viewModels.append(model)
         }
         
         /// Sort them in case we appended an implicit goal
@@ -543,12 +543,12 @@ extension ItemPortion.ViewModel {
     }
     
     //MARK: Meal MeterViewModels
-    var calculatedMealMeterViewModels: [NutrientMeter.ViewModel] {
+    var calculatedMealMeterViewModels: [NutrientMeter.Model] {
 
 //        guard let meal, let day else { return [] }
         guard let day else { return [] }
 
-        var viewModels: [NutrientMeter.ViewModel] = []
+        var viewModels: [NutrientMeter.Model] = []
         
         /// First get any explicit goals we have for the `mealType`
         if let mealType = meal.goalSet {
@@ -557,11 +557,11 @@ extension ItemPortion.ViewModel {
             })
         }
         
-        let subgoals: [NutrientMeter.ViewModel] = calculatedDietMeterViewModels.compactMap { dietMeterViewModel in
-//        let subgoals: [NutrientMeter.ViewModel] = dietMeterViewModels.compactMap { dietMeterViewModel in
+        let subgoals: [NutrientMeter.Model] = calculatedDietMeterViewModels.compactMap { dietMeterViewModel in
+//        let subgoals: [NutrientMeter.Model] = dietMeterViewModels.compactMap { dietMeterViewModel in
             
             let component = dietMeterViewModel.component
-            /// Make sure we don't already have a ViewModel for this
+            /// Make sure we don't already have a Model for this
             guard !viewModels.contains(where: { $0.component == component }) else {
                 return nil
             }
@@ -614,7 +614,7 @@ extension ItemPortion.ViewModel {
             }
 
 
-            return NutrientMeter.ViewModel(
+            return NutrientMeter.Model(
                 component: component,
                 isGenerated: true,
                 goalLower: subgoalLower,
@@ -639,11 +639,11 @@ extension ItemPortion.ViewModel {
         return viewModels
     }
     
-    var currentMeterViewModels: [NutrientMeter.ViewModel] {
+    var currentMeterViewModels: [NutrientMeter.Model] {
         meterViewModels(for: portionPage)
     }
     
-    func meterViewModels(for type: PortionPage) -> [NutrientMeter.ViewModel] {
+    func meterViewModels(for type: PortionPage) -> [NutrientMeter.Model] {
         switch type {
         case .nutrients:
             return nutrientMeterViewModels

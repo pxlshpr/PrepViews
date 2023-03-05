@@ -3,8 +3,8 @@ import PrepDataTypes
 
 extension NutrientBreakdown {
     struct Row: View {
-        @EnvironmentObject var breakdownViewModel: NutrientBreakdown.ViewModel
-        @Binding var foodMeterViewModel: NutrientMeter.ViewModel
+        @EnvironmentObject var breakdownViewModel: NutrientBreakdown.Model
+        @Binding var foodMeterViewModel: NutrientMeter.Model
     }
 }
 
@@ -104,7 +104,7 @@ extension NutrientBreakdown.Row {
 
     var gauge: some View {
         //TODO: See if just using an ObservedObject here is sufficient (instead of a binding)
-        NutrientMeter(viewModel: $foodMeterViewModel)
+        NutrientMeter(model: $foodMeterViewModel)
 //        FoodMeter(goal: $foodMeterViewModel.goal,
 //                  food: $foodMeterViewModel.food,
 //                  burned: $foodMeterViewModel.burned,
