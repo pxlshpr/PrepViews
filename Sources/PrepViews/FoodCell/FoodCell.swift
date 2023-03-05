@@ -12,8 +12,6 @@ public struct FoodCell: View {
     /// [ ] Make it optional so that we can disregard it if needed
     /// [ ] Conslidate it by moving it back to `PrepViews`
 
-//    @AppStorage(UserDefaultsKeys.showingFoodEmojis) var showingFoodEmojis = true
-
     @Binding var showEmoji: Bool
     @Binding var isSelectable: Bool
     @State var isSelected: Bool = false
@@ -168,7 +166,6 @@ public struct FoodCell: View {
         FoodBadge(c: carb, f: fat, p: protein)
     }
 }
-
 
 struct FoodCellPreview: View {
     
