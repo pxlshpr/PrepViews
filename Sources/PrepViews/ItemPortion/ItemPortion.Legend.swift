@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftHaptics
+import PrepCoreDataStack
 
 //MARK: - Legend
 
@@ -24,9 +25,11 @@ extension ItemPortion {
 //        @EnvironmentObject var viewModel: ViewModel
         @State var showingLegend: Bool
         
+        let didUpdateUser = NotificationCenter.default.publisher(for: .didUpdateUser)
+        
         init(viewModel: ViewModel) {
             self.viewModel = viewModel
-            _showingLegend = State(initialValue: viewModel.showingLegend)
+            _showingLegend = State(initialValue: UserManager.showingLegendForPortion)
         }
     }
 }
@@ -40,6 +43,13 @@ extension ItemPortion.Legend {
                 grid
             }
         }
+        .onReceive(didUpdateUser, perform: didUpdateUser)
+    }
+    
+    func didUpdateUser(notification: Notification) {
+        withAnimation {
+            showingLegend = UserManager.showingLegendForPortion
+        }
     }
     
     var legendButton: some View {
@@ -48,7 +58,7 @@ extension ItemPortion.Legend {
             withAnimation {
                 showingLegend.toggle()
                 /// Set the binding too so it's saved to `UserDefaults`
-                viewModel.showingLegend = showingLegend
+                UserManager.showingLegendForPortion = showingLegend
             }
         }
         
@@ -96,7 +106,7 @@ extension ItemPortion.Legend {
             let relativeBrightness = colorScheme == .light ? "lighter" : "darker"
             return " (\(relativeBrightness))"
         }
-        switch viewModel.currentType {
+        switch viewModel.portionPage {
         case .nutrients, .diet:
             let prefix: String
             if viewModel.day?.date.startOfDay == Date().startOfDay {
@@ -137,7 +147,7 @@ extension ItemPortion.Legend {
     
     var boundedRemainderText: some View {
         var goalDescription: String {
-            switch viewModel.currentType {
+            switch viewModel.portionPage {
             case .nutrients:
                 return "RDA*"
 //            case .meal:
@@ -199,7 +209,7 @@ extension ItemPortion.Legend {
             "met"
         }
         
-        switch viewModel.currentType {
+        switch viewModel.portionPage {
         case .nutrients:
             return Text("RDA* \(suffix)")
         case .meal:
@@ -335,7 +345,7 @@ extension ItemPortion.Legend {
         
         @ViewBuilder
         var rdaExplanation: some View {
-            if viewModel.currentType == .nutrients && showLinesRow {
+            if viewModel.portionPage == .nutrients && showLinesRow {
                 HStack(alignment: .firstTextBaseline, spacing: 5) {
                     Text("*")
                         .font(.callout)

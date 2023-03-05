@@ -12,7 +12,7 @@ public struct FoodCell: View {
     /// [ ] Make it optional so that we can disregard it if needed
     /// [ ] Conslidate it by moving it back to `PrepViews`
 
-    @Binding var showEmoji: Bool
+    @Binding var showingEmoji: Bool
     @Binding var isSelectable: Bool
     @State var isSelected: Bool = false
 
@@ -35,6 +35,8 @@ public struct FoodCell: View {
     let showMacrosIndicator: Bool
     let didTapMacrosIndicator: (() -> ())?
     let didToggleSelection: ((Bool) -> ())?
+    
+    @State var showingEmojiAnimated: Bool
     
     public init(
         emoji: String,
@@ -65,7 +67,8 @@ public struct FoodCell: View {
         self.didToggleSelection = didToggleSelection
 
         _isSelectable = isSelectable
-        _showEmoji = showEmoji
+        _showingEmoji = showEmoji
+        _showingEmojiAnimated = State(initialValue: showEmoji.wrappedValue)
     }
     
     public var body: some View {
@@ -78,10 +81,17 @@ public struct FoodCell: View {
                 macrosIndicator
             }
         }
+        .onChange(of: showingEmoji, perform: showingEmojiChanged)
 //        .listRowBackground(
 //            colorScheme == .light ? Color(.systemGroupedBackground) : Color(hex: "191919")
 ////            FormCellBackground()
 //        )
+    }
+    
+    func showingEmojiChanged(_ newValue: Bool) {
+        withAnimation(.interactiveSpring()) {
+            showingEmojiAnimated = newValue
+        }
     }
     
     @ViewBuilder
@@ -102,8 +112,9 @@ public struct FoodCell: View {
     
     @ViewBuilder
     var emojiText: some View {
-        if showEmoji {
+        if showingEmojiAnimated {
             Text(emoji)
+                .transition(.scale)
         }
     }
     

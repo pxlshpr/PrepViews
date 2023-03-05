@@ -128,7 +128,7 @@ public struct ItemPortion: View {
                 viewModel.day = day
             }
         }
-        .onChange(of: viewModel.currentType) { newValue in
+        .onChange(of: viewModel.portionPage) { newValue in
             UserDefaults.standard.setValue(newValue.rawValue, forKey: "portionAwarenessType")
         }
         .onReceive(didUpdateUser, perform: didUpdateUser)
@@ -151,12 +151,12 @@ public struct ItemPortion: View {
     var pager: some View {
         Pager(
             page: viewModel.page,
-            data: viewModel.metersTypes,
+            data: PortionPage.allCases,
             id: \.self,
-            content: { metersType in
-                content(for: metersType)
+            content: { portionPage in
+                content(for: portionPage)
                     .readSize { size in
-                        viewModel.pagerHeights[metersType] = size.height
+                        viewModel.pagerHeights[portionPage] = size.height
                     }
             }
         )
@@ -164,15 +164,15 @@ public struct ItemPortion: View {
         .onPageWillTransition(viewModel.pageWillTransition)
 //        .frame(height: 200)
 //        .frame(height: viewModel.pagerHeight)
-        .frame(height: viewModel.pagerHeights[viewModel.currentType])
+        .frame(height: viewModel.pagerHeights[viewModel.portionPage])
     }
     
     @ViewBuilder
-    func content(for metersType: MetersType) -> some View {
-        if metersType == .nutrients {
+    func content(for portionPage: PortionPage) -> some View {
+        if portionPage == .nutrients {
             foodLabelSection
         } else {
-            Meters(metersType)
+            ItemPortionMetrics(portionPage)
                 .environmentObject(viewModel)
                 .frame(maxWidth: .infinity)
                 .padding(.leading, 17)
@@ -188,8 +188,10 @@ public struct ItemPortion: View {
         FormStyledSection {
             VStack {
                 foodLabel
-                Toggle("Use daily goals", isOn: $usingDietGoalsInsteadOfRDA)
-                    .fixedSize(horizontal: false, vertical: true)
+                if showingRDA {
+                    Toggle("Use daily goals", isOn: $usingDietGoalsInsteadOfRDA)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
             }
             .onChange(of: foodItem, perform: foodItemChanged)
             .onChange(of: showingRDA, perform: showingRDAChanged)
@@ -199,6 +201,7 @@ public struct ItemPortion: View {
     
     func usingDietGoalsInsteadOfRDAChanged(_ newValue: Bool) {
         updateFoodLabelData()
+        UserManager.usingDietGoalsInsteadOfRDAForPortion = newValue
     }
     
     func updateFoodLabelData() {
@@ -219,6 +222,7 @@ public struct ItemPortion: View {
 
     func showingRDAChanged(_ newValue: Bool) {
         updateFoodLabelData()
+        UserManager.showingRDAForPortion = newValue
     }
 
     func foodItemChanged(_ newValue: MealItem) {
@@ -255,16 +259,14 @@ public struct ItemPortion: View {
     
     @ViewBuilder
     var typePickerRow: some View {
-        if viewModel.metersTypes.count > 1 {
-            typePicker
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal, 20)
-        }
+        typePicker
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 20)
     }
     
     var footer: some View {
         Group {
-            switch viewModel.currentType {
+            switch viewModel.portionPage {
             case .nutrients:
                 EmptyView()
 //                legend
@@ -298,7 +300,7 @@ public struct ItemPortion: View {
     }
     
     var footer_legacy: some View {
-        Text(viewModel.currentType.footerString)
+        Text(viewModel.portionPage.footerString)
             .fixedSize(horizontal: false, vertical: true)
             .foregroundColor(Color(.secondaryLabel))
             .font(.footnote)
@@ -310,7 +312,7 @@ public struct ItemPortion: View {
 
     var typePicker: some View {
         Picker("", selection: viewModel.metersTypeBinding) {
-            ForEach(viewModel.metersTypes, id: \.self) {
+            ForEach(PortionPage.allCases, id: \.self) {
                 Text($0.description).tag($0)
             }
         }
@@ -326,7 +328,7 @@ public struct ItemPortion: View {
     //MARK: - GoalSet Picker
     @ViewBuilder
     var goalSetPicker: some View {
-        switch viewModel.currentType {
+        switch viewModel.portionPage {
         case .nutrients:
             nutrientsPicker
                 .transition(.move(edge: .leading)
@@ -419,7 +421,7 @@ public struct ItemPortion: View {
         }
         
         return Button {
-            didTapGoalSetButton(viewModel.currentType == .meal)
+            didTapGoalSetButton(viewModel.portionPage == .meal)
         } label: {
             label
 //                .padding(.trailing, 20)
@@ -452,14 +454,14 @@ public struct ItemPortion: View {
 extension ItemPortion.ViewModel {
     
     var showMealSubgoals: Bool {
-        guard currentType == .meal else { return false }
+        guard portionPage == .meal else { return false }
         return currentMeterViewModels.contains {
             $0.isGenerated
         }
     }
     
     var showDietAutoGoals: Bool {
-        guard currentType == .diet else { return false }
+        guard portionPage == .diet else { return false }
         return currentMeterViewModels.contains {
             $0.isGenerated
         }
@@ -529,15 +531,6 @@ extension ItemPortion.ViewModel {
             components.append(.micro(nutrientType: .sodium, nutrientUnit: .mg))
         }
         return components
-    }
-    
-    var showingLegend: Bool {
-        get {
-            return UserDefaults.standard.object(forKey: "showingLegend") as? Bool ?? false
-        }
-        set(newValue) {
-            UserDefaults.standard.setValue(newValue, forKey: "showingLegend")
-        }
     }
 }
 

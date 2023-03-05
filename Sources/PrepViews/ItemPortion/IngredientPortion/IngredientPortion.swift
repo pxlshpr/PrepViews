@@ -92,8 +92,10 @@ public struct IngredientPortion: View {
         FormStyledSection {
             VStack {
                 foodLabel
-                Toggle("Use daily goals", isOn: $usingDietGoalsInsteadOfRDA)
-                    .fixedSize(horizontal: false, vertical: true)
+                if showingRDA {
+                    Toggle("Use daily goals", isOn: $usingDietGoalsInsteadOfRDA)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
             }
             .onChange(of: ingredientItem, perform: ingredientItemChanged)
             .onChange(of: showingRDA, perform: showingRDAChanged)
@@ -103,6 +105,7 @@ public struct IngredientPortion: View {
     
     func usingDietGoalsInsteadOfRDAChanged(_ newValue: Bool) {
         updateFoodLabelData()
+        UserManager.usingDietGoalsInsteadOfRDAForPortion = newValue
     }
     
     func updateFoodLabelData() {
@@ -123,6 +126,7 @@ public struct IngredientPortion: View {
 
     func showingRDAChanged(_ newValue: Bool) {
         updateFoodLabelData()
+        UserManager.showingRDAForPortion = newValue
     }
 
     func ingredientItemChanged(_ newValue: IngredientItem) {

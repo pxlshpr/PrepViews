@@ -4,21 +4,15 @@ import PrepDataTypes
 let MeterLabelFontStyle: Font.TextStyle = .body
 let MeterLabelFont: Font = Font.system(MeterLabelFontStyle)
 
-extension ItemPortion {
+struct ItemPortionMetrics: View {
     
-    struct Meters: View {
-        
-        @EnvironmentObject var viewModel: ItemPortion.ViewModel
-        
-        let type: MetersType
-        
-        init(_ type: MetersType) {
-            self.type = type
-        }
+    @EnvironmentObject var viewModel: ItemPortion.ViewModel
+    
+    let type: PortionPage
+    
+    init(_ type: PortionPage) {
+        self.type = type
     }
-}
-
-extension ItemPortion.Meters {
     
     var body: some View {
         metersGrid
