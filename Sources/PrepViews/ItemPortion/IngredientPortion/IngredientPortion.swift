@@ -4,11 +4,9 @@ import PrepDataTypes
 import SwiftUIPager
 import SwiftHaptics
 import FoodLabel
+import PrepCoreDataStack
 
 public struct IngredientPortion: View {
-
-    @AppStorage(UserDefaultsKeys.showingRDA) private var showingRDA = true
-    @AppStorage(UserDefaultsKeys.usingDietGoalsInsteadOfRDA) private var usingDietGoalsInsteadOfRDA = true
 
     @Environment(\.colorScheme) var colorScheme
     @StateObject var viewModel: ViewModel
@@ -19,7 +17,11 @@ public struct IngredientPortion: View {
     @State var foodLabelData: FoodLabelData
     @State var showingRDASettings: Bool = false
 
+    @State var showingRDA = true
+    @State var usingDietGoalsInsteadOfRDA = true
+
     let didTapGoalSetButton: (Bool) -> ()
+    let didUpdateUser = NotificationCenter.default.publisher(for: .didUpdateUser)
     
     public init(
         ingredientItem: Binding<IngredientItem>,
@@ -31,6 +33,11 @@ public struct IngredientPortion: View {
         _ingredientItem = ingredientItem
         _lastUsedGoalSet = lastUsedGoalSet
         
+        let showingRDA = UserManager.showingRDAForPortion
+        let usingDietGoalsInsteadOfRDA = UserManager.usingDietGoalsInsteadOfRDAForPortion
+        _showingRDA = State(initialValue: UserManager.showingRDAForPortion)
+        _usingDietGoalsInsteadOfRDA = State(initialValue: usingDietGoalsInsteadOfRDA)
+
         let viewModel = ViewModel(
             ingredientItem: ingredientItem.wrappedValue,
             lastUsedGoalSet: lastUsedGoalSet.wrappedValue,
@@ -38,23 +45,6 @@ public struct IngredientPortion: View {
             bodyProfile: bodyProfile
         )
         _viewModel = StateObject(wrappedValue: viewModel)
-
-        let showingRDA: Bool
-        if let showingRDAValue = UserDefaults.standard.value(forKey: UserDefaultsKeys.showingRDA) {
-            showingRDA = showingRDAValue as? Bool ?? true
-        } else {
-            /// Make sure the initial value (if not set) is always `true`
-            showingRDA = true
-        }
-
-        /// Make sure the initial value (if not set) is always `true`
-        let usingDietGoalsInsteadOfRDA: Bool
-        if let usingDietGoalsInsteadOfRDAValue = UserDefaults.standard.value(forKey: UserDefaultsKeys.usingDietGoalsInsteadOfRDA) {
-            usingDietGoalsInsteadOfRDA = usingDietGoalsInsteadOfRDAValue as? Bool ?? true
-        } else {
-            /// Make sure the initial value (if not set) is always `true`
-            usingDietGoalsInsteadOfRDA = true
-        }
 
         let diet = lastUsedGoalSet.wrappedValue
         
@@ -71,6 +61,13 @@ public struct IngredientPortion: View {
         self.didTapGoalSetButton = didTapGoalSetButton
     }
     
+    func didUpdateUser(notification: Notification) {
+        withAnimation {
+            self.showingRDA = UserManager.showingRDAForPortion
+            self.usingDietGoalsInsteadOfRDA = UserManager.usingDietGoalsInsteadOfRDAForPortion
+        }
+    }
+    
     public var body: some View {
         Group {
             VStack(spacing: 7) {
@@ -83,6 +80,7 @@ public struct IngredientPortion: View {
                 viewModel.ingredientItem = newItem
             }
         }
+        .onReceive(didUpdateUser, perform: didUpdateUser)
         .sheet(isPresented: $showingRDASettings) { rdaSettings }
     }
     
