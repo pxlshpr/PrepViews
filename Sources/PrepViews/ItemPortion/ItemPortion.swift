@@ -128,9 +128,6 @@ public struct ItemPortion: View {
                 viewModel.day = day
             }
         }
-        .onChange(of: viewModel.portionPage) { newValue in
-            UserDefaults.standard.setValue(newValue.rawValue, forKey: "portionAwarenessType")
-        }
         .onReceive(didUpdateUser, perform: didUpdateUser)
         .sheet(isPresented: $showingRDASettings) { rdaSettings }
     }

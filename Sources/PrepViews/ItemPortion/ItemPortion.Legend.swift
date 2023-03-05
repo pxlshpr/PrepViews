@@ -19,7 +19,7 @@ extension ItemPortion {
         /// Note: We're using an `@ObservedObject` here instead of `@EnvironmentObject` so that
         /// we are able to set the internal `showingLegend` bool during initialization as opposed to in the
         /// `onAppear` modifier—which causes it to be temporarily whatever value we set it with and
-        /// then animate to the actual value saved in the `UserDefaults`, causing a jump in the height
+        /// then animate to the actual value saved in `UserOptions`, causing a jump in the height
         /// when transitioning between types.
         @ObservedObject var viewModel: ViewModel
 //        @EnvironmentObject var viewModel: ViewModel
@@ -57,7 +57,6 @@ extension ItemPortion.Legend {
             Haptics.feedback(style: .soft)
             withAnimation {
                 showingLegend.toggle()
-                /// Set the binding too so it's saved to `UserDefaults`
                 UserManager.showingLegendForPortion = showingLegend
             }
         }
