@@ -28,28 +28,28 @@ public struct NutrientBreakdown: View {
                 headerRow
                 Divider()
             }
-            row(foodMeterViewModel: $model.energyViewModel)
-            row(foodMeterViewModel: $model.carbViewModel)
-            row(foodMeterViewModel: $model.fatViewModel)
-            row(foodMeterViewModel: $model.proteinViewModel)
-//            ForEach(model.foodMeterViewModels, id: \.self) { foodMeterViewModel in
-//                row(foodMeterViewModel: foodMeterViewModel)
+            row(foodMeterModel: $model.energyModel)
+            row(foodMeterModel: $model.carbModel)
+            row(foodMeterModel: $model.fatModel)
+            row(foodMeterModel: $model.proteinModel)
+//            ForEach(model.foodMeterModels, id: \.self) { foodMeterModel in
+//                row(foodMeterModel: foodMeterModel)
 //            }
         }
     }
     
     @ViewBuilder
-    func row(foodMeterViewModel: Binding<NutrientMeter.Model>) -> some View {
-        Row(foodMeterViewModel: foodMeterViewModel)
+    func row(foodMeterModel: Binding<NutrientMeter.Model>) -> some View {
+        Row(foodMeterModel: foodMeterModel)
             .environmentObject(model)
             .if(!model.haveGoal) { view in
                 view.redacted(reason: .placeholder)
             }
 //        if model.haveGoal {
-//            Row(model: rowViewModel)
+//            Row(model: rowModel)
 //                .environmentObject(model)
 //        } else {
-//            Row(model: rowViewModel)
+//            Row(model: rowModel)
 //                .environmentObject(model)
 //                .redacted(reason: .placeholder)
 //        }
@@ -130,29 +130,29 @@ public extension NutrientBreakdown {
         @Published public var includeBurnedCalories: Bool = true
         @Published public var includeHeaderRow: Bool = true
         
-//        @Published var foodMeterViewModels: [FoodMeter.Model]
-//        init(foodMeterViewModels: [FoodMeter.Model]) {
-//            self.foodMeterViewModels = foodMeterViewModels
+//        @Published var foodMeterModels: [FoodMeter.Model]
+//        init(foodMeterModels: [FoodMeter.Model]) {
+//            self.foodMeterModels = foodMeterModels
 //        }
         
-        @Published public var energyViewModel: NutrientMeter.Model
-        @Published public var carbViewModel: NutrientMeter.Model
-        @Published public var fatViewModel: NutrientMeter.Model
-        @Published public var proteinViewModel: NutrientMeter.Model
+        @Published public var energyModel: NutrientMeter.Model
+        @Published public var carbModel: NutrientMeter.Model
+        @Published public var fatModel: NutrientMeter.Model
+        @Published public var proteinModel: NutrientMeter.Model
         
-        public required init(energyViewModel: NutrientMeter.Model, carbViewModel: NutrientMeter.Model, fatViewModel: NutrientMeter.Model, proteinViewModel: NutrientMeter.Model) {
-            self.energyViewModel = energyViewModel
-            self.carbViewModel = carbViewModel
-            self.fatViewModel = fatViewModel
-            self.proteinViewModel = proteinViewModel
+        public required init(energyModel: NutrientMeter.Model, carbModel: NutrientMeter.Model, fatModel: NutrientMeter.Model, proteinModel: NutrientMeter.Model) {
+            self.energyModel = energyModel
+            self.carbModel = carbModel
+            self.fatModel = fatModel
+            self.proteinModel = proteinModel
         }
         
         public static var empty: Model {
             Self.init(
-                energyViewModel: NutrientMeter.Model.empty(for: .energy),
-                carbViewModel: NutrientMeter.Model.empty(for: .carb),
-                fatViewModel: NutrientMeter.Model.empty(for: .fat),
-                proteinViewModel: NutrientMeter.Model.empty(for: .protein)
+                energyModel: NutrientMeter.Model.empty(for: .energy),
+                carbModel: NutrientMeter.Model.empty(for: .carb),
+                fatModel: NutrientMeter.Model.empty(for: .fat),
+                proteinModel: NutrientMeter.Model.empty(for: .protein)
             )
         }
     }

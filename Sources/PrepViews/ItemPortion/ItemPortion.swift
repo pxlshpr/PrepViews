@@ -452,39 +452,39 @@ extension ItemPortion.Model {
     
     var showMealSubgoals: Bool {
         guard portionPage == .meal else { return false }
-        return currentMeterViewModels.contains {
+        return currentMeterModels.contains {
             $0.isGenerated
         }
     }
     
     var showDietAutoGoals: Bool {
         guard portionPage == .diet else { return false }
-        return currentMeterViewModels.contains {
+        return currentMeterModels.contains {
             $0.isGenerated
         }
     }
 
     var showCompletion: Bool {
-        currentMeterViewModels.contains {
+        currentMeterModels.contains {
             $0.percentageType == .complete
         }
     }
     
     var showExcess: Bool {
-        currentMeterViewModels.contains {
+        currentMeterModels.contains {
             $0.percentageType == .excess
         }
     }
     
     var showSolidLine: Bool {
-        currentMeterViewModels.contains {
+        currentMeterModels.contains {
             $0.goalBoundsType == .lowerAndUpper
             && !$0.percentageType.isPastCompletion
         }
     }
     
     var showFirstDashedLine: Bool {
-        currentMeterViewModels.contains {
+        currentMeterModels.contains {
             $0.goalBoundsType == .lowerAndUpper
             &&
             ($0.percentageType == .complete || $0.percentageType == .excess)
@@ -492,7 +492,7 @@ extension ItemPortion.Model {
     }
 
     var showSecondDashedLine: Bool {
-        currentMeterViewModels.contains {
+        currentMeterModels.contains {
             $0.goalBoundsType == .lowerAndUpper
             && $0.percentageType == .excess
         }
@@ -500,31 +500,31 @@ extension ItemPortion.Model {
 
     var componentsFromFood: [NutrientMeterComponent] {
 //        foodItem.food.componentsForLegend
-        let viewModelsWithTotal = currentMeterViewModels.filter {
+        let modelsWithTotal = currentMeterModels.filter {
             guard let increment = $0.increment else { return false }
             return increment > 0 && !$0.percentageType.isPastCompletion
         }
         
         /// Get components except for micro first (because there may be multiples of those)
-        var components = viewModelsWithTotal
+        var components = modelsWithTotal
             .filter { !$0.component.isMicro }
             .map { $0.component }
-        if viewModelsWithTotal.contains(where: { $0.component.isMicro }) {
+        if modelsWithTotal.contains(where: { $0.component.isMicro }) {
             components.append(.micro(nutrientType: .sodium, nutrientUnit: .mg))
         }
         return components
     }
     
     var componentsWithTotals: [NutrientMeterComponent] {
-        let viewModelsWithTotal = currentMeterViewModels.filter {
+        let modelsWithTotal = currentMeterModels.filter {
             $0.planned > 0 && !$0.percentageType.isPastCompletion
         }
         
         /// Get components except for micro first (because there may be multiples of those)
-        var components = viewModelsWithTotal
+        var components = modelsWithTotal
             .filter { !$0.component.isMicro }
             .map { $0.component }
-        if viewModelsWithTotal.contains(where: { $0.component.isMicro }) {
+        if modelsWithTotal.contains(where: { $0.component.isMicro }) {
             components.append(.micro(nutrientType: .sodium, nutrientUnit: .mg))
         }
         return components

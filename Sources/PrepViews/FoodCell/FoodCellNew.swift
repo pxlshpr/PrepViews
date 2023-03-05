@@ -3,7 +3,7 @@
 //import PrepDataTypes
 //import SwiftSugar
 //
-//public class FoodCellViewModel: ObservableObject, Identifiable {
+//public class FoodCellModel: ObservableObject, Identifiable {
 //    public let id: UUID = UUID()
 //    let emoji: String
 //    let name: String
@@ -88,14 +88,14 @@
 //    @Binding var isSelectable: Bool
 //    @State var isSelected: Bool = false
 //
-//    @ObservedObject var model: FoodCellViewModel
+//    @ObservedObject var model: FoodCellModel
 //    
 //    let showMacrosIndicator: Bool
 //    let didTapMacrosIndicator: (() -> ())?
 //    let didToggleSelection: ((Bool) -> ())?
 //
 //    public init(
-//        model: FoodCellViewModel,
+//        model: FoodCellModel,
 //        showMacrosIndicator: Bool = true,
 //        isSelectable: Binding<Bool> = .constant(false),
 //        didTapMacrosIndicator: (() -> ())? = nil,

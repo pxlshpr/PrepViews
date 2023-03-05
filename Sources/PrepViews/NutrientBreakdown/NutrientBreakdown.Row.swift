@@ -3,8 +3,8 @@ import PrepDataTypes
 
 extension NutrientBreakdown {
     struct Row: View {
-        @EnvironmentObject var breakdownViewModel: NutrientBreakdown.Model
-        @Binding var foodMeterViewModel: NutrientMeter.Model
+        @EnvironmentObject var breakdownModel: NutrientBreakdown.Model
+        @Binding var foodMeterModel: NutrientMeter.Model
     }
 }
 
@@ -38,16 +38,16 @@ extension NutrientBreakdown.Row {
     var label: some View {
         
         return HStack(spacing: 0) {
-            if let iconImageName = foodMeterViewModel.component.iconImageName {
+            if let iconImageName = foodMeterModel.component.iconImageName {
                 Image(systemName: iconImageName)
                 Spacer().frame(width: 2)
                 if !showingDetails {
-                    Text(foodMeterViewModel.component.name)
+                    Text(foodMeterModel.component.name)
                 }
             } else {
-                Text(foodMeterViewModel.component.initial)
+                Text(foodMeterModel.component.initial)
                 if !showingDetails {
-                    Text(foodMeterViewModel.component.name.dropFirst())
+                    Text(foodMeterModel.component.name.dropFirst())
                 }
             }
         }
@@ -71,7 +71,7 @@ extension NutrientBreakdown.Row {
         .gridColumnAlignment(showingDetails ? .center : .trailing)
         
         //TODO: Have all colors provided by FoodMeterComponent
-        .foregroundColor(foodMeterViewModel.labelTextColor)
+        .foregroundColor(foodMeterModel.labelTextColor)
         .fontWeight(.bold)
         .font(.title3)
 //        .font(FontEnergyLabel)
@@ -79,7 +79,7 @@ extension NutrientBreakdown.Row {
     
     var workoutsText: some View {
         Text(burnedString)
-            .foregroundColor(foodMeterViewModel.labelTextColor)
+            .foregroundColor(foodMeterModel.labelTextColor)
             .font(.subheadline)
             .fontWeight(.semibold)
 //            .font(FontEnergyValue)
@@ -87,7 +87,7 @@ extension NutrientBreakdown.Row {
     
     var amountText: some View {
         Text(foodString)
-            .foregroundColor(foodMeterViewModel.labelTextColor)
+            .foregroundColor(foodMeterModel.labelTextColor)
             .font(.subheadline)
             .fontWeight(.semibold)
 //            .font(FontEnergyValue)
@@ -95,7 +95,7 @@ extension NutrientBreakdown.Row {
 
     var totalGoalText: some View {
         Text(goalString)
-            .foregroundColor(foodMeterViewModel.labelTextColor)
+            .foregroundColor(foodMeterModel.labelTextColor)
             .font(.subheadline)
             .fontWeight(.semibold)
 //            .foregroundColor(Colors.placeholder)
@@ -104,13 +104,13 @@ extension NutrientBreakdown.Row {
 
     var gauge: some View {
         //TODO: See if just using an ObservedObject here is sufficient (instead of a binding)
-        NutrientMeter(model: $foodMeterViewModel)
-//        FoodMeter(goal: $foodMeterViewModel.goal,
-//                  food: $foodMeterViewModel.food,
-//                  burned: $foodMeterViewModel.burned,
-////                  eaten: $foodMeterViewModel.eaten,
+        NutrientMeter(model: $foodMeterModel)
+//        FoodMeter(goal: $foodMeterModel.goal,
+//                  food: $foodMeterModel.food,
+//                  burned: $foodMeterModel.burned,
+////                  eaten: $foodMeterModel.eaten,
 //                  eaten: .constant(0),
-//                  includeBurned: $breakdownViewModel.includeBurnedCalories,
+//                  includeBurned: $breakdownModel.includeBurnedCalories,
 //                  type: FoodMeterComponent(macro: macro)
 //        )
     }
@@ -122,7 +122,7 @@ extension NutrientBreakdown.Row {
                 .fontWeight(.bold)
 //            if !showingDetails {
             //TODO: have units provided by FoodMeterComponent, utilising associated value for micro
-            Text(foodMeterViewModel.component.unit.shortestDescription)
+            Text(foodMeterModel.component.unit.shortestDescription)
 //                Text(macro == nil ? "kcal" : "g")
                     .font(.footnote)
 //            }
@@ -130,7 +130,7 @@ extension NutrientBreakdown.Row {
         //TODO-NEXT: Replace this with the calculated massive possible value in the column
         .gridColumnAlignment(showingDetails ? .center : .leading)
         .frame(minWidth: 70, alignment: showingDetails ? .center : .leading)
-        .foregroundColor(foodMeterViewModel.labelTextColor)
+        .foregroundColor(foodMeterModel.labelTextColor)
 //        .foregroundColor(Color(.label))
     }
 
@@ -143,12 +143,12 @@ extension NutrientBreakdown.Row {
     
     //MARK: Accessors
     
-    var component: NutrientMeterComponent? { foodMeterViewModel.component }
-    var remainingString: String { foodMeterViewModel.remainingString }
-    var goalString: String { foodMeterViewModel.goalString }
-    var burnedString: String { foodMeterViewModel.burnedString }
-    var foodString: String { foodMeterViewModel.foodString }
+    var component: NutrientMeterComponent? { foodMeterModel.component }
+    var remainingString: String { foodMeterModel.remainingString }
+    var goalString: String { foodMeterModel.goalString }
+    var burnedString: String { foodMeterModel.burnedString }
+    var foodString: String { foodMeterModel.foodString }
     
-    var showingDetails: Bool { breakdownViewModel.showingDetails }
-    var includeBurnedCalories: Bool { breakdownViewModel.includeBurnedCalories }
+    var showingDetails: Bool { breakdownModel.showingDetails }
+    var includeBurnedCalories: Bool { breakdownModel.includeBurnedCalories }
 }
