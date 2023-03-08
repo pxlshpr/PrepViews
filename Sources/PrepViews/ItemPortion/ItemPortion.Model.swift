@@ -30,7 +30,7 @@ extension ItemPortion {
         }
         
         let userUnits: UserOptions.Units
-        let bodyProfile: BodyProfile?
+        let biometrics: Biometrics?
         let shouldCreateSubgoals: Bool
         let lastUsedGoalSet: GoalSet?
         
@@ -52,7 +52,7 @@ extension ItemPortion {
             day: Day?,
             lastUsedGoalSet: GoalSet?,
             userUnits: UserOptions.Units,
-            bodyProfile: BodyProfile?,
+            biometrics: Biometrics?,
             shouldCreateSubgoals: Bool
         ) {
             self.lastUsedGoalSet = lastUsedGoalSet
@@ -60,7 +60,7 @@ extension ItemPortion {
             self.day = day
             self.meal = meal
             self.userUnits = userUnits
-            self.bodyProfile = bodyProfile
+            self.biometrics = biometrics
             self.shouldCreateSubgoals = shouldCreateSubgoals
             
             self.portionPage = UserManager.portionPage
@@ -283,7 +283,7 @@ extension ItemPortion.Model {
     var goalCalcParams: GoalCalcParams {
         GoalCalcParams(
             userUnits: userUnits,
-            bodyProfile: bodyProfile,
+            biometrics: biometrics,
             energyGoal: diet?.energyGoal)
 //            energyGoal: day?.goalSet?.energyGoal)
     }

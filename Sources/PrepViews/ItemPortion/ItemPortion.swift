@@ -33,7 +33,7 @@ public struct ItemPortion: View {
         day: Binding<Day?>,
         lastUsedGoalSet: Binding<GoalSet?>,
         userUnits: UserOptions.Units,
-        bodyProfile: BodyProfile?,
+        biometrics: Biometrics?,
         shouldCreateSubgoals: Bool = true,
         didTapGoalSetButton: @escaping (Bool) -> ()
     ) {
@@ -53,7 +53,7 @@ public struct ItemPortion: View {
             day: day.wrappedValue,
             lastUsedGoalSet: lastUsedGoalSet.wrappedValue,
             userUnits: userUnits,
-            bodyProfile: bodyProfile,
+            biometrics: biometrics,
             shouldCreateSubgoals: shouldCreateSubgoals
         )
         _model = StateObject(wrappedValue: model)
