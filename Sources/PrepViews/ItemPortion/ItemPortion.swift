@@ -32,7 +32,7 @@ public struct ItemPortion: View {
         meal: Binding<DayMeal>,
         day: Binding<Day?>,
         lastUsedGoalSet: Binding<GoalSet?>,
-        userUnits: UserOptions.Units,
+        units: UserOptions.Units,
         biometrics: Biometrics?,
         shouldCreateSubgoals: Bool = true,
         didTapGoalSetButton: @escaping (Bool) -> ()
@@ -52,7 +52,7 @@ public struct ItemPortion: View {
             meal: meal.wrappedValue,
             day: day.wrappedValue,
             lastUsedGoalSet: lastUsedGoalSet.wrappedValue,
-            userUnits: userUnits,
+            units: units,
             biometrics: biometrics,
             shouldCreateSubgoals: shouldCreateSubgoals
         )
@@ -606,7 +606,7 @@ extension GoalSet {
             guard let value = goal.calculateLowerBound(with: goalCalcParams) else { continue }
             values[goal.anyNutrient] = (
                 value,
-                goal.nutrientUnit(userUnits: goalCalcParams.userUnits)
+                goal.nutrientUnit(units: goalCalcParams.units)
             )
         }
         return values
@@ -625,10 +625,10 @@ extension Goal {
         }
     }
     
-    func nutrientUnit(userUnits: UserOptions.Units) -> NutrientUnit {
+    func nutrientUnit(units: UserOptions.Units) -> NutrientUnit {
         switch type {
         case .energy(let energyGoalType):
-            return energyGoalType.nutrientUnit(userUnits: userUnits)
+            return energyGoalType.nutrientUnit(units: units)
         case .macro:
             return .g
         case .micro(_, _, let nutrientUnit):
@@ -638,14 +638,14 @@ extension Goal {
 }
 
 extension EnergyGoalType {
-    func nutrientUnit(userUnits: UserOptions.Units) -> NutrientUnit {
+    func nutrientUnit(units: UserOptions.Units) -> NutrientUnit {
         switch self {
         case .fixed(let energyUnit):
             return energyUnit.nutrientUnit
         case .fromMaintenance(let energyUnit, _):
             return energyUnit.nutrientUnit
         case .percentFromMaintenance(_):
-            return userUnits.energy.nutrientUnit
+            return units.energy.nutrientUnit
         }
     }
 }
