@@ -311,8 +311,23 @@ public struct NutrientsPicker: View {
     var navigationLeadingContent: some ToolbarContent {
         ToolbarItemGroup(placement: .navigationBarLeading) {
             if pickedNutrientsCount > 0, supportsMultipleSelections {
-                Button("Add \(pickedNutrientsCount)") {
+                Button {
                     dismissWithSelections()
+                } label: {
+                    Text("Add \(pickedNutrientsCount)")
+                        .fontWeight(.bold)
+//                        .font(.footnote)
+                        .foregroundColor(.white)
+                        .frame(height: 32)
+                        .padding(.horizontal, 8)
+//                        .padding(.vertical, 8)
+                        .background(
+                            RoundedRectangle(cornerRadius: 7, style: .continuous)
+                                .fill(Color.accentColor.gradient)
+        //                        .fill(Color.accentColor.opacity(
+        //                            colorScheme == .dark ? 0.1 : 0.15
+        //                        ))
+                        )
                 }
             }
         }
@@ -323,8 +338,7 @@ public struct NutrientsPicker: View {
                 Haptics.feedback(style: .soft)
                 dismiss()
             } label: {
-                CloseButtonLabel(forNavigationBar: true)
-//                closeButtonLabel
+                CloseButtonLabel()
             }
         }
     }
