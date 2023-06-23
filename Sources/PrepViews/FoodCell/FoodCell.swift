@@ -209,7 +209,7 @@ struct FoodCellPreview: View {
                         showEmoji: .constant(true),
                         isSelectable: .constant(false),
                         didToggleSelection: { isSelected in
-                            cprint("\(food) selection changed to: \(isSelected)")
+//                            cprint("\(food) selection changed to: \(isSelected)")
                         }
                     )
                 }

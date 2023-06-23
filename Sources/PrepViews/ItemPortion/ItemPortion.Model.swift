@@ -2,7 +2,7 @@ import SwiftUI
 import PrepDataTypes
 import SwiftUIPager
 import SwiftHaptics
-import PrepCoreDataStack
+//import PrepCoreDataStack
 
 let MeterSpacing = 5.0
 let MeterHeight = 20.0
@@ -63,8 +63,11 @@ extension ItemPortion {
             self.biometrics = biometrics
             self.shouldCreateSubgoals = shouldCreateSubgoals
             
-            self.portionPage = UserManager.portionPage
-            self.page = Page.withIndex(UserManager.portionPage.rawValue - 1)
+            let portionPage = PortionPage.nutrients
+            //TODO: Bring back UserManager
+//            let portionPage = UserManager.portionPage
+            self.portionPage = portionPage
+            self.page = Page.withIndex(portionPage.rawValue - 1)
             
             self.pagerHeight = 0
             
@@ -156,12 +159,11 @@ extension ItemPortion.Model {
     }
     
     @objc func didUpdateUser(notification: Notification) {
-        withAnimation {
-            print("👣 didUpdateUser, UserManager.portionPage: \(UserManager.portionPage)")
-            self.portionPage = UserManager.portionPage
-            print("👣 Set portionPage to: \(self.portionPage)")
-            self.typeChanged(to: UserManager.portionPage)
-        }
+        //TODO: Bring back UserManager
+//        withAnimation {
+//            self.portionPage = UserManager.portionPage
+//            self.typeChanged(to: UserManager.portionPage)
+//        }
     }
     
     func refresh() {
@@ -268,7 +270,8 @@ extension ItemPortion.Model {
             set: { newType in
                 withAnimation {
                     self.portionPage = newType
-                    UserManager.portionPage = newType
+                    //TODO: Bring back UserManager
+//                    UserManager.portionPage = newType
                     self.typeChanged(to: newType)
                 }
             }

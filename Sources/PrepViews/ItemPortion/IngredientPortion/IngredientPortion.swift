@@ -4,7 +4,7 @@ import PrepDataTypes
 import SwiftUIPager
 import SwiftHaptics
 import FoodLabel
-import PrepCoreDataStack
+//import PrepCoreDataStack
 
 public struct IngredientPortion: View {
 
@@ -33,9 +33,12 @@ public struct IngredientPortion: View {
         _ingredientItem = ingredientItem
         _lastUsedGoalSet = lastUsedGoalSet
         
-        let showingRDA = UserManager.showingRDAForPortion
-        let usingDietGoalsInsteadOfRDA = UserManager.usingDietGoalsInsteadOfRDAForPortion
-        _showingRDA = State(initialValue: UserManager.showingRDAForPortion)
+        //TODO: Bring back UserManager
+        let showingRDA = true
+        let usingDietGoalsInsteadOfRDA = true
+//        let showingRDA = UserManager.showingRDAForPortion
+//        let usingDietGoalsInsteadOfRDA = UserManager.usingDietGoalsInsteadOfRDAForPortion
+        _showingRDA = State(initialValue: showingRDA)
         _usingDietGoalsInsteadOfRDA = State(initialValue: usingDietGoalsInsteadOfRDA)
 
         let model = Model(
@@ -62,10 +65,11 @@ public struct IngredientPortion: View {
     }
     
     func didUpdateUser(notification: Notification) {
-        withAnimation {
-            self.showingRDA = UserManager.showingRDAForPortion
-            self.usingDietGoalsInsteadOfRDA = UserManager.usingDietGoalsInsteadOfRDAForPortion
-        }
+        //TODO: Bring back UserManager
+//        withAnimation {
+//            self.showingRDA = UserManager.showingRDAForPortion
+//            self.usingDietGoalsInsteadOfRDA = UserManager.usingDietGoalsInsteadOfRDAForPortion
+//        }
     }
     
     public var body: some View {
@@ -105,7 +109,8 @@ public struct IngredientPortion: View {
     
     func usingDietGoalsInsteadOfRDAChanged(_ newValue: Bool) {
         updateFoodLabelData()
-        UserManager.usingDietGoalsInsteadOfRDAForPortion = newValue
+        //TODO: Bring back UserManager
+//        UserManager.usingDietGoalsInsteadOfRDAForPortion = newValue
     }
     
     func updateFoodLabelData() {
@@ -126,7 +131,8 @@ public struct IngredientPortion: View {
 
     func showingRDAChanged(_ newValue: Bool) {
         updateFoodLabelData()
-        UserManager.showingRDAForPortion = newValue
+        //TODO: Bring back UserManager
+//        UserManager.showingRDAForPortion = newValue
     }
 
     func ingredientItemChanged(_ newValue: IngredientItem) {

@@ -1,6 +1,6 @@
 import SwiftUI
 import SwiftHaptics
-import PrepCoreDataStack
+//import PrepCoreDataStack
 
 //MARK: - Legend
 
@@ -29,7 +29,11 @@ extension ItemPortion {
         
         init(model: Model) {
             self.model = model
-            _showingLegend = State(initialValue: UserManager.showingLegendForPortion)
+            let showingLegendForPortion = true
+            
+            //TODO: Bring back UserManager
+//            let showingLegendForPortion = UserManager.showingLegendForPortion
+            _showingLegend = State(initialValue: showingLegendForPortion)
         }
     }
 }
@@ -47,9 +51,10 @@ extension ItemPortion.Legend {
     }
     
     func didUpdateUser(notification: Notification) {
-        withAnimation {
-            showingLegend = UserManager.showingLegendForPortion
-        }
+        //TODO: Bring back UserManager
+//        withAnimation {
+//            showingLegend = UserManager.showingLegendForPortion
+//        }
     }
     
     var legendButton: some View {
@@ -57,7 +62,8 @@ extension ItemPortion.Legend {
             Haptics.feedback(style: .soft)
             withAnimation {
                 showingLegend.toggle()
-                UserManager.showingLegendForPortion = showingLegend
+                //TODO: Bring back UserManager
+//                UserManager.showingLegendForPortion = showingLegend
             }
         }
         
